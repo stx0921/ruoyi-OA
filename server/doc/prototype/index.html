@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>FlowOA 页面原型 · 索引</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  body{background:#f5f7fa}
+  .proto-wrap{max-width:1180px;margin:0 auto;padding:44px 24px 60px}
+  .proto-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+  .proto-head h1{font-size:26px;letter-spacing:.5px}
+  .proto-head h1 b{color:#409EFF}
+  .proto-head p{color:#909399;font-size:13px;margin-top:8px;line-height:1.8}
+  .proto-badge{background:#ecf5ff;color:#409EFF;border:1px solid #b3d8ff;border-radius:4px;padding:5px 10px;font-size:12px}
+  .proto-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:26px}
+  .proto-card{background:#fff;border-radius:8px;box-shadow:0 2px 12px rgba(0,21,41,.08);overflow:hidden;transition:.18s;display:block}
+  .proto-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,21,41,.14)}
+  .proto-thumb{height:132px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;letter-spacing:4px}
+  .proto-body{padding:16px 18px 18px}
+  .proto-body h3{font-size:15px;margin-bottom:6px}
+  .proto-body p{font-size:12px;color:#909399;line-height:1.7;min-height:38px}
+  .proto-meta{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+  .proto-meta span{font-size:11px;color:#606266;background:#f4f4f5;border-radius:3px;padding:3px 7px}
+</style>
+</head>
+<body>
+<div class="proto-wrap">
+  <div class="proto-head">
+    <div>
+      <h1>Flow<b>OA</b> · 页面原型</h1>
+      <p>基于 RuoYi-Vue3 + Element Plus 视觉规范的静态原型，共 6 个核心页面。<br>点击卡片查看，所有页面均为纯静态，可离线打开。</p>
+    </div>
+    <div class="proto-badge">v0.1 · 2026-10-30</div>
+  </div>
+
+  <div class="proto-grid">
+    <a class="proto-card" href="dashboard.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#409EFF,#79bbff)">工作台</div>
+      <div class="proto-body">
+        <h3>工作台</h3>
+        <p>待办概览、快捷入口、近 7 日审批量、流程类型分布，登录后的第一屏。</p>
+        <div class="proto-meta"><span>统计卡</span><span>待办列表</span><span>图表</span></div>
+      </div>
+    </a>
+
+    <a class="proto-card" href="leave.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#67C23A,#95d475)">请假申请</div>
+      <div class="proto-body">
+        <h3>请假申请</h3>
+        <p>列表 + 新增表单弹窗。含请假类型、起止时间、时长自动计算、附件上传。</p>
+        <div class="proto-meta"><span>列表</span><span>弹窗表单</span><span>状态流转</span></div>
+      </div>
+    </a>
+
+    <a class="proto-card" href="todo.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#E6A23C,#f3d19e)">待办中心</div>
+      <div class="proto-body">
+        <h3>待办中心</h3>
+        <p>待我审批 / 我已审批 / 我发起 / 抄送我的四个视角，右侧审批抽屉含同意、驳回、转办、加签。</p>
+        <div class="proto-meta"><span>多 Tab</span><span>审批抽屉</span><span>步骤条</span></div>
+      </div>
+    </a>
+
+    <a class="proto-card" href="trace.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#F56C6C,#f89898)">流程跟踪</div>
+      <div class="proto-body">
+        <h3>流程跟踪</h3>
+        <p>流程图节点状态、审批记录时间线、流程变量、抄送人，作品集最出效果的一页。</p>
+        <div class="proto-meta"><span>流程图</span><span>时间线</span><span>变量表</span></div>
+      </div>
+    </a>
+
+    <a class="proto-card" href="employee.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#909399,#c0c4cc)">员工档案</div>
+      <div class="proto-body">
+        <h3>员工档案</h3>
+        <p>左侧组织架构树 + 右侧员工列表，覆盖入转调离与在职状态。</p>
+        <div class="proto-meta"><span>部门树</span><span>档案列表</span><span>导入导出</span></div>
+      </div>
+    </a>
+
+    <a class="proto-card" href="report.html">
+      <div class="proto-thumb" style="background:linear-gradient(135deg,#409EFF,#67C23A)">统计看板</div>
+      <div class="proto-body">
+        <h3>统计看板</h3>
+        <p>流程总量、通过率、平均耗时、超时预警，以及流程类型分布与审批人效率榜。</p>
+        <div class="proto-meta"><span>趋势图</span><span>环形图</span><span>效率榜</span></div>
+      </div>
+    </a>
+  </div>
+</div>
+</body>
+</html>

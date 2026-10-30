@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:flowable="http://flowable.org/bpmn"
+             typeLanguage="http://www.w3.org/2001/XMLSchema"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             targetNamespace="http://flowable.org/processdef">
+
+    <process id="leaveApproval" name="请假审批" isExecutable="true">
+        <documentation>
+            请假审批流程：按请假天数动态路由。
+            ≤1 天：部门负责人；1&lt;天数≤3：部门负责人 + 人事备案；&gt;3 天：再加总经理。
+            驳回时执行流退回 submitTask，由发起人修改后重新提交，同一流程实例继续。
+        </documentation>
+
+        <startEvent id="startEvent" name="开始"/>
+        <sequenceFlow id="flowStart" sourceRef="startEvent" targetRef="submitTask"/>
+
+        <!-- 发起人节点：首次由系统自动完成；驳回后变为发起人待办 -->
+        <userTask id="submitTask" name="提交申请" flowable:assignee="${applyUserId}">
+            <documentation>发起人确认或修改申请内容后提交</documentation>
+        </userTask>
+        <sequenceFlow id="flowSubmit" sourceRef="submitTask" targetRef="deptLeaderTask"/>
+
+        <userTask id="deptLeaderTask" name="部门负责人审批"
+                  flowable:assignee="${oaAssigneeResolver.deptLeader(applyDeptId)}"/>
+        <sequenceFlow id="flowLeader" sourceRef="deptLeaderTask" targetRef="durationGateway"/>
+
+        <exclusiveGateway id="durationGateway" name="请假天数判断" default="flowDirectEnd"/>
+        <sequenceFlow id="flowDirectEnd" sourceRef="durationGateway" targetRef="endEvent"/>
+        <sequenceFlow id="flowToHr" sourceRef="durationGateway" targetRef="hrTask">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${days > 1}]]></conditionExpression>
+        </sequenceFlow>
+
+        <userTask id="hrTask" name="人事备案" flowable:assignee="${oaAssigneeResolver.roleUser('hr')}"/>
+        <sequenceFlow id="flowHr" sourceRef="hrTask" targetRef="gmGateway"/>
+
+        <exclusiveGateway id="gmGateway" name="是否需总经理审批" default="flowEnd"/>
+        <sequenceFlow id="flowEnd" sourceRef="gmGateway" targetRef="endEvent"/>
+        <sequenceFlow id="flowToGm" sourceRef="gmGateway" targetRef="gmTask">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${days > 3}]]></conditionExpression>
+        </sequenceFlow>
+
+        <userTask id="gmTask" name="总经理审批" flowable:assignee="${oaAssigneeResolver.roleUser('gm')}"/>
+        <sequenceFlow id="flowGm" sourceRef="gmTask" targetRef="endEvent"/>
+
+        <endEvent id="endEvent" name="结束"/>
+    </process>
+</definitions>

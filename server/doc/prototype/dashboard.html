@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>工作台 - FlowOA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="page-title">下午好，石天行 <small>今天有 5 条待办需要你处理</small></div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="ico tint-blue"><svg viewBox="0 0 24 24"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-2 14-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg></div>
+          <div><div class="num">5</div><div class="label">待我审批</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-orange"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></div>
+          <div><div class="num">12</div><div class="label">我发起的</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-green"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          <div><div class="num">28</div><div class="label">本月已办</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-red"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+          <div><div class="num">1.8<small style="font-size:13px;color:#909399"> 天</small></div><div class="label">平均审批时长</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>我的待办</h3><span class="link">查看全部</span></div>
+          <div class="list-row">
+            <span class="dot"></span>
+            <div class="lr-main">
+              <div class="lr-title">张三提交的《请假申请》— 事假 2 天，等待你审批</div>
+              <div class="lr-sub">来自：研发部 · 15 分钟前 · 流程：请假审批</div>
+            </div>
+            <span class="pill pill-orange">待审批</span>
+            <button class="btn btn-sm">去处理</button>
+          </div>
+          <div class="list-row">
+            <span class="dot" style="background:#E6A23C"></span>
+            <div class="lr-main">
+              <div class="lr-title">李四提交的《费用报销》— 差旅费 ¥3,280.00</div>
+              <div class="lr-sub">来自：市场部 · 1 小时前 · 流程：报销审批</div>
+            </div>
+            <span class="pill pill-orange">待审批</span>
+            <button class="btn btn-sm">去处理</button>
+          </div>
+          <div class="list-row">
+            <span class="dot" style="background:#67C23A"></span>
+            <div class="lr-main">
+              <div class="lr-title">王五提交的《出差申请》— 上海 3 天，已完成你的会签</div>
+              <div class="lr-sub">来自：产品部 · 今天 09:20 · 流程：出差审批</div>
+            </div>
+            <span class="pill pill-blue">已会签</span>
+            <button class="btn btn-sm">看流程</button>
+          </div>
+          <div class="list-row">
+            <span class="dot" style="background:#F56C6C"></span>
+            <div class="lr-main">
+              <div class="lr-title">赵六提交的《请假申请》被驳回 — 请补充病假证明</div>
+              <div class="lr-sub">来自：人事部 · 昨天 17:42 · 流程：请假审批</div>
+            </div>
+            <span class="pill pill-red">已驳回</span>
+            <button class="btn btn-sm">查看详情</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>快捷入口</h3></div>
+          <div class="quick-grid">
+            <div class="quick"><div class="q-ico tint-blue">假</div><div class="q-txt">请假申请</div></div>
+            <div class="quick"><div class="q-ico tint-green">报</div><div class="q-txt">费用报销</div></div>
+            <div class="quick"><div class="q-ico tint-orange">差</div><div class="q-txt">出差申请</div></div>
+            <div class="quick"><div class="q-ico tint-red">审</div><div class="q-txt">待办中心</div></div>
+            <div class="quick"><div class="q-ico tint-blue">档</div><div class="q-txt">员工档案</div></div>
+            <div class="quick"><div class="q-ico tint-green">表</div><div class="q-txt">统计看板</div></div>
+          </div>
+          <div class="card-head" style="margin-top:20px"><h3>系统公告</h3></div>
+          <div class="list-row"><span class="dot" style="background:#409EFF"></span><div class="lr-main"><div class="lr-title">关于国庆假期值班安排的通知</div><div class="lr-sub">2026-10-28 · 行政部</div></div></div>
+          <div class="list-row"><span class="dot" style="background:#909399"></span><div class="lr-main"><div class="lr-title">OA 系统上线试运行说明</div><div class="lr-sub">2026-10-25 · 信息部</div></div></div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card">
+          <div class="card-head"><h3>近 7 日审批量</h3><span class="link">按流程类型</span></div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar" style="height:42%"></div><div class="bar-label">周一</div></div>
+            <div class="bar-col"><div class="bar" style="height:66%"></div><div class="bar-label">周二</div></div>
+            <div class="bar-col"><div class="bar" style="height:54%"></div><div class="bar-label">周三</div></div>
+            <div class="bar-col"><div class="bar" style="height:88%"></div><div class="bar-label">周四</div></div>
+            <div class="bar-col"><div class="bar" style="height:72%"></div><div class="bar-label">周五</div></div>
+            <div class="bar-col"><div class="bar" style="height:26%"></div><div class="bar-label">周六</div></div>
+            <div class="bar-col"><div class="bar" style="height:18%"></div><div class="bar-label">周日</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>流程类型分布</h3></div>
+          <div class="donut-wrap">
+            <div class="donut"><div class="donut-center"><b>186</b><span>本月总单量</span></div></div>
+            <div class="legend">
+              <div><i style="background:#409EFF"></i>请假审批　42%</div>
+              <div><i style="background:#67C23A"></i>费用报销　26%</div>
+              <div><i style="background:#E6A23C"></i>出差申请　18%</div>
+              <div><i style="background:#F56C6C"></i>其他　　　14%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shell.js"></script>
+<script>Shell.mount('dashboard', '工作台', '工作台');</script>
+</body>
+</html>

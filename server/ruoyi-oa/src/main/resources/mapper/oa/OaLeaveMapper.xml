@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.mapper.OaLeaveMapper">
+
+    <resultMap type="OaLeave" id="OaLeaveResult">
+        <result property="leaveId"           column="leave_id"/>
+        <result property="applyUserId"       column="apply_user_id"/>
+        <result property="applyUserName"     column="apply_user_name"/>
+        <result property="applyDeptId"       column="apply_dept_id"/>
+        <result property="applyDeptName"     column="apply_dept_name"/>
+        <result property="leaveType"         column="leave_type"/>
+        <result property="startTime"         column="start_time"/>
+        <result property="endTime"           column="end_time"/>
+        <result property="duration"          column="duration"/>
+        <result property="reason"            column="reason"/>
+        <result property="attachmentUrl"     column="attachment_url"/>
+        <result property="processInstanceId" column="process_instance_id"/>
+        <result property="status"            column="status"/>
+        <result property="applyTime"         column="apply_time"/>
+        <result property="createBy"          column="create_by"/>
+        <result property="createTime"        column="create_time"/>
+        <result property="updateBy"          column="update_by"/>
+        <result property="updateTime"        column="update_time"/>
+        <result property="remark"            column="remark"/>
+    </resultMap>
+
+    <sql id="selectOaLeaveVo">
+        select l.leave_id, l.apply_user_id, l.apply_user_name, l.apply_dept_id, l.leave_type,
+               l.start_time, l.end_time, l.duration, l.reason, l.attachment_url,
+               l.process_instance_id, l.status, l.apply_time,
+               l.create_by, l.create_time, l.update_by, l.update_time, l.remark,
+               d.dept_name as apply_dept_name
+        from oa_leave l
+        left join sys_dept d on d.dept_id = l.apply_dept_id
+    </sql>
+
+    <select id="selectOaLeaveList" parameterType="OaLeave" resultMap="OaLeaveResult">
+        <include refid="selectOaLeaveVo"/>
+        <where>
+            <if test="applyUserName != null and applyUserName != ''">
+                and l.apply_user_name like concat('%', #{applyUserName}, '%')
+            </if>
+            <if test="leaveType != null and leaveType != ''">
+                and l.leave_type = #{leaveType}
+            </if>
+            <if test="status != null and status != ''">
+                and l.status = #{status}
+            </if>
+            <if test="applyUserId != null">
+                and l.apply_user_id = #{applyUserId}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and date_format(l.apply_time, '%y%m%d') &gt;= date_format(#{params.beginTime}, '%y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and date_format(l.apply_time, '%y%m%d') &lt;= date_format(#{params.endTime}, '%y%m%d')
+            </if>
+        </where>
+        order by l.leave_id desc
+    </select>
+
+    <select id="selectOaLeaveById" parameterType="Long" resultMap="OaLeaveResult">
+        <include refid="selectOaLeaveVo"/>
+        where l.leave_id = #{leaveId}
+    </select>
+
+    <select id="selectOaLeaveByProcessInstanceId" parameterType="String" resultMap="OaLeaveResult">
+        <include refid="selectOaLeaveVo"/>
+        where l.process_instance_id = #{processInstanceId}
+        limit 1
+    </select>
+
+    <insert id="insertOaLeave" parameterType="OaLeave" useGeneratedKeys="true" keyProperty="leaveId">
+        insert into oa_leave (
+            apply_user_id, apply_user_name, apply_dept_id, leave_type,
+            start_time, end_time, duration, reason, attachment_url,
+            process_instance_id, status, apply_time,
+            create_by, create_time, remark
+        ) values (
+            #{applyUserId}, #{applyUserName}, #{applyDeptId}, #{leaveType},
+            #{startTime}, #{endTime}, #{duration}, #{reason}, #{attachmentUrl},
+            #{processInstanceId}, #{status}, #{applyTime},
+            #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateOaLeave" parameterType="OaLeave">
+        update oa_leave
+        <set>
+            <if test="applyUserId != null">apply_user_id = #{applyUserId},</if>
+            <if test="applyUserName != null">apply_user_name = #{applyUserName},</if>
+            <if test="applyDeptId != null">apply_dept_id = #{applyDeptId},</if>
+            <if test="leaveType != null">leave_type = #{leaveType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="duration != null">duration = #{duration},</if>
+            <if test="reason != null">reason = #{reason},</if>
+            <if test="attachmentUrl != null">attachment_url = #{attachmentUrl},</if>
+            <if test="processInstanceId != null">process_instance_id = #{processInstanceId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="applyTime != null">apply_time = #{applyTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_time = sysdate()
+        </set>
+        where leave_id = #{leaveId}
+    </update>
+
+    <delete id="deleteOaLeaveById" parameterType="Long">
+        delete from oa_leave where leave_id = #{leaveId}
+    </delete>
+
+    <delete id="deleteOaLeaveByIds" parameterType="String">
+        delete from oa_leave where leave_id in
+        <foreach item="leaveId" collection="array" open="(" separator="," close=")">
+            #{leaveId}
+        </foreach>
+    </delete>
+
+</mapper>

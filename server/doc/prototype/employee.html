@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>员工档案 - FlowOA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="page-title">员工档案 <small>共 128 人 · 在职 121 人</small></div>
+
+      <div style="display:flex;gap:16px;align-items:flex-start">
+
+        <div class="card" style="width:240px;flex:0 0 240px">
+          <div class="card-head"><h3>组织架构</h3></div>
+          <div style="font-size:13px;color:#606266">
+            <div style="padding:8px 6px;font-weight:500;color:#303133">▾ 若依科技有限公司</div>
+            <div style="padding:7px 6px 7px 24px">▾ 研发中心</div>
+            <div style="padding:7px 6px 7px 42px;color:#409EFF;background:#ecf5ff;border-radius:4px">平台组（18）</div>
+            <div style="padding:7px 6px 7px 42px">前端组（9）</div>
+            <div style="padding:7px 6px 7px 42px">测试组（7）</div>
+            <div style="padding:7px 6px 7px 24px">▸ 市场部</div>
+            <div style="padding:7px 6px 7px 24px">▸ 产品部</div>
+            <div style="padding:7px 6px 7px 24px">▸ 人事部</div>
+            <div style="padding:7px 6px 7px 24px">▸ 财务部</div>
+          </div>
+        </div>
+
+        <div class="card" style="flex:1;min-width:0">
+          <div class="search-bar">
+            <div class="field"><label>姓名</label><input class="input" placeholder="请输入姓名" style="width:140px"></div>
+            <div class="field"><label>岗位</label><div class="select" style="width:130px">全部</div></div>
+            <div class="field"><label>状态</label><div class="select" style="width:120px">在职</div></div>
+            <button class="btn btn-primary">搜索</button>
+            <button class="btn">重置</button>
+          </div>
+
+          <div class="toolbar">
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-primary">+ 新增员工</button>
+              <button class="btn">导入</button>
+              <button class="btn">导出</button>
+            </div>
+          </div>
+
+          <table class="el-table">
+            <thead>
+              <tr>
+                <th style="width:42px"><input type="checkbox"></th>
+                <th>员工</th><th>工号</th><th>部门</th><th>岗位</th><th>手机号</th><th>入职日期</th><th>状态</th><th style="width:140px">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="strong"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="width:26px;height:26px;font-size:12px">张</span>张三</div></td>
+                <td>EMP1024</td><td>研发中心 / 平台组</td><td>高级后端工程师</td><td>138****8801</td><td>2023-03-01</td>
+                <td><span class="pill pill-green">在职</span></td>
+                <td><button class="btn-text">详情</button><button class="btn-text">编辑</button><button class="btn-text danger">离职</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="strong"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="width:26px;height:26px;font-size:12px">李</span>李四</div></td>
+                <td>EMP1031</td><td>市场部</td><td>市场经理</td><td>139****6620</td><td>2022-07-15</td>
+                <td><span class="pill pill-green">在职</span></td>
+                <td><button class="btn-text">详情</button><button class="btn-text">编辑</button><button class="btn-text danger">离职</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="strong"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="width:26px;height:26px;font-size:12px;background:linear-gradient(135deg,#67C23A,#95d475)">王</span>王五</div></td>
+                <td>EMP1018</td><td>产品部</td><td>产品经理</td><td>137****2219</td><td>2021-11-02</td>
+                <td><span class="pill pill-orange">试用期</span></td>
+                <td><button class="btn-text">详情</button><button class="btn-text">编辑</button><button class="btn-text danger">离职</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="strong"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="width:26px;height:26px;font-size:12px;background:linear-gradient(135deg,#E6A23C,#f3d19e)">赵</span>赵六</div></td>
+                <td>EMP1042</td><td>人事部</td><td>HR 专员</td><td>135****7788</td><td>2024-05-20</td>
+                <td><span class="pill pill-green">在职</span></td>
+                <td><button class="btn-text">详情</button><button class="btn-text">编辑</button><button class="btn-text danger">离职</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox"></td>
+                <td class="strong"><div style="display:flex;align-items:center;gap:8px"><span class="avatar" style="width:26px;height:26px;font-size:12px;background:linear-gradient(135deg,#909399,#c0c4cc)">孙</span>孙七</div></td>
+                <td>EMP1009</td><td>财务部</td><td>财务主管</td><td>136****3344</td><td>2020-09-01</td>
+                <td><span class="pill pill-gray">已离职</span></td>
+                <td><button class="btn-text">详情</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pager">
+            <span class="total">共 128 条</span>
+            <span class="pg">‹</span><span class="pg active">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">›</span>
+            <div class="select" style="width:110px;height:30px">10 条/页</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script src="shell.js"></script>
+<script>Shell.mount('employee', 'OA 办公 / 员工档案', '员工档案');</script>
+</body>
+</html>

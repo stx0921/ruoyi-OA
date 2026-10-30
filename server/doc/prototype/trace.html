@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>流程跟踪 - FlowOA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="page-title">流程跟踪 <small>请假审批 · 实例 ID：PI-20261030-0001</small></div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>基本信息</h3>
+          <div style="display:flex;gap:10px;align-items:center">
+            <span class="pill pill-orange">审批中</span>
+            <button class="btn btn-sm">导出流程图</button>
+            <button class="btn btn-sm btn-danger-plain">撤 回</button>
+          </div>
+        </div>
+        <table class="desc-table">
+          <tr><th>流程名称</th><td>请假审批</td><th>业务单号</th><td>QJ20261030001</td></tr>
+          <tr><th>发起人</th><td>张三（研发部 / 平台组）</td><th>发起时间</th><td>2026-10-30 08:42</td></tr>
+          <tr><th>当前节点</th><td>部门主管审批</td><th>当前处理人</th><td>李经理</td></tr>
+          <tr><th>已耗时</th><td>2 小时 18 分</td><th>流程定义版本</th><td>leave_approval:v3</td></tr>
+        </table>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card">
+          <div class="card-head"><h3>流程图</h3><span style="font-size:12px;color:#909399">绿色为已完成，蓝色为进行中</span></div>
+          <div class="flow-canvas">
+            <div class="flow-row">
+              <div class="node start">开始</div>
+              <div class="arrow done"></div>
+              <div class="node done">提交申请<span class="n-role">张三</span></div>
+              <div class="arrow done"></div>
+              <div class="node current">部门主管审批<span class="n-role">李经理 · 处理中</span></div>
+              <div class="arrow"></div>
+              <div class="node">人事备案<span class="n-role">人事部</span></div>
+              <div class="arrow"></div>
+              <div class="node end">结束</div>
+            </div>
+          </div>
+
+          <div class="card-head" style="margin-top:20px"><h3>流程变量</h3></div>
+          <table class="el-table">
+            <thead><tr><th>变量名</th><th>类型</th><th>值</th></tr></thead>
+            <tbody>
+              <tr><td>leaveType</td><td>String</td><td>1（事假）</td></tr>
+              <tr><td>duration</td><td>Double</td><td>2.0</td></tr>
+              <tr><td>applyUserId</td><td>Long</td><td>102</td></tr>
+              <tr><td>deptLeaderApproved</td><td>Boolean</td><td><span style="color:#909399">未设置</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>审批记录</h3></div>
+          <div class="timeline">
+            <div class="tl-item current">
+              <div class="tl-title">部门主管审批 <span class="pill pill-orange">进行中</span></div>
+              <div class="tl-meta">李经理 · 2026-10-30 10:35 接单 · 已等待 2 小时</div>
+            </div>
+            <div class="tl-item done">
+              <div class="tl-title">提交申请 <span class="pill pill-blue">发起</span></div>
+              <div class="tl-meta">张三 · 2026-10-30 08:42</div>
+              <div class="tl-comment">已提交请假申请，事假 2 天。</div>
+            </div>
+          </div>
+
+          <div class="card-head" style="margin-top:24px"><h3>抄送人</h3></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="pill pill-gray">人事-王芳</span>
+            <span class="pill pill-gray">研发-张伟</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shell.js"></script>
+<script>Shell.mount('trace', 'OA 办公 / 流程跟踪', '流程跟踪');</script>
+</body>
+</html>

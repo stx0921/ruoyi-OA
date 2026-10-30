@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>统计看板 - FlowOA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="page-title">统计看板 <small>数据截至 2026-10-30</small></div>
+
+      <div class="card" style="margin-bottom:16px;padding:12px 16px">
+        <div class="search-bar" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+          <div class="field"><label>统计周期</label><div class="input" style="width:210px;color:#606266">2026-10-01 ~ 2026-10-30</div></div>
+          <div class="field"><label>部门</label><div class="select" style="width:150px">全部部门</div></div>
+          <button class="btn btn-primary">查 询</button>
+          <button class="btn">导出报表</button>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <div class="ico tint-blue"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg></div>
+          <div><div class="num">186</div><div class="label">本月流程总量</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-green"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          <div><div class="num">92.4<small style="font-size:13px;color:#909399">%</small></div><div class="label">审批通过率</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-orange"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+          <div><div class="num">1.8<small style="font-size:13px;color:#909399"> 天</small></div><div class="label">平均审批时长</div></div>
+        </div>
+        <div class="stat">
+          <div class="ico tint-red"><svg viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg></div>
+          <div><div class="num">14</div><div class="label">超时未处理</div></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-head"><h3>审批量趋势</h3><span style="font-size:12px;color:#909399">单位：单</span></div>
+          <div class="bar-chart">
+            <div class="bar-col"><div class="bar" style="height:38%"></div><div class="bar-label">第1周</div></div>
+            <div class="bar-col"><div class="bar" style="height:62%"></div><div class="bar-label">第2周</div></div>
+            <div class="bar-col"><div class="bar" style="height:48%"></div><div class="bar-label">第3周</div></div>
+            <div class="bar-col"><div class="bar" style="height:90%"></div><div class="bar-label">第4周</div></div>
+            <div class="bar-col"><div class="bar" style="height:70%"></div><div class="bar-label">第5周</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>流程类型分布</h3></div>
+          <div class="donut-wrap">
+            <div class="donut"><div class="donut-center"><b>186</b><span>总单量</span></div></div>
+            <div class="legend">
+              <div><i style="background:#409EFF"></i>请假审批　42%</div>
+              <div><i style="background:#67C23A"></i>费用报销　26%</div>
+              <div><i style="background:#E6A23C"></i>出差申请　18%</div>
+              <div><i style="background:#F56C6C"></i>其他　　　14%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px">
+        <div class="card">
+          <div class="card-head"><h3>各流程平均耗时</h3></div>
+          <div style="display:flex;flex-direction:column;gap:16px;padding:6px 0">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;color:#606266;margin-bottom:6px"><span>请假审批</span><span>0.8 天</span></div>
+              <div style="height:10px;background:#f0f2f5;border-radius:5px"><div style="width:32%;height:10px;background:#409EFF;border-radius:5px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;color:#606266;margin-bottom:6px"><span>费用报销</span><span>2.6 天</span></div>
+              <div style="height:10px;background:#f0f2f5;border-radius:5px"><div style="width:72%;height:10px;background:#67C23A;border-radius:5px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;color:#606266;margin-bottom:6px"><span>出差申请</span><span>1.4 天</span></div>
+              <div style="height:10px;background:#f0f2f5;border-radius:5px"><div style="width:48%;height:10px;background:#E6A23C;border-radius:5px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;color:#606266;margin-bottom:6px"><span>加班申请</span><span>0.5 天</span></div>
+              <div style="height:10px;background:#f0f2f5;border-radius:5px"><div style="width:18%;height:10px;background:#F56C6C;border-radius:5px"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>审批人效率 TOP5</h3></div>
+          <table class="el-table">
+            <thead><tr><th>审批人</th><th>部门</th><th>已办</th><th>平均耗时</th></tr></thead>
+            <tbody>
+              <tr><td class="strong">李经理</td><td>研发中心</td><td>46</td><td><span class="pill pill-green">2.1 小时</span></td></tr>
+              <tr><td class="strong">王芳</td><td>人事部</td><td>38</td><td><span class="pill pill-green">3.4 小时</span></td></tr>
+              <tr><td class="strong">张伟</td><td>研发中心</td><td>31</td><td><span class="pill pill-blue">5.8 小时</span></td></tr>
+              <tr><td class="strong">刘洋</td><td>财务部</td><td>27</td><td><span class="pill pill-orange">1.2 天</span></td></tr>
+              <tr><td class="strong">陈静</td><td>市场部</td><td>19</td><td><span class="pill pill-orange">1.6 天</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="shell.js"></script>
+<script>Shell.mount('report', 'OA 办公 / 统计看板', '统计看板');</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>待办中心 - FlowOA</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="page-title">待办中心 <small>按角色聚合你的待处理任务</small></div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="search-bar" style="border-bottom:none;padding-bottom:0;margin-bottom:0">
+          <span class="tag active" style="height:32px;line-height:30px;padding:0 16px">待我审批 5</span>
+          <span class="tag" style="height:32px;line-height:30px;padding:0 16px">我已审批 28</span>
+          <span class="tag" style="height:32px;line-height:30px;padding:0 16px">我发起的 12</span>
+          <span class="tag" style="height:32px;line-height:30px;padding:0 16px">抄送我的 3</span>
+          <div style="flex:1"></div>
+          <div class="field"><div class="select" style="width:150px">全部流程类型</div></div>
+          <button class="btn btn-primary">搜索</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <table class="el-table">
+          <thead>
+            <tr>
+              <th style="width:42px"><input type="checkbox"></th>
+              <th>任务标题</th><th>流程类型</th><th>发起人</th><th>部门</th>
+              <th>提交时间</th><th>已等待</th><th>当前节点</th><th style="width:150px">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="strong">张三的请假申请（事假 2 天）</td>
+              <td><span class="pill pill-blue">请假审批</span></td>
+              <td>张三</td><td>研发部</td><td>2026-10-30 08:42</td>
+              <td><span class="pill pill-orange">15 分钟</span></td>
+              <td>部门主管审批</td>
+              <td><button class="btn btn-sm btn-primary">审 批</button> <button class="btn btn-sm">流程</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="strong">李四的费用报销（差旅 ¥3,280）</td>
+              <td><span class="pill pill-green">报销审批</span></td>
+              <td>李四</td><td>市场部</td><td>2026-10-30 07:55</td>
+              <td><span class="pill pill-orange">1 小时</span></td>
+              <td>财务复核</td>
+              <td><button class="btn btn-sm btn-primary">审 批</button> <button class="btn btn-sm">流程</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="strong">王五的出差申请（上海 3 天）</td>
+              <td><span class="pill pill-orange">出差审批</span></td>
+              <td>王五</td><td>产品部</td><td>2026-10-29 18:20</td>
+              <td><span class="pill pill-red">14 小时</span></td>
+              <td>总经理会签</td>
+              <td><button class="btn btn-sm btn-primary">审 批</button> <button class="btn btn-sm">流程</button></td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td class="strong">赵六的加班申请（周末 1 天）</td>
+              <td><span class="pill pill-gray">加班审批</span></td>
+              <td>赵六</td><td>人事部</td><td>2026-10-29 16:10</td>
+              <td><span class="pill pill-red">1 天</span></td>
+              <td>部门主管审批</td>
+              <td><button class="btn btn-sm btn-primary">审 批</button> <button class="btn btn-sm">流程</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pager">
+          <span class="total">共 5 条</span>
+          <span class="pg">‹</span><span class="pg active">1</span><span class="pg">›</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 审批抽屉（原型展示用，默认展开） -->
+<div class="overlay" style="background:rgba(0,0,0,.28);z-index:55"></div>
+<div class="drawer">
+  <div class="drawer-head">审批 · 请假申请 <span class="modal-close">×</span></div>
+  <div class="drawer-body">
+
+    <div class="steps" style="margin-bottom:22px">
+      <div class="step done"><div class="circle">✓</div><div class="txt">提交申请</div><div class="bar"></div></div>
+      <div class="step current"><div class="circle">2</div><div class="txt">部门主管审批</div><div class="bar"></div></div>
+      <div class="step"><div class="circle">3</div><div class="txt">人事备案</div><div class="bar"></div></div>
+      <div class="step"><div class="circle">4</div><div class="txt">完成</div></div>
+    </div>
+
+    <table class="desc-table" style="margin-bottom:20px">
+      <tr><th>申请单号</th><td>QJ20261030001</td><th>申请人</th><td>张三（研发部 / 平台组）</td></tr>
+      <tr><th>请假类型</th><td>事假</td><th>请假时长</th><td>2.0 天</td></tr>
+      <tr><th>开始时间</th><td>2026-10-30 09:00</td><th>结束时间</th><td>2026-10-31 18:00</td></tr>
+      <tr><th>请假事由</th><td colspan="3">家中有事，需回老家处理，期间工作已与同事交接。</td></tr>
+      <tr><th>附件</th><td colspan="3"><span class="link">交接说明.pdf</span></td></tr>
+    </table>
+
+    <div class="card-head"><h3>审批记录</h3></div>
+    <div class="timeline" style="margin-bottom:20px">
+      <div class="tl-item current">
+        <div class="tl-title">部门主管审批 <span class="pill pill-orange">处理中</span></div>
+        <div class="tl-meta">当前节点 · 指派给：你</div>
+      </div>
+      <div class="tl-item done">
+        <div class="tl-title">提交申请 <span class="pill pill-blue">发起人</span></div>
+        <div class="tl-meta">张三 · 2026-10-30 08:42</div>
+        <div class="tl-comment">已提交，等待部门主管审批。</div>
+      </div>
+    </div>
+
+    <div class="form-item">
+      <label><span class="req">*</span>审批意见</label>
+      <textarea class="textarea" placeholder="请输入审批意见（驳回时必填）"></textarea>
+    </div>
+    <div class="radio-line" style="margin-top:12px">
+      <span class="radio on"><i></i>同意</span>
+      <span class="radio"><i></i>驳回</span>
+      <span class="radio"><i></i>转办</span>
+      <span class="radio"><i></i>加签</span>
+    </div>
+
+  </div>
+  <div class="drawer-foot">
+    <button class="btn">转 办</button>
+    <button class="btn">加 签</button>
+    <div style="flex:1"></div>
+    <button class="btn btn-danger-plain">驳 回</button>
+    <button class="btn btn-primary">同 意</button>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>Shell.mount('todo', 'OA 办公 / 待办中心', '待办中心');</script>
+</body>
+</html>
