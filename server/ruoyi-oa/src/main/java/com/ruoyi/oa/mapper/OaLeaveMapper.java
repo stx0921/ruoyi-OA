@@ -2,12 +2,14 @@ package com.ruoyi.oa.mapper;
 
 import java.util.List;
 import com.ruoyi.oa.domain.OaLeave;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 请假申请 Mapper
  *
  * @author ruoyi-oa
  */
+@Mapper
 public interface OaLeaveMapper
 {
     /**

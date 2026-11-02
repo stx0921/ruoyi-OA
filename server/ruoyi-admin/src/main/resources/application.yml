@@ -148,3 +148,32 @@ flowable:
   # 关闭 IDM，用户与部门体系复用若依
   idm:
     enabled: false
+
+# 组织人事（人员录入）模块配置
+oa:
+  # H5 报名验证码：v1 使用图形验证码，不依赖短信通道
+  captcha:
+    # 图形验证码有效期（秒）
+    expire-seconds: 300
+    # 图形验证码校验通过后的令牌有效期（分钟），用于 H5 上传与提交
+    verify-token-minutes: 30
+    # 报名进度查询令牌有效期（分钟），用于撤回/修改重提
+    query-token-minutes: 30
+    # 同一 IP 在 10 分钟内验证码失败上限，超过返回 429
+    fail-limit: 10
+  submit:
+    # 同一手机号 24 小时内最大提交次数
+    phone-24h-limit: 5
+  import:
+    # Excel 单次最大数据行数
+    max-rows: 500
+    # Excel 文件最大体积（MB）
+    max-file-size-mb: 10
+    # 确认导入时每批提交行数
+    batch-size: 100
+  account:
+    # 初始密码规则：phone-last-6（手机号后 6 位）
+    init-password: phone-last-6
+  sensitive:
+    # 干事视角是否打码（R12：部长/主席团/管理员/本人明文）
+    mask-staff: true

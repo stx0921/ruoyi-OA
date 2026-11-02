@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.apply.mapper.OaFileMapper">
+
+    <resultMap type="com.ruoyi.oa.apply.domain.OaFile" id="OaFileResult">
+        <result property="fileId"        column="file_id"/>
+        <result property="fileName"      column="file_name"/>
+        <result property="originalName"  column="original_name"/>
+        <result property="filePath"      column="file_path"/>
+        <result property="bizType"       column="biz_type"/>
+        <result property="bizId"         column="biz_id"/>
+        <result property="fileSize"      column="file_size"/>
+        <result property="uploaderId"    column="uploader_id"/>
+        <result property="createTime"    column="create_time"/>
+    </resultMap>
+
+    <insert id="insertFile" parameterType="com.ruoyi.oa.apply.domain.OaFile" useGeneratedKeys="true" keyProperty="fileId">
+        insert into oa_file (
+            file_name, original_name, file_path, biz_type, biz_id,
+            file_size, uploader_id, create_time
+        ) values (
+            #{fileName}, #{originalName}, #{filePath}, #{bizType}, #{bizId},
+            #{fileSize}, #{uploaderId}, sysdate()
+        )
+    </insert>
+
+    <select id="selectFileById" parameterType="Long" resultMap="OaFileResult">
+        select file_id, file_name, original_name, file_path, biz_type, biz_id, file_size, uploader_id, create_time
+        from oa_file
+        where file_id = #{fileId}
+    </select>
+
+    <update id="updateFileBiz">
+        update oa_file
+        set biz_type = #{bizType},
+            biz_id = #{bizId}
+        where file_id = #{fileId}
+    </update>
+
+    <select id="selectFileByIds" resultMap="OaFileResult">
+        select file_id, file_name, original_name, file_path, biz_type, biz_id, file_size, uploader_id, create_time
+        from oa_file
+        where file_id in
+        <foreach item="fileId" collection="fileIds" open="(" separator="," close=")">
+            #{fileId}
+        </foreach>
+    </select>
+
+</mapper>

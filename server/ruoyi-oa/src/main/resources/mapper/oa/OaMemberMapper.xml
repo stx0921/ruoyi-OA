@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaMemberMapper">
+
+    <resultMap type="OaMember" id="OaMemberResult">
+        <id     property="memberId"      column="member_id"/>
+        <result property="memberNo"      column="member_no"/>
+        <result property="name"          column="name"/>
+        <result property="gender"        column="gender"/>
+        <result property="studentNo"     column="student_no"/>
+        <result property="phone"         column="phone"/>
+        <result property="college"       column="college"/>
+        <result property="major"         column="major"/>
+        <result property="className"     column="class_name"/>
+        <result property="grade"         column="grade"/>
+        <result property="cohort"        column="cohort"/>
+        <result property="deptId"        column="dept_id"/>
+        <result property="deptName"      column="dept_name"/>
+        <result property="position"      column="position"/>
+        <result property="status"        column="status"/>
+        <result property="source"        column="source"/>
+        <result property="joinDate"      column="join_date"/>
+        <result property="leaveDate"     column="leave_date"/>
+        <result property="email"         column="email"/>
+        <result property="wechat"        column="wechat"/>
+        <result property="qq"            column="qq"/>
+        <result property="skills"        column="skills"/>
+        <result property="intro"         column="intro"/>
+        <result property="obeyAdjust"    column="obey_adjust"/>
+        <result property="photoUrl"      column="photo_url"/>
+        <result property="cardUrl"       column="card_url"/>
+        <result property="userId"        column="user_id"/>
+        <result property="applyId"       column="apply_id"/>
+        <result property="accountStatus" column="account_status"/>
+        <result property="lastLoginTime" column="last_login_time"/>
+        <result property="remark"        column="remark"/>
+        <result property="createBy"      column="create_by"/>
+        <result property="createTime"    column="create_time"/>
+        <result property="updateBy"      column="update_by"/>
+        <result property="updateTime"    column="update_time"/>
+    </resultMap>
+
+    <sql id="selectMemberVo">
+        select m.member_id, m.member_no, m.name, m.gender, m.student_no, m.phone, m.college, m.major,
+               m.class_name, m.grade, m.cohort, m.dept_id, d.dept_name, m.position, m.status, m.source,
+               m.join_date, m.leave_date, m.email, m.wechat, m.qq, m.skills, m.intro, m.obey_adjust,
+               m.photo_url, m.card_url, m.user_id, m.apply_id, m.remark,
+               m.create_by, m.create_time, m.update_by, m.update_time,
+               u.status as account_status, u.login_date as last_login_time
+        from oa_member m
+        left join sys_dept d on d.dept_id = m.dept_id
+        left join sys_user u on u.user_id = m.user_id and u.del_flag = '0'
+    </sql>
+
+    <select id="selectMemberList" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        <where>
+            <if test="name != null and name != ''">
+                and m.name like concat('%', #{name}, '%')
+            </if>
+            <if test="studentNo != null and studentNo != ''">
+                and m.student_no like concat(#{studentNo}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and m.phone like concat('%', #{phone}, '%')
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (m.name like concat('%', #{keyword}, '%')
+                     or m.student_no like concat(#{keyword}, '%')
+                     or m.phone like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="deptId != null">
+                and m.dept_id = #{deptId}
+            </if>
+            <if test="grade != null and grade != ''">
+                and m.grade = #{grade}
+            </if>
+            <if test="cohort != null and cohort != ''">
+                and m.cohort = #{cohort}
+            </if>
+            <if test="position != null and position != ''">
+                and m.position = #{position}
+            </if>
+            <if test="status != null and status != ''">
+                and m.status = #{status}
+            </if>
+            <if test="source != null and source != ''">
+                and m.source = #{source}
+            </if>
+            <if test="userId != null">
+                and m.user_id = #{userId}
+            </if>
+            <if test="params.beginJoinDate != null and params.beginJoinDate != ''">
+                and m.join_date &gt;= #{params.beginJoinDate}
+            </if>
+            <if test="params.endJoinDate != null and params.endJoinDate != ''">
+                and m.join_date &lt;= #{params.endJoinDate}
+            </if>
+            ${params.dataScope}
+        </where>
+        order by m.member_id desc
+    </select>
+
+    <select id="selectMemberById" parameterType="Long" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.member_id = #{memberId}
+    </select>
+
+    <select id="selectMemberByIdForUpdate" parameterType="Long" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.member_id = #{memberId}
+        for update
+    </select>
+
+    <select id="selectByStudentNo" parameterType="String" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.student_no = #{studentNo}
+        limit 1
+    </select>
+
+    <select id="selectByStudentNoForUpdate" parameterType="String" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.student_no = #{studentNo}
+        limit 1
+        for update
+    </select>
+
+    <select id="selectByPhone" parameterType="String" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.phone = #{phone}
+        limit 1
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="OaMemberResult">
+        <include refid="selectMemberVo"/>
+        where m.user_id = #{userId}
+        limit 1
+    </select>
+
+    <insert id="insertMember" parameterType="OaMember" useGeneratedKeys="true" keyProperty="memberId">
+        insert into oa_member (
+            member_no, name, gender, student_no, phone, college, major, class_name, grade, cohort,
+            dept_id, position, status, source, join_date, leave_date, email, wechat, qq, skills, intro,
+            obey_adjust, photo_url, card_url, user_id, apply_id, remark, create_by, create_time
+        ) values (
+            #{memberNo}, #{name}, #{gender}, #{studentNo}, #{phone}, #{college}, #{major}, #{className},
+            #{grade}, #{cohort}, #{deptId}, #{position}, #{status}, #{source}, #{joinDate}, #{leaveDate},
+            #{email}, #{wechat}, #{qq}, #{skills}, #{intro}, #{obeyAdjust}, #{photoUrl}, #{cardUrl},
+            #{userId}, #{applyId}, #{remark}, #{createBy}, sysdate()
+        )
+    </insert>
+
+    <update id="updateMember" parameterType="OaMember">
+        update oa_member
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="studentNo != null">student_no = #{studentNo},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="college != null">college = #{college},</if>
+            <if test="major != null">major = #{major},</if>
+            <if test="className != null">class_name = #{className},</if>
+            <if test="grade != null">grade = #{grade},</if>
+            <if test="cohort != null">cohort = #{cohort},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="joinDate != null">join_date = #{joinDate},</if>
+            <if test="leaveDate != null">leave_date = #{leaveDate},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="wechat != null">wechat = #{wechat},</if>
+            <if test="qq != null">qq = #{qq},</if>
+            <if test="skills != null">skills = #{skills},</if>
+            <if test="intro != null">intro = #{intro},</if>
+            <if test="obeyAdjust != null">obey_adjust = #{obeyAdjust},</if>
+            <if test="photoUrl != null">photo_url = #{photoUrl},</if>
+            <if test="cardUrl != null">card_url = #{cardUrl},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="applyId != null">apply_id = #{applyId},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where member_id = #{memberId}
+    </update>
+
+    <update id="updateMemberUserId">
+        update oa_member set user_id = #{userId}, update_time = sysdate() where member_id = #{memberId}
+    </update>
+
+    <update id="updateMemberStatus">
+        update oa_member
+        set status = #{status}, leave_date = #{leaveDate}, update_time = sysdate()
+        where member_id = #{memberId}
+    </update>
+
+    <update id="updateMemberDeptPosition">
+        update oa_member
+        set dept_id = #{deptId}, position = #{position}, update_time = sysdate()
+        where member_id = #{memberId}
+    </update>
+
+    <update id="updateMemberSelf">
+        update oa_member
+        set wechat = #{wechat}, qq = #{qq}, email = #{email}, skills = #{skills}, intro = #{intro},
+            photo_url = #{photoUrl}, update_time = sysdate()
+        where member_id = #{memberId}
+    </update>
+
+    <select id="selectMaxMemberNoSeq" resultType="java.lang.Long">
+        select max(cast(substring(member_no, 7) as signed))
+        from oa_member
+        where member_no like concat('M', #{year}, '-%')
+    </select>
+
+    <select id="countActive" resultType="java.lang.Long">
+        select count(*) from oa_member m
+        left join sys_dept d on d.dept_id = m.dept_id
+        <where>
+            m.status = '0'
+            <if test="deptId != null">and m.dept_id = #{deptId}</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <select id="countPendingApply" resultType="java.lang.Long">
+        select count(*) from oa_member_apply a
+        left join sys_dept d on d.dept_id = a.dept_id
+        <where>
+            a.status = '0'
+            <if test="deptId != null">and a.dept_id = #{deptId}</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <select id="countMonthJoin" resultType="java.lang.Long">
+        select count(*) from oa_member m
+        left join sys_dept d on d.dept_id = m.dept_id
+        <where>
+            m.status = '0'
+            and date_format(m.join_date, '%Y%m') = date_format(sysdate(), '%Y%m')
+            <if test="deptId != null">and m.dept_id = #{deptId}</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <select id="countMonthLeave" resultType="java.lang.Long">
+        select count(*) from oa_member m
+        left join sys_dept d on d.dept_id = m.dept_id
+        <where>
+            m.status in ('1', '2')
+            and m.leave_date is not null
+            and date_format(m.leave_date, '%Y%m') = date_format(sysdate(), '%Y%m')
+            <if test="deptId != null">and m.dept_id = #{deptId}</if>
+            ${params.dataScope}
+        </where>
+    </select>
+
+    <select id="selectMemberCountGroupByDept" resultType="java.util.Map">
+        select dept_id as deptId, count(*) as memberCount
+        from oa_member
+        where status = '0' and dept_id is not null
+        group by dept_id
+    </select>
+
+    <select id="countActiveMemberByUserIdAndDept" resultType="java.lang.Integer">
+        select count(*) from oa_member
+        where user_id = #{userId} and dept_id = #{deptId} and status = '0'
+    </select>
+
+</mapper>

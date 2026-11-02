@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaAccountMapper">
+
+    <resultMap type="com.ruoyi.common.core.domain.entity.SysUser" id="SysUserMiniResult">
+        <id     property="userId"      column="user_id"/>
+        <result property="deptId"      column="dept_id"/>
+        <result property="userName"    column="user_name"/>
+        <result property="nickName"    column="nick_name"/>
+        <result property="email"       column="email"/>
+        <result property="phonenumber" column="phonenumber"/>
+        <result property="sex"         column="sex"/>
+        <result property="status"      column="status"/>
+        <result property="delFlag"     column="del_flag"/>
+        <result property="loginDate"   column="login_date"/>
+    </resultMap>
+
+    <select id="selectRoleKeysByUserId" resultType="java.lang.String">
+        select r.role_key
+        from sys_role r
+        inner join sys_user_role ur on ur.role_id = r.role_id
+        where ur.user_id = #{userId} and r.status = '0' and r.del_flag = '0'
+    </select>
+
+    <select id="selectRoleIdByKey" resultType="java.lang.Long">
+        select role_id from sys_role
+        where role_key = #{roleKey} and del_flag = '0'
+        limit 1
+    </select>
+
+    <delete id="deleteBusinessRoles" parameterType="Long">
+        delete from sys_user_role
+        where user_id = #{userId}
+          and role_id in (select role_id from sys_role
+                          where role_key in ('oa_president', 'oa_minister', 'oa_staff'))
+    </delete>
+
+    <insert id="insertUserRole">
+        insert ignore into sys_user_role (user_id, role_id) values (#{userId}, #{roleId})
+    </insert>
+
+    <select id="selectFirstUserByRoleKey" resultMap="SysUserMiniResult">
+        select u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.sex,
+               u.status, u.del_flag, u.login_date
+        from sys_user u
+        inner join sys_user_role ur on ur.user_id = u.user_id
+        inner join sys_role r on r.role_id = ur.role_id
+        where r.role_key = #{roleKey} and r.status = '0' and r.del_flag = '0'
+          and u.status = '0' and u.del_flag = '0'
+        order by u.user_id
+        limit 1
+    </select>
+
+    <update id="updateUserDept">
+        update sys_user set dept_id = #{deptId}, update_time = sysdate() where user_id = #{userId}
+    </update>
+
+    <update id="updateUserPhone">
+        update sys_user set phonenumber = #{phonenumber}, update_time = sysdate() where user_id = #{userId}
+    </update>
+
+    <update id="updateUserName">
+        update sys_user set user_name = #{userName}, update_time = sysdate() where user_id = #{userId}
+    </update>
+
+</mapper>

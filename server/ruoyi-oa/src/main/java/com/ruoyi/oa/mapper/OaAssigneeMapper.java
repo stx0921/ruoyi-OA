@@ -1,5 +1,6 @@
 package com.ruoyi.oa.mapper;
 
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -10,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
  *
  * @author ruoyi-oa
  */
+@Mapper
 public interface OaAssigneeMapper
 {
     /**

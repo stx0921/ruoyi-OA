@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaDeptMapper">
+
+    <resultMap type="com.ruoyi.oa.member.vo.DeptVO" id="DeptVoResult">
+        <id     property="deptId"      column="dept_id"/>
+        <result property="deptName"    column="dept_name"/>
+        <result property="parentId"    column="parent_id"/>
+        <result property="orderNum"    column="order_num"/>
+        <result property="status"      column="status"/>
+        <result property="memberCount" column="member_count"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.oa.member.vo.DeptOptionVO" id="DeptOptionResult">
+        <id     property="deptId"   column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+    </resultMap>
+
+    <select id="selectOrgRootDeptId" resultType="java.lang.Long">
+        select dept_id from sys_dept
+        where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
+        order by dept_id
+        limit 1
+    </select>
+
+    <select id="selectOrgDeptList" resultMap="DeptVoResult">
+        select d.dept_id, d.dept_name, d.parent_id, d.order_num, d.status,
+               (select count(*) from oa_member m where m.dept_id = d.dept_id and m.status = '0') as member_count
+        from sys_dept d
+        where d.del_flag = '0'
+          and d.parent_id = (select dept_id from sys_dept
+                             where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
+                             order by dept_id limit 1)
+        order by d.order_num, d.dept_id
+    </select>
+
+    <select id="selectOrgDeptOptions" resultMap="DeptOptionResult">
+        select d.dept_id, d.dept_name
+        from sys_dept d
+        where d.del_flag = '0' and d.status = '0'
+          and d.parent_id = (select dept_id from sys_dept
+                             where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
+                             order by dept_id limit 1)
+        order by d.order_num, d.dept_id
+    </select>
+
+    <update id="updateDeptLeader">
+        update sys_dept set leader = #{leader} where dept_id = #{deptId}
+    </update>
+
+</mapper>

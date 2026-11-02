@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.apply.mapper.OaMemberApplyMapper">
+
+    <resultMap type="com.ruoyi.oa.apply.domain.OaMemberApply" id="OaMemberApplyResult">
+        <result property="id"             column="id"/>
+        <result property="applyNo"        column="apply_no"/>
+        <result property="studentNo"      column="student_no"/>
+        <result property="name"           column="name"/>
+        <result property="gender"         column="gender"/>
+        <result property="phone"          column="phone"/>
+        <result property="college"        column="college"/>
+        <result property="major"          column="major"/>
+        <result property="className"      column="class_name"/>
+        <result property="grade"          column="grade"/>
+        <result property="cohort"         column="cohort"/>
+        <result property="deptId"         column="dept_id"/>
+        <result property="deptName"       column="dept_name"/>
+        <result property="skills"         column="skills"/>
+        <result property="intro"          column="intro"/>
+        <result property="obeyAdjust"     column="obey_adjust"/>
+        <result property="photoUrl"       column="photo_url"/>
+        <result property="cardUrl"        column="card_url"/>
+        <result property="status"         column="status"/>
+        <result property="auditUserId"    column="audit_user_id"/>
+        <result property="auditUserName"  column="audit_user_name"/>
+        <result property="auditTime"      column="audit_time"/>
+        <result property="auditRemark"    column="audit_remark"/>
+        <result property="retryCount"     column="retry_count"/>
+        <result property="memberId"       column="member_id"/>
+        <result property="ip"             column="ip"/>
+        <result property="createTime"     column="create_time"/>
+        <result property="updateTime"     column="update_time"/>
+    </resultMap>
+
+    <sql id="selectApplyVo">
+        select a.id, a.apply_no, a.student_no, a.name, a.gender, a.phone,
+               a.college, a.major, a.class_name, a.grade, a.cohort, a.dept_id,
+               a.skills, a.intro, a.obey_adjust, a.photo_url, a.card_url,
+               a.status, a.audit_user_id, a.audit_user_name, a.audit_time, a.audit_remark,
+               a.retry_count, a.member_id, a.ip, a.create_time, a.update_time,
+               d.dept_name as dept_name
+        from oa_member_apply a
+        left join sys_dept d on d.dept_id = a.dept_id
+    </sql>
+
+    <select id="selectApplyList" parameterType="com.ruoyi.oa.apply.domain.OaMemberApply" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        <where>
+            <if test="params.scope != null and params.scope == 'todo'">
+                and a.status = '0'
+                <if test="params.scopeAll == null or params.scopeAll == false">
+                    and exists (select 1 from oa_dept_leader l where l.dept_id = a.dept_id and l.user_id = #{params.scopeUserId})
+                </if>
+            </if>
+            <if test="params.scope != null and params.scope == 'done'">
+                and a.audit_user_id = #{params.scopeUserId}
+            </if>
+            <if test="status != null and status != ''">
+                and a.status = #{status}
+            </if>
+            <if test="deptId != null">
+                and a.dept_id = #{deptId}
+            </if>
+            <if test="studentNo != null and studentNo != ''">
+                and a.student_no like concat(#{studentNo}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                and a.name like concat('%', #{name}, '%')
+            </if>
+            <if test="phone != null and phone != ''">
+                and a.phone like concat(#{phone}, '%')
+            </if>
+            <if test="grade != null and grade != ''">
+                and a.grade = #{grade}
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and a.create_time &gt;= #{params.beginTime}
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and a.create_time &lt;= #{params.endTime}
+            </if>
+            <if test="params.dataScope != null and params.dataScope != ''">
+                ${params.dataScope}
+            </if>
+        </where>
+        order by a.id desc
+    </select>
+
+    <select id="selectApplyById" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        where a.id = #{id}
+    </select>
+
+    <select id="selectApplyByIdForUpdate" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        where a.id = #{id}
+        for update
+    </select>
+
+    <select id="selectPendingByStudentAndDeptForUpdate" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        where a.student_no = #{studentNo}
+          and a.dept_id = #{deptId}
+          and a.status = '0'
+        order by a.id asc
+        limit 1
+        for update
+    </select>
+
+    <select id="selectPendingByStudentNoForUpdate" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        where a.student_no = #{studentNo}
+          and a.status = '0'
+        order by a.id asc
+        for update
+    </select>
+
+    <select id="selectApplyByPhone" resultMap="OaMemberApplyResult">
+        <include refid="selectApplyVo"/>
+        where a.phone = #{phone}
+        order by a.create_time desc, a.id desc
+    </select>
+
+    <insert id="insertApply" parameterType="com.ruoyi.oa.apply.domain.OaMemberApply" useGeneratedKeys="true" keyProperty="id">
+        insert into oa_member_apply (
+            apply_no, student_no, name, gender, phone,
+            college, major, class_name, grade, cohort, dept_id,
+            skills, intro, obey_adjust, photo_url, card_url,
+            status, retry_count, ip, create_time, update_time
+        ) values (
+            #{applyNo}, #{studentNo}, #{name}, #{gender}, #{phone},
+            #{college}, #{major}, #{className}, #{grade}, #{cohort}, #{deptId},
+            #{skills}, #{intro}, #{obeyAdjust}, #{photoUrl}, #{cardUrl},
+            #{status}, #{retryCount}, #{ip}, sysdate(), sysdate()
+        )
+    </insert>
+
+    <update id="approve">
+        update oa_member_apply
+        set status = '1',
+            member_id = #{memberId},
+            audit_user_id = #{auditUserId},
+            audit_user_name = #{auditUserName},
+            audit_time = sysdate(),
+            audit_remark = #{auditRemark},
+            update_time = sysdate()
+        where id = #{id} and status = '0'
+    </update>
+
+    <update id="updateAuditStatus">
+        update oa_member_apply
+        set status = #{status},
+            audit_user_id = #{auditUserId},
+            audit_user_name = #{auditUserName},
+            audit_time = sysdate(),
+            audit_remark = #{auditRemark},
+            update_time = sysdate()
+        where id = #{id} and status = '0'
+    </update>
+
+    <update id="resubmit" parameterType="com.ruoyi.oa.apply.domain.OaMemberApply">
+        update oa_member_apply
+        set name = #{name},
+            gender = #{gender},
+            phone = #{phone},
+            college = #{college},
+            major = #{major},
+            class_name = #{className},
+            grade = #{grade},
+            cohort = #{cohort},
+            skills = #{skills},
+            intro = #{intro},
+            obey_adjust = #{obeyAdjust},
+            <if test="photoUrl != null and photoUrl != ''">photo_url = #{photoUrl},</if>
+            <if test="cardUrl != null and cardUrl != ''">card_url = #{cardUrl},</if>
+            status = '0',
+            retry_count = retry_count + 1,
+            audit_user_id = null,
+            audit_user_name = '',
+            audit_time = null,
+            audit_remark = '',
+            update_time = sysdate()
+        where id = #{id} and status = '2'
+    </update>
+
+    <update id="withdraw">
+        update oa_member_apply
+        set status = '3',
+            update_time = sysdate()
+        where id = #{id} and status = '0'
+    </update>
+
+    <select id="countPending" resultType="int">
+        select count(1) from oa_member_apply
+        where student_no = #{studentNo}
+          and dept_id = #{deptId}
+          and status = '0'
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="selectMaxApplyNo" resultType="String">
+        select max(apply_no) from oa_member_apply
+        where apply_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

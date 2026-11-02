@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>部门管理 · 人员录入 v1</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+  <div id="sidebar"></div>
+  <div class="main">
+    <div id="navbar" class="navbar"></div>
+    <div id="tags" class="tags"></div>
+    <div class="content">
+
+      <div class="demo-id">
+        <span>演示身份：<b>主席团 · 石天行</b></span><span class="sp">|</span>
+        <span>role_key：<b>oa_president</b></span><span class="sp">|</span>
+        <span>权限标识：<b>oa:dept:list / oa:dept:edit</b></span>
+      </div>
+
+      <div class="page-title">部门与负责人 <small>6 个部门 · 在册 20 人</small></div>
+
+      <div class="notice blue">
+        <span><b>部门数据与若依 sys_dept 共用</b>：不另建组织树，成员数据权限直接走 RuoYi 的 data_scope=3（本部门）；正 / 副部长存放在 <b>oa_dept_leader</b>（leader_type 1 正 / 2 副），部长缺位时由主席团 / 管理员兜底代审并留痕。</span>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary">+ 新增部门</button>
+            <button class="btn">刷新人数</button>
+          </div>
+          <span style="font-size:12px;color:#909399">排序值越小越靠前，部门停用后不参与招新意向选择</span>
+        </div>
+
+        <div class="table-wrap">
+          <table class="el-table">
+            <thead>
+              <tr><th>部门</th><th>部长</th><th>副部长</th><th>在册人数</th><th>排序</th><th>状态</th><th style="width:170px">操作</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="strong">组织部</td><td>江叙白</td><td>沈亦舟</td><td>8</td><td>1</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('组织部','江叙白','沈亦舟','1')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+              <tr>
+                <td class="strong">宣传部</td><td>林清越</td><td>沈知微</td><td>3</td><td>2</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('宣传部','林清越','沈知微','2')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+              <tr>
+                <td class="strong">外联部</td><td>周慕言</td><td>傅北辰</td><td>2</td><td>3</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('外联部','周慕言','傅北辰','3')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+              <tr>
+                <td class="strong">秘书处</td><td>苏晚晴</td><td>唐予星</td><td>3</td><td>4</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('秘书处','苏晚晴','唐予星','4')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+              <tr>
+                <td class="strong">文艺部</td><td>顾斯远</td><td>白亦初</td><td>2</td><td>5</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('文艺部','顾斯远','白亦初','5')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+              <tr>
+                <td class="strong">体育部</td><td>程亦舟</td><td style="color:#C0C4CC">—（未设置）</td><td>2</td><td>6</td>
+                <td><span class="pill pill-green">正常</span></td>
+                <td><button class="btn-text" onclick="openDept('体育部','程亦舟','','6')">编辑</button><a class="btn-text" href="member-list.html">成员</a><button class="btn-text danger">停用</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 部门编辑抽屉 -->
+<div class="overlay" id="deptMask" style="display:none;padding-top:0" onclick="closeDept()"></div>
+<div class="drawer" id="deptDrawer" style="display:none">
+  <div class="drawer-head">
+    <span>编辑部门 · <span id="deptName">组织部</span></span>
+    <span class="modal-close" onclick="closeDept()">×</span>
+  </div>
+  <div class="drawer-body">
+    <div class="notice">部门主体信息取自 <b>sys_dept</b>，本页只维护负责人映射（oa_dept_leader）与排序、状态。</div>
+    <div class="form-section">
+      <div class="form-section-title">部门信息</div>
+      <div class="form-grid">
+        <div class="form-item"><label>部门名称</label><div class="readonly-val" id="deptName2">组织部</div></div>
+        <div class="form-item"><label>上级部门</label><div class="readonly-val">XX 学生会（根节点）</div></div>
+        <div class="form-item"><label>排序</label><input class="input" id="deptSort" value="1"></div>
+        <div class="form-item"><label>状态</label>
+          <div class="radio-line"><span class="radio on"><i></i>正常</span><span class="radio"><i></i>停用</span></div>
+        </div>
+        <div class="form-item"><label>数据权限</label><div class="readonly-val">本部门数据权限（data_scope=3）</div></div>
+        <div class="form-item"><label>在册人数</label><div class="readonly-val">8 人（只读，由成员档案汇总）</div></div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">负责人 <small>从在册成员中下拉选择，一个部门 1 正 1 副</small></div>
+      <div class="form-grid">
+        <div class="form-item"><label>部长（正职）</label>
+          <select class="input" id="deptLeader" style="width:100%">
+            <option>江叙白（2023020103）</option>
+            <option>沈亦舟（2023030116）</option>
+            <option>温禾（2026030107）</option>
+            <option>顾言（2024040115）</option>
+          </select>
+        </div>
+        <div class="form-item"><label>副部长（副职）</label>
+          <select class="input" id="deptVice" style="width:100%">
+            <option>沈亦舟（2023030116）</option>
+            <option>温禾（2026030107）</option>
+            <option>顾言（2024040115）</option>
+          </select>
+        </div>
+      </div>
+      <div class="hint-red show" style="color:#909399">部长缺位时，该部门入会申请自动升级至主席团 / 管理员代审，代审记录写入审批时间轴。</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">成员预览 <small>本部门在册成员（只读）</small></div>
+      <table class="desc-table">
+        <tr><th>在册成员</th><td id="deptMemberList">石天行、江叙白、沈亦舟、温禾、顾言、韩青禾、叶知秋、陆知夏</td></tr>
+        <tr><th>已离会</th><td id="deptLeftList">何知远（已毕业，2026-06-30 停用账号）</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <button class="btn" onclick="closeDept()">取 消</button>
+    <button class="btn btn-primary" onclick="closeDept()">保 存</button>
+  </div>
+</div>
+
+<script src="shell.js"></script>
+<script>
+Shell.mount('dept', '组织人事 / 部门与负责人', '部门管理');
+
+var DEPT_MEMBERS = {
+  '组织部': [['石天行', '2023010101'], ['江叙白', '2023020103'], ['沈亦舟', '2023030116'], ['温禾', '2026030107'], ['顾言', '2024040115'], ['韩青禾', '2024030319'], ['叶知秋', '2024040425'], ['陆知夏', '2026050508']],
+  '宣传部': [['林清越', '2023010205'], ['沈知微', '2024020712'], ['周雨眠', '2026040318']],
+  '外联部': [['周慕言', '2023020327'], ['傅北辰', '2024040522']],
+  '秘书处': [['苏晚晴', '2023030422'], ['陈子墨', '2024040611'], ['唐予星', '2024020206']],
+  '文艺部': [['顾斯远', '2023040602'], ['白亦初', '2024050824']],
+  '体育部': [['程亦舟', '2023050919'], ['邵雨桐', '2024020628']]
+};
+var DEPT_LEFT = {
+  '组织部': '何知远（已毕业，2026-06-30 停用账号）',
+  '外联部': '许星野（已退会，2026-06-30 停用账号）'
+};
+
+function fillSelect(sel, list, current) {
+  sel.innerHTML = '';
+  var empty = document.createElement('option');
+  empty.value = '';
+  empty.textContent = '—（未设置）';
+  sel.appendChild(empty);
+  for (var i = 0; i < list.length; i++) {
+    var opt = document.createElement('option');
+    opt.value = list[i][0];
+    opt.textContent = list[i][0] + '（' + list[i][1] + '）';
+    if (list[i][0] === current) opt.selected = true;
+    sel.appendChild(opt);
+  }
+  if (!current) sel.value = '';
+}
+
+function openDept(name, leader, vice, sort) {
+  document.getElementById('deptName').textContent = name;
+  document.getElementById('deptName2').textContent = name;
+  document.getElementById('deptSort').value = sort;
+  var list = DEPT_MEMBERS[name] || [];
+  fillSelect(document.getElementById('deptLeader'), list, leader);
+  fillSelect(document.getElementById('deptVice'), list, vice);
+  var names = [];
+  for (var i = 0; i < list.length; i++) names.push(list[i][0]);
+  document.getElementById('deptMemberList').textContent = names.join('、') || '—';
+  document.getElementById('deptLeftList').textContent = DEPT_LEFT[name] || '无';
+  document.getElementById('deptMask').style.display = 'block';
+  document.getElementById('deptDrawer').style.display = 'flex';
+}
+function closeDept() {
+  document.getElementById('deptMask').style.display = 'none';
+  document.getElementById('deptDrawer').style.display = 'none';
+}
+</script>
+</body>
+</html>

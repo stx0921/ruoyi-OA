@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.apply.mapper.OaMemberApplyLogMapper">
+
+    <resultMap type="com.ruoyi.oa.apply.domain.OaMemberApplyLog" id="OaMemberApplyLogResult">
+        <result property="logId"         column="log_id"/>
+        <result property="applyId"       column="apply_id"/>
+        <result property="action"        column="action"/>
+        <result property="operatorId"    column="operator_id"/>
+        <result property="operatorName"  column="operator_name"/>
+        <result property="remark"        column="remark"/>
+        <result property="createTime"    column="create_time"/>
+    </resultMap>
+
+    <insert id="insertLog" parameterType="com.ruoyi.oa.apply.domain.OaMemberApplyLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into oa_member_apply_log (
+            apply_id, action, operator_id, operator_name, remark, create_time
+        ) values (
+            #{applyId}, #{action}, #{operatorId}, #{operatorName}, #{remark}, sysdate()
+        )
+    </insert>
+
+    <select id="selectLogByApplyId" parameterType="Long" resultMap="OaMemberApplyLogResult">
+        select log_id, apply_id, action, operator_id, operator_name, remark, create_time
+        from oa_member_apply_log
+        where apply_id = #{applyId}
+        order by log_id asc
+    </select>
+
+</mapper>

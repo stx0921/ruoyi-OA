@@ -66,7 +66,7 @@ export const constantRoutes = [
         path: '/index',
         component: () => import('@/views/index'),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        meta: { title: '工作台', icon: 'dashboard', affix: true }
       }
     ]
   },
@@ -87,6 +87,32 @@ export const constantRoutes = [
         component: () => import('@/views/system/user/profile/index'),
         name: 'Profile',
         meta: { title: '个人中心', icon: 'user' }
+      }
+    ]
+  },
+  {
+    // H5（人员录入）：报名 / 报名进度免登录，干事门户需登录；不渲染 PC 侧边栏
+    path: '/h5',
+    component: () => import('@/views/h5/layout/index.vue'),
+    hidden: true,
+    children: [
+      {
+        path: 'apply',
+        component: () => import('@/views/h5/apply/index.vue'),
+        name: 'H5Apply',
+        meta: { title: '入会报名' }
+      },
+      {
+        path: 'progress',
+        component: () => import('@/views/h5/progress/index.vue'),
+        name: 'H5Progress',
+        meta: { title: '报名进度' }
+      },
+      {
+        path: 'portal',
+        component: () => import('@/views/h5/portal/index.vue'),
+        name: 'H5Portal',
+        meta: { title: '干事门户' }
       }
     ]
   }

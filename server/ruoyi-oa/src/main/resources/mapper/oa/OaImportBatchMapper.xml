@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaImportBatchMapper">
+
+    <resultMap type="com.ruoyi.oa.member.domain.OaImportBatch" id="OaImportBatchResult">
+        <result property="batchId"          column="batch_id"/>
+        <result property="batchNo"          column="batch_no"/>
+        <result property="fileName"         column="file_name"/>
+        <result property="filePath"         column="file_path"/>
+        <result property="templateVersion"  column="template_version"/>
+        <result property="totalRows"        column="total_rows"/>
+        <result property="successRows"      column="success_rows"/>
+        <result property="failRows"         column="fail_rows"/>
+        <result property="updateRows"       column="update_rows"/>
+        <result property="skipRows"         column="skip_rows"/>
+        <result property="status"           column="status"/>
+        <result property="errorFileUrl"     column="error_file_url"/>
+        <result property="operatorId"       column="operator_id"/>
+        <result property="operatorName"     column="operator_name"/>
+        <result property="deptId"           column="dept_id"/>
+        <result property="createTime"       column="create_time"/>
+        <result property="confirmTime"      column="confirm_time"/>
+    </resultMap>
+
+    <insert id="insertBatch" parameterType="com.ruoyi.oa.member.domain.OaImportBatch" useGeneratedKeys="true" keyProperty="batchId">
+        insert into oa_import_batch (
+            batch_no, file_name, file_path, template_version,
+            total_rows, success_rows, fail_rows, update_rows, skip_rows,
+            status, error_file_url, operator_id, operator_name, dept_id, create_time
+        ) values (
+            #{batchNo}, #{fileName}, #{filePath}, #{templateVersion},
+            #{totalRows}, #{successRows}, #{failRows}, #{updateRows}, #{skipRows},
+            #{status}, #{errorFileUrl}, #{operatorId}, #{operatorName}, #{deptId}, sysdate()
+        )
+    </insert>
+
+    <select id="selectBatchById" resultMap="OaImportBatchResult">
+        select batch_id, batch_no, file_name, file_path, template_version,
+               total_rows, success_rows, fail_rows, update_rows, skip_rows,
+               status, error_file_url, operator_id, operator_name, dept_id, create_time, confirm_time
+        from oa_import_batch
+        where batch_id = #{batchId}
+    </select>
+
+    <update id="updateBatchValidate">
+        update oa_import_batch
+        set success_rows = #{successRows},
+            fail_rows = #{failRows},
+            update_rows = #{updateRows},
+            skip_rows = #{skipRows},
+            error_file_url = #{errorFileUrl}
+        where batch_id = #{batchId}
+    </update>
+
+    <update id="updateBatchConfirm">
+        update oa_import_batch
+        set status = '1',
+            success_rows = #{successRows},
+            fail_rows = #{failRows},
+            update_rows = #{updateRows},
+            skip_rows = #{skipRows},
+            error_file_url = #{errorFileUrl},
+            confirm_time = sysdate()
+        where batch_id = #{batchId} and status = '0'
+    </update>
+
+    <select id="selectMaxBatchNo" parameterType="String" resultType="String">
+        select max(batch_no) from oa_import_batch
+        where batch_no like concat(#{prefix}, '%')
+    </select>
+
+</mapper>

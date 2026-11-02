@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaMemberLogMapper">
+
+    <resultMap type="OaMemberLog" id="OaMemberLogResult">
+        <id     property="logId"        column="log_id"/>
+        <result property="memberId"     column="member_id"/>
+        <result property="action"       column="action"/>
+        <result property="deptId"       column="dept_id"/>
+        <result property="deptName"     column="dept_name"/>
+        <result property="beforeJson"   column="before_json"/>
+        <result property="afterJson"    column="after_json"/>
+        <result property="operatorId"   column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="ip"           column="ip"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="memberName"   column="member_name"/>
+        <result property="studentNo"    column="student_no"/>
+    </resultMap>
+
+    <insert id="insertMemberLog" parameterType="OaMemberLog" useGeneratedKeys="true" keyProperty="logId">
+        insert into oa_member_log (member_id, action, dept_id, before_json, after_json,
+                                   operator_id, operator_name, ip, create_time)
+        values (#{memberId}, #{action}, #{deptId}, #{beforeJson}, #{afterJson},
+                #{operatorId}, #{operatorName}, #{ip}, #{createTime})
+    </insert>
+
+    <select id="selectLogList" resultMap="OaMemberLogResult">
+        select l.log_id, l.member_id, l.action, l.dept_id, d.dept_name, l.before_json, l.after_json,
+               l.operator_id, l.operator_name, l.ip, l.create_time,
+               m.name as member_name, m.student_no
+        from oa_member_log l
+        left join oa_member m on m.member_id = l.member_id
+        left join sys_dept d on d.dept_id = l.dept_id
+        <where>
+            <if test="memberId != null">
+                and l.member_id = #{memberId}
+            </if>
+            <if test="action != null and action != ''">
+                and l.action = #{action}
+            </if>
+            <if test="operatorName != null and operatorName != ''">
+                and l.operator_name like concat('%', #{operatorName}, '%')
+            </if>
+            <if test="deptId != null">
+                and l.dept_id = #{deptId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (m.name like concat('%', #{keyword}, '%') or m.student_no like concat(#{keyword}, '%'))
+            </if>
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and l.create_time &gt;= concat(#{params.beginTime}, ' 00:00:00')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and l.create_time &lt;= concat(#{params.endTime}, ' 23:59:59')
+            </if>
+            ${params.dataScope}
+        </where>
+        order by l.log_id desc
+    </select>
+
+    <select id="selectLogById" parameterType="Long" resultMap="OaMemberLogResult">
+        select l.log_id, l.member_id, l.action, l.dept_id, l.before_json, l.after_json,
+               l.operator_id, l.operator_name, l.ip, l.create_time
+        from oa_member_log l
+        where l.log_id = #{logId}
+    </select>
+
+    <select id="selectLogByMemberId" resultMap="OaMemberLogResult">
+        select l.log_id, l.member_id, l.action, l.dept_id, d.dept_name, l.before_json, l.after_json,
+               l.operator_id, l.operator_name, l.ip, l.create_time
+        from oa_member_log l
+        left join sys_dept d on d.dept_id = l.dept_id
+        where l.member_id = #{memberId}
+        order by l.log_id desc
+        limit #{limit}
+    </select>
+
+</mapper>

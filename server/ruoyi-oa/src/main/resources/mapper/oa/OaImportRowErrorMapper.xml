@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.member.mapper.OaImportRowErrorMapper">
+
+    <resultMap type="com.ruoyi.oa.member.domain.OaImportRowError" id="OaImportRowErrorResult">
+        <result property="id"          column="id"/>
+        <result property="batchId"     column="batch_id"/>
+        <result property="rowNum"      column="row_num"/>
+        <result property="studentNo"   column="student_no"/>
+        <result property="name"        column="name"/>
+        <result property="columnName"  column="column_name"/>
+        <result property="errorMsg"    column="error_msg"/>
+        <result property="rawJson"     column="raw_json"/>
+        <result property="createTime"  column="create_time"/>
+    </resultMap>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into oa_import_row_error (
+            batch_id, row_num, student_no, name, column_name, error_msg, raw_json, create_time
+        ) values
+        <foreach item="item" collection="list" separator=",">
+            (#{item.batchId}, #{item.rowNum}, #{item.studentNo}, #{item.name},
+             #{item.columnName}, #{item.errorMsg}, #{item.rawJson}, sysdate())
+        </foreach>
+    </insert>
+
+    <select id="selectByBatchId" resultMap="OaImportRowErrorResult">
+        select id, batch_id, row_num, student_no, name, column_name, error_msg, raw_json, create_time
+        from oa_import_row_error
+        where batch_id = #{batchId}
+        order by row_num asc, id asc
+    </select>
+
+    <delete id="deleteByBatchId">
+        delete from oa_import_row_error where batch_id = #{batchId}
+    </delete>
+
+</mapper>
