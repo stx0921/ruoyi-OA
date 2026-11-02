@@ -1,0 +1,258 @@
+/**
+ * PC-02 成员详情 / 新增 / 编辑抽屉共用样式
+ * 由 MemberFormDialog.vue / MemberDetailDrawer.vue 通过 @import 引入（scoped 内联）
+ */
+
+/* ---------- 头部 ---------- */
+.member-drawer__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.member-drawer__name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.member-drawer__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.member-drawer__foot-grow {
+  flex: 1;
+}
+
+/* ---------- 骨架 ---------- */
+.member-drawer-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.member-drawer-skeleton__group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.member-drawer-skeleton__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.member-skeleton__bar {
+  display: inline-block;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f2f4f7 25%, #e9edf3 37%, #f2f4f7 63%);
+  background-size: 400% 100%;
+  animation: member-skeleton-loading 1.4s ease infinite;
+}
+
+@keyframes member-skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+/* ---------- 错误 / 无权限态 ---------- */
+.member-drawer-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 0;
+  text-align: center;
+}
+
+.member-drawer-error__title {
+  font-size: 15px;
+  color: #606266;
+}
+
+.member-drawer-error__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* ---------- 分组表单 ---------- */
+.member-form {
+  :deep(.el-form-item) {
+    margin-bottom: 16px;
+  }
+
+  :deep(.el-form-item__label) {
+    font-size: 13px;
+    color: #606266;
+  }
+}
+
+.member-form-section {
+  margin-bottom: 18px;
+}
+
+.member-form-section__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ebeef5;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+
+  &::before {
+    content: '';
+    width: 3px;
+    height: 13px;
+    border-radius: 2px;
+    background: #409eff;
+  }
+}
+
+/* ---------- 手机号行 ---------- */
+.member-phone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+
+  .el-input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* ---------- 附件 ---------- */
+.member-att-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.member-att-block {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.member-att-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 128px;
+  border: 1px dashed #dcdfe6;
+  border-radius: 4px;
+  background: #fafbfd;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #409eff;
+  }
+}
+
+.member-att-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.member-att-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #a8bdd6;
+}
+
+.member-att-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  padding-top: 4px;
+}
+
+.member-att-tip {
+  margin-top: 10px;
+}
+
+/* ---------- 账号信息条 ---------- */
+.member-account-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  background: #fafbfc;
+  font-size: 13px;
+  color: #606266;
+
+  b {
+    font-family: Consolas, 'Courier New', monospace;
+    font-weight: 600;
+    color: #303133;
+  }
+}
+
+.member-account-box__grow {
+  flex: 1;
+}
+
+.member-account-box__tip {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* ---------- 变动时间轴 ---------- */
+.member-log-timeline {
+  max-height: 240px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.member-log-item__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.member-log-item__meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.member-log-item__summary {
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #f8f9fb;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #606266;
+  word-break: break-all;
+}
