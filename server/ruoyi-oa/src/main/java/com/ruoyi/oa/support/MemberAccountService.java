@@ -42,6 +42,11 @@ public class MemberAccountService
             SysUser exists = userMapper.selectUserById(member.getUserId());
             if (exists != null)
             {
+                // 历史账号可能因退会/软删除被停用：重新入册时恢复启用
+                if ("1".equals(exists.getStatus()))
+                {
+                    userMapper.updateUserStatus(exists.getUserId(), "0");
+                }
                 return exists;
             }
         }
@@ -51,6 +56,10 @@ public class MemberAccountService
             if (!StringUtils.equals(byName.getPhonenumber(), member.getPhone()))
             {
                 throw new ServiceException("该学号已存在账号且手机号不一致，请人工核对", 409);
+            }
+            if ("1".equals(byName.getStatus()))
+            {
+                userMapper.updateUserStatus(byName.getUserId(), "0");
             }
             return byName;
         }

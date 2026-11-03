@@ -31,6 +31,7 @@
         <result property="cardUrl"       column="card_url"/>
         <result property="userId"        column="user_id"/>
         <result property="applyId"       column="apply_id"/>
+        <result property="delFlag"       column="del_flag"/>
         <result property="accountStatus" column="account_status"/>
         <result property="lastLoginTime" column="last_login_time"/>
         <result property="remark"        column="remark"/>
@@ -44,7 +45,7 @@
         select m.member_id, m.member_no, m.name, m.gender, m.student_no, m.phone, m.college, m.major,
                m.class_name, m.grade, m.cohort, m.dept_id, d.dept_name, m.position, m.status, m.source,
                m.join_date, m.leave_date, m.email, m.wechat, m.qq, m.skills, m.intro, m.obey_adjust,
-               m.photo_url, m.card_url, m.user_id, m.apply_id, m.remark,
+               m.photo_url, m.card_url, m.user_id, m.apply_id, m.del_flag, m.remark,
                m.create_by, m.create_time, m.update_by, m.update_time,
                u.status as account_status, u.login_date as last_login_time
         from oa_member m
@@ -55,6 +56,7 @@
     <select id="selectMemberList" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
         <where>
+            and m.del_flag = '0'
             <if test="name != null and name != ''">
                 and m.name like concat('%', #{name}, '%')
             </if>
@@ -103,37 +105,37 @@
 
     <select id="selectMemberById" parameterType="Long" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.member_id = #{memberId}
+        where m.member_id = #{memberId} and m.del_flag = '0'
     </select>
 
     <select id="selectMemberByIdForUpdate" parameterType="Long" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.member_id = #{memberId}
+        where m.member_id = #{memberId} and m.del_flag = '0'
         for update
     </select>
 
     <select id="selectByStudentNo" parameterType="String" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.student_no = #{studentNo}
+        where m.student_no = #{studentNo} and m.del_flag = '0'
         limit 1
     </select>
 
     <select id="selectByStudentNoForUpdate" parameterType="String" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.student_no = #{studentNo}
+        where m.student_no = #{studentNo} and m.del_flag = '0'
         limit 1
         for update
     </select>
 
     <select id="selectByPhone" parameterType="String" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.phone = #{phone}
+        where m.phone = #{phone} and m.del_flag = '0'
         limit 1
     </select>
 
     <select id="selectByUserId" parameterType="Long" resultMap="OaMemberResult">
         <include refid="selectMemberVo"/>
-        where m.user_id = #{userId}
+        where m.user_id = #{userId} and m.del_flag = '0'
         limit 1
     </select>
 
@@ -218,6 +220,7 @@
         left join sys_dept d on d.dept_id = m.dept_id
         <where>
             m.status = '0'
+            and m.del_flag = '0'
             <if test="deptId != null">and m.dept_id = #{deptId}</if>
             ${params.dataScope}
         </where>
@@ -238,6 +241,7 @@
         left join sys_dept d on d.dept_id = m.dept_id
         <where>
             m.status = '0'
+            and m.del_flag = '0'
             and date_format(m.join_date, '%Y%m') = date_format(sysdate(), '%Y%m')
             <if test="deptId != null">and m.dept_id = #{deptId}</if>
             ${params.dataScope}
@@ -249,6 +253,7 @@
         left join sys_dept d on d.dept_id = m.dept_id
         <where>
             m.status in ('1', '2')
+            and m.del_flag = '0'
             and m.leave_date is not null
             and date_format(m.leave_date, '%Y%m') = date_format(sysdate(), '%Y%m')
             <if test="deptId != null">and m.dept_id = #{deptId}</if>
@@ -259,13 +264,23 @@
     <select id="selectMemberCountGroupByDept" resultType="java.util.Map">
         select dept_id as deptId, count(*) as memberCount
         from oa_member
-        where status = '0' and dept_id is not null
+        where status = '0' and del_flag = '0' and dept_id is not null
         group by dept_id
     </select>
 
     <select id="countActiveMemberByUserIdAndDept" resultType="java.lang.Integer">
         select count(*) from oa_member
-        where user_id = #{userId} and dept_id = #{deptId} and status = '0'
+        where user_id = #{userId} and dept_id = #{deptId} and status = '0' and del_flag = '0'
     </select>
+
+    <update id="softDeleteByIds">
+        update oa_member
+        set del_flag = '1', update_by = #{updateBy}, update_time = sysdate()
+        where member_id in
+        <foreach collection="memberIds" item="memberId" open="(" separator="," close=")">
+            #{memberId}
+        </foreach>
+        and del_flag = '0'
+    </update>
 
 </mapper>

@@ -111,6 +111,7 @@
               <el-dropdown-menu>
                 <el-dropdown-item command="status">批量改状态</el-dropdown-item>
                 <el-dropdown-item v-if="canTransfer" command="transfer">批量调部门</el-dropdown-item>
+                <el-dropdown-item v-if="canRemove" command="delete" divided>批量删除</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -152,6 +153,18 @@
                 :disabled="selectedRows.length > 200"
                 @click="openBatchTransfer"
               >批量调部门</el-button>
+            </span>
+          </el-tooltip>
+          <el-tooltip v-if="canRemove" :disabled="selectedRows.length <= 200" content="单次最多选择 200 条，请分批操作" placement="top">
+            <span>
+              <el-button
+                size="small"
+                type="danger"
+                plain
+                v-hasPermi="['oa:member:remove']"
+                :disabled="selectedRows.length > 200"
+                @click="handleBatchDelete"
+              >批量删除</el-button>
             </span>
           </el-tooltip>
         </div>
@@ -256,6 +269,7 @@
                     <el-dropdown-item v-if="statusOf(scope.row) === '0'" command="quit" divided>退会</el-dropdown-item>
                     <el-dropdown-item v-if="statusOf(scope.row) === '0'" command="graduate">毕业</el-dropdown-item>
                     <el-dropdown-item v-if="statusOf(scope.row) !== '0'" command="restore">恢复在籍</el-dropdown-item>
+                    <el-dropdown-item v-if="canRemove" command="delete" divided>删除</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -408,6 +422,7 @@ import {
   exportMember,
   changeMemberStatus,
   transferMember,
+  delMember,
   deptTreeSelect
 } from '@/api/oa/member'
 import {
@@ -451,6 +466,7 @@ const canAdd = computed(() => proxy.$auth.hasPermi('oa:member:add'))
 const canEdit = computed(() => proxy.$auth.hasPermi('oa:member:edit'))
 const canExport = computed(() => proxy.$auth.hasPermi('oa:member:export'))
 const canImport = computed(() => proxy.$auth.hasPermi('oa:member:import'))
+const canRemove = computed(() => proxy.$auth.hasPermi('oa:member:remove'))
 const isAdmin = computed(() => userStore.roles.indexOf('admin') > -1)
 const isPresident = computed(() => userStore.roles.indexOf('oa_president') > -1)
 const isMinister = computed(() => userStore.roles.indexOf('oa_minister') > -1)
@@ -698,6 +714,7 @@ function handleRowClick(row, column) {
 }
 
 function hasRowMoreActions(row) {
+  if (canRemove.value) return true
   if (!canEdit.value) return false
   if (canTransfer.value) return true
   return ['0', '1', '2'].indexOf(statusOf(row)) > -1
@@ -763,11 +780,44 @@ function handleMutated() {
 /* 单条状态 / 调部门 / 升职                                                    */
 /* -------------------------------------------------------------------------- */
 function handleRowCommand(command, row) {
+  if (command === 'delete') {
+    handleDelete(row)
+    return
+  }
   if (command === 'quit' || command === 'graduate' || command === 'restore') {
     handleStatusAction(row, command)
     return
   }
   openTransfer(row, command)
+}
+
+/* -------------------------------------------------------------------------- */
+/* 删除（软删除 del_flag=1：列表隐藏、账号停用、数据保留）                      */
+/* -------------------------------------------------------------------------- */
+function handleDelete(row) {
+  proxy.$modal
+    .confirm('确认删除 ' + row.name + '（' + row.studentNo + '）？删除后将从成员列表隐藏、账号停用，数据保留并记录操作日志')
+    .then(() => delMember([row.memberId]))
+    .then(() => {
+      proxy.$modal.msgSuccess('已删除，账号已停用，数据保留并记录日志')
+      clearSelection(false)
+      handleMutated()
+    })
+    .catch(() => {})
+}
+
+function handleBatchDelete() {
+  if (!ensureBatchLimit()) return
+  const rows = [...selectedRows.value]
+  proxy.$modal
+    .confirm('确认删除选中的 ' + rows.length + ' 名成员？删除后将从成员列表隐藏、账号停用，数据保留并记录操作日志')
+    .then(() => delMember(rows.map(item => item.memberId)))
+    .then(() => {
+      proxy.$modal.msgSuccess('已删除 ' + rows.length + ' 名成员，账号已停用，数据保留并记录日志')
+      clearSelection(false)
+      handleMutated()
+    })
+    .catch(() => {})
 }
 
 /** 状态变更二次确认 */
@@ -902,6 +952,7 @@ function ensureBatchLimit() {
 function handleBatchCommand(command) {
   if (command === 'status') openBatchStatus()
   if (command === 'transfer') openBatchTransfer()
+  if (command === 'delete') handleBatchDelete()
 }
 
 function openBatchStatus() {

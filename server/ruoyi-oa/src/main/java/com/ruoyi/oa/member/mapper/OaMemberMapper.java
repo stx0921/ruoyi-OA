@@ -117,4 +117,9 @@ public interface OaMemberMapper
      * 校验某账号是否是某部门在籍成员（部门负责人设置用）
      */
     int countActiveMemberByUserIdAndDept(@Param("userId") Long userId, @Param("deptId") Long deptId);
+
+    /**
+     * 软删除成员（del_flag=1，仅处理当前正常记录）
+     */
+    int softDeleteByIds(@Param("memberIds") Long[] memberIds, @Param("updateBy") String updateBy);
 }

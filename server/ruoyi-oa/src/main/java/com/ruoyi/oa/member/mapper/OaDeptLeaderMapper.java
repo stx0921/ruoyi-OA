@@ -32,6 +32,11 @@ public interface OaDeptLeaderMapper
     int countLeader(@Param("deptId") Long deptId, @Param("userId") Long userId);
 
     /**
+     * 统计某账号担任负责人的部门数（删除成员前校验）
+     */
+    int countByUserId(Long userId);
+
+    /**
      * 删除某部门全部负责人
      */
     int deleteByDeptId(Long deptId);

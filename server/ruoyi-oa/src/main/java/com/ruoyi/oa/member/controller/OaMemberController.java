@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -150,6 +151,18 @@ public class OaMemberController extends BaseController
     public AjaxResult transfer(@RequestBody MemberTransferDTO dto)
     {
         memberService.transfer(dto);
+        return success();
+    }
+
+    /**
+     * 软删除成员（del_flag=1，账号停用、数据保留；支持批量）
+     */
+    @PreAuthorize("@ss.hasPermi('oa:member:remove')")
+    @Log(title = "成员管理", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{memberIds}")
+    public AjaxResult remove(@PathVariable Long[] memberIds)
+    {
+        memberService.deleteMembers(memberIds);
         return success();
     }
 

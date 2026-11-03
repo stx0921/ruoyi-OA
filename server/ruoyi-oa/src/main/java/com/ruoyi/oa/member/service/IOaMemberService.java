@@ -51,6 +51,11 @@ public interface IOaMemberService
     void transfer(MemberTransferDTO dto);
 
     /**
+     * 软删除成员（del_flag=1，账号停用，数据保留）
+     */
+    void deleteMembers(Long[] memberIds);
+
+    /**
      * 统计卡片
      */
     MemberStatsVO selectStats(MemberQuery query);

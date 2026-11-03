@@ -117,6 +117,9 @@ public class OaMember extends BaseEntity
     /** 首次入会来源申请ID */
     private Long applyId;
 
+    /** 删除标识（0正常 1已删除；软删除保留数据） */
+    private String delFlag;
+
     /** 账号状态（关联查询，非表字段） */
     private String accountStatus;
 
@@ -402,6 +405,16 @@ public class OaMember extends BaseEntity
     public void setApplyId(Long applyId)
     {
         this.applyId = applyId;
+    }
+
+    public String getDelFlag()
+    {
+        return delFlag;
+    }
+
+    public void setDelFlag(String delFlag)
+    {
+        this.delFlag = delFlag;
     }
 
     public String getAccountStatus()

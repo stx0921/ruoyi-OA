@@ -79,6 +79,15 @@ export function exportMember(params) {
   })
 }
 
+// 14. 删除成员（软删除：del_flag=1，账号停用、数据保留；支持批量）
+export function delMember(memberIds) {
+  const ids = Array.isArray(memberIds) ? memberIds.join(',') : memberIds
+  return request({
+    url: '/oa/member/' + ids,
+    method: 'delete'
+  })
+}
+
 // 9. 当前登录人档案（H5-03 用）
 export function getSelfMember() {
   return request({

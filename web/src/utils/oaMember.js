@@ -79,6 +79,7 @@ export const ACTION_MAP = {
   退会: { label: '退会', tone: 'red' },
   毕业: { label: '毕业', tone: 'gray' },
   恢复在籍: { label: '恢复在籍', tone: 'green' },
+  删除: { label: '删除', tone: 'red' },
   调部门: { label: '调部门', tone: 'orange' },
   升职: { label: '升职', tone: 'orange' },
   审批: { label: '审批', tone: 'blue' },

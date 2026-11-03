@@ -39,6 +39,10 @@
         select count(*) from oa_dept_leader where dept_id = #{deptId} and user_id = #{userId}
     </select>
 
+    <select id="countByUserId" resultType="java.lang.Integer">
+        select count(*) from oa_dept_leader where user_id = #{userId}
+    </select>
+
     <delete id="deleteByDeptId" parameterType="Long">
         delete from oa_dept_leader where dept_id = #{deptId}
     </delete>

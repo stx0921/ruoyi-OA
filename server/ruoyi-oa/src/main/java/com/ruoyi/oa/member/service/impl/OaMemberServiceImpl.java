@@ -1,6 +1,7 @@
 package com.ruoyi.oa.member.service.impl;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +27,7 @@ import com.ruoyi.oa.member.dto.MemberStatusDTO;
 import com.ruoyi.oa.member.dto.MemberTransferDTO;
 import com.ruoyi.oa.member.dto.MemberUpdateDTO;
 import com.ruoyi.oa.member.mapper.OaAccountMapper;
+import com.ruoyi.oa.member.mapper.OaDeptLeaderMapper;
 import com.ruoyi.oa.member.mapper.OaMemberLogMapper;
 import com.ruoyi.oa.member.mapper.OaMemberMapper;
 import com.ruoyi.oa.member.service.IOaMemberService;
@@ -58,6 +60,9 @@ public class OaMemberServiceImpl implements IOaMemberService
 
     @Autowired
     private OaAccountMapper accountMapper;
+
+    @Autowired
+    private OaDeptLeaderMapper deptLeaderMapper;
 
     @Autowired
     private OaMemberVoAssembler voAssembler;
@@ -419,6 +424,61 @@ public class OaMemberServiceImpl implements IOaMemberService
         finally
         {
             lockService.unlock(lockKey);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteMembers(Long[] memberIds)
+    {
+        if (memberIds == null || memberIds.length == 0)
+        {
+            throw new ServiceException("请选择要删除的成员", 400);
+        }
+        if (!isAdminOrPresident() && !isMinister())
+        {
+            throw new ServiceException("没有权限访问该数据", 403);
+        }
+        List<OaMember> target = new ArrayList<>();
+        for (Long memberId : memberIds)
+        {
+            if (memberId == null)
+            {
+                continue;
+            }
+            OaMember member = memberMapper.selectMemberByIdForUpdate(memberId);
+            if (member == null)
+            {
+                // 已删除或不存在：跳过，保证批量删除幂等
+                continue;
+            }
+            assertWriteAllowed(member);
+            if (currentUser.isSelf(member.getUserId()))
+            {
+                throw new ServiceException("不能删除本人档案", 400);
+            }
+            if (member.getUserId() != null && deptLeaderMapper.countByUserId(member.getUserId()) > 0)
+            {
+                throw new ServiceException("成员「" + member.getName() + "」是部门负责人，请先在「部门与负责人」中更换负责人后再删除",
+                        400);
+            }
+            target.add(member);
+        }
+        if (target.isEmpty())
+        {
+            throw new ServiceException("成员不存在或已删除", 404);
+        }
+        Long[] ids = new Long[target.size()];
+        for (int i = 0; i < target.size(); i++)
+        {
+            ids[i] = target.get(i).getMemberId();
+        }
+        memberMapper.softDeleteByIds(ids, currentUser.username());
+        for (OaMember member : target)
+        {
+            // 账号停用但保留数据；档案通过 del_flag 隐藏
+            accountService.disableAccount(member.getUserId());
+            memberLogService.record(member, "删除", memberLogService.snapshot(member), null);
         }
     }
 

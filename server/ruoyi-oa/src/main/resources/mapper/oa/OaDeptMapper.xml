@@ -25,7 +25,7 @@
 
     <select id="selectOrgDeptList" resultMap="DeptVoResult">
         select d.dept_id, d.dept_name, d.parent_id, d.order_num, d.status,
-               (select count(*) from oa_member m where m.dept_id = d.dept_id and m.status = '0') as member_count
+               (select count(*) from oa_member m where m.dept_id = d.dept_id and m.status = '0' and m.del_flag = '0') as member_count
         from sys_dept d
         where d.del_flag = '0'
           and d.parent_id = (select dept_id from sys_dept
