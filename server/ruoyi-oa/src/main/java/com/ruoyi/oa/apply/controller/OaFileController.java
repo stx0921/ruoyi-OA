@@ -32,9 +32,9 @@ public class OaFileController extends BaseController
     private IOaFileService fileService;
 
     /**
-     * PC 端上传附件（照片/学生证），返回 {fileId,fileUrl}
+     * PC 端上传附件（人员照片/学生证、任务附件），返回 {fileId,fileUrl}
      */
-    @PreAuthorize("@ss.hasPermi('oa:member:edit')")
+    @PreAuthorize("@ss.hasAnyPermi('oa:member:edit,oa:task:query,oa:task:add,oa:task:edit,oa:task:submit,oa:task:audit')")
     @Log(title = "附件管理", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
     public AjaxResult upload(@RequestParam("file") MultipartFile file,
@@ -50,7 +50,7 @@ public class OaFileController extends BaseController
     /**
      * 鉴权下载 / 预览附件（不暴露物理路径）
      */
-    @PreAuthorize("@ss.hasAnyPermi('oa:member:query,oa:apply:query')")
+    @PreAuthorize("@ss.hasAnyPermi('oa:member:query,oa:apply:query,oa:task:query')")
     @GetMapping("/{fileId}")
     public void download(@PathVariable("fileId") Long fileId, HttpServletResponse response)
     {

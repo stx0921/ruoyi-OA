@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.task.mapper.OaTaskMapper">
+
+    <!-- ==================== resultMap ==================== -->
+
+    <resultMap type="com.ruoyi.oa.task.domain.OaTask" id="OaTaskResult">
+        <id     property="taskId"       column="task_id"/>
+        <result property="taskNo"       column="task_no"/>
+        <result property="title"        column="title"/>
+        <result property="description"  column="description"/>
+        <result property="projectId"    column="project_id"/>
+        <result property="parentId"     column="parent_id"/>
+        <result property="assigneeId"   column="assignee_id"/>
+        <result property="priority"     column="priority"/>
+        <result property="tags"         column="tags"/>
+        <result property="status"       column="status"/>
+        <result property="startTime"    column="start_time"/>
+        <result property="dueTime"      column="due_time"/>
+        <result property="finishTime"   column="finish_time"/>
+        <result property="submitTime"   column="submit_time"/>
+        <result property="rejectCount"  column="reject_count"/>
+        <result property="creatorId"    column="creator_id"/>
+        <result property="auditorId"    column="auditor_id"/>
+        <result property="source"       column="source"/>
+        <result property="recurId"      column="recur_id"/>
+        <result property="generateDate" column="generate_date"/>
+        <result property="overdueFlag"  column="overdue_flag"/>
+        <result property="deptId"       column="dept_id"/>
+        <result property="createBy"     column="create_by"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="updateBy"     column="update_by"/>
+        <result property="updateTime"   column="update_time"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.oa.task.vo.TaskListVO" id="TaskListResult">
+        <id     property="taskId"           column="task_id"/>
+        <result property="taskNo"           column="task_no"/>
+        <result property="title"            column="title"/>
+        <result property="projectId"        column="project_id"/>
+        <result property="projectName"      column="project_name"/>
+        <result property="projectStatus"    column="project_status"/>
+        <result property="projectOwnerId"   column="project_owner_id"/>
+        <result property="assigneeId"       column="assignee_id"/>
+        <result property="assigneeName"     column="assignee_name"/>
+        <result property="assigneeDeptName" column="assignee_dept_name"/>
+        <result property="creatorId"        column="creator_id"/>
+        <result property="creatorName"      column="creator_name"/>
+        <result property="auditorId"        column="auditor_id"/>
+        <result property="auditorName"      column="auditor_name"/>
+        <result property="priority"         column="priority"/>
+        <result property="tagsText"         column="tags"/>
+        <result property="status"           column="status"/>
+        <result property="dueTime"          column="due_time"/>
+        <result property="startTime"        column="start_time"/>
+        <result property="submitTime"       column="submit_time"/>
+        <result property="finishTime"       column="finish_time"/>
+        <result property="rejectCount"      column="reject_count"/>
+        <result property="overdueFlag"      column="overdue_flag"/>
+        <result property="source"           column="source"/>
+        <result property="recurId"          column="recur_id"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.oa.task.vo.TaskDetailVO" id="TaskDetailResult" extends="TaskListResult">
+        <result property="description" column="description"/>
+        <result property="parentId"    column="parent_id"/>
+    </resultMap>
+
+    <resultMap type="com.ruoyi.oa.task.vo.UserBriefVO" id="UserBriefResult">
+        <id     property="userId"   column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="deptId"   column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+    </resultMap>
+
+    <!-- ==================== 公共 SQL ==================== -->
+
+    <sql id="taskTableColumns">
+        t.task_id, t.task_no, t.title, t.description, t.project_id, t.parent_id, t.assignee_id,
+        t.priority, t.tags, t.status, t.start_time, t.due_time, t.finish_time, t.submit_time,
+        t.reject_count, t.creator_id, t.auditor_id, t.source, t.recur_id, t.generate_date,
+        t.overdue_flag, t.dept_id, t.create_by, t.create_time, t.update_by, t.update_time
+    </sql>
+
+    <sql id="selectTaskVoColumns">
+        t.task_id, t.task_no, t.title, t.description, t.parent_id, t.project_id,
+        p.name as project_name, p.status as project_status, p.owner_id as project_owner_id,
+        t.assignee_id, ifnull(nullif(ua.nick_name, ''), ua.user_name) as assignee_name,
+        da.dept_name as assignee_dept_name,
+        t.creator_id, ifnull(nullif(uc.nick_name, ''), uc.user_name) as creator_name,
+        t.auditor_id, ifnull(nullif(ud.nick_name, ''), ud.user_name) as auditor_name,
+        t.priority, t.tags, t.status, t.due_time, t.start_time, t.submit_time, t.finish_time,
+        t.reject_count, t.overdue_flag, t.source, t.recur_id, t.dept_id
+    </sql>
+
+    <sql id="fromTaskVo">
+        from oa_task t
+        left join oa_project p on p.project_id = t.project_id
+        left join sys_user ua on ua.user_id = t.assignee_id
+        left join sys_dept da on da.dept_id = ua.dept_id
+        left join sys_user uc on uc.user_id = t.creator_id
+        left join sys_user ud on ud.user_id = t.auditor_id
+    </sql>
+
+    <sql id="participateCondition">
+        (t.assignee_id = #{params.me}
+         or t.creator_id = #{params.me}
+         or t.auditor_id = #{params.me}
+         or exists (select 1 from oa_task_collaborator c where c.task_id = t.task_id and c.user_id = #{params.me}))
+    </sql>
+
+    <sql id="commonFilters">
+        <if test="projectId != null">and t.project_id = #{projectId}</if>
+        <if test="assigneeId != null">and t.assignee_id = #{assigneeId}</if>
+        <if test="creatorId != null">and t.creator_id = #{creatorId}</if>
+        <if test="auditorId != null">and t.auditor_id = #{auditorId}</if>
+        <if test="status != null and status != ''">and t.status = #{status}</if>
+        <if test="priority != null and priority != ''">and t.priority = #{priority}</if>
+        <if test="parentId != null">and t.parent_id = #{parentId}</if>
+        <if test="tag != null and tag != ''">and find_in_set(#{tag}, t.tags)</if>
+        <if test="keyword != null and keyword != ''">
+            and (t.title like concat('%', #{keyword}, '%') or t.task_no like concat(#{keyword}, '%'))
+        </if>
+        <if test="overdueOnly != null and overdueOnly">
+            and t.status in ('0', '1') and t.due_time &lt; sysdate()
+        </if>
+        <if test="params.beginDue != null and params.beginDue != ''">
+            and t.due_time &gt;= #{params.beginDue}
+        </if>
+        <if test="params.endDue != null and params.endDue != ''">
+            and t.due_time &lt;= date_format(#{params.endDue}, '%Y-%m-%d 23:59:59')
+        </if>
+    </sql>
+
+    <!-- 排序：逾期置顶（查询时计算，Job 落库仅作参考）→ 优先级高→低 → 截止升序 → 新任务优先 -->
+    <sql id="taskOrderBy">
+        order by (case when t.status in ('0', '1') and t.due_time &lt; sysdate() then 1 else 0 end) desc,
+                 t.priority asc, t.due_time asc, t.task_id desc
+    </sql>
+
+    <!-- ==================== 契约 §3.3 稳定签名 ==================== -->
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/> from oa_task t where t.task_id = #{taskId}
+    </select>
+
+    <select id="selectByIdForUpdate" parameterType="java.lang.Long" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/> from oa_task t where t.task_id = #{taskId} for update
+    </select>
+
+    <insert id="insertTask" parameterType="com.ruoyi.oa.task.domain.OaTask" useGeneratedKeys="true" keyProperty="taskId">
+        insert into oa_task (
+            task_no, title, description, project_id, parent_id, assignee_id, priority, tags, status,
+            start_time, due_time, finish_time, submit_time, reject_count, creator_id, auditor_id,
+            source, recur_id, generate_date, overdue_flag, dept_id, create_by, create_time
+        ) values (
+            #{taskNo}, #{title}, ifnull(#{description}, ''), #{projectId}, #{parentId}, #{assigneeId},
+            ifnull(#{priority}, '1'), ifnull(#{tags}, ''), ifnull(#{status}, '0'),
+            #{startTime}, #{dueTime}, #{finishTime}, #{submitTime}, ifnull(#{rejectCount}, 0),
+            #{creatorId}, #{auditorId}, ifnull(#{source}, '0'), #{recurId}, #{generateDate},
+            ifnull(#{overdueFlag}, '0'), #{deptId}, ifnull(#{createBy}, ''), sysdate()
+        )
+    </insert>
+
+    <insert id="insertIgnoreRecurDate" parameterType="com.ruoyi.oa.task.domain.OaTask"
+            useGeneratedKeys="true" keyProperty="taskId">
+        insert into oa_task (
+            task_no, title, description, project_id, parent_id, assignee_id, priority, tags, status,
+            start_time, due_time, finish_time, submit_time, reject_count, creator_id, auditor_id,
+            source, recur_id, generate_date, overdue_flag, dept_id, create_by, create_time
+        ) values (
+            #{taskNo}, #{title}, ifnull(#{description}, ''), #{projectId}, #{parentId}, #{assigneeId},
+            ifnull(#{priority}, '1'), ifnull(#{tags}, ''), ifnull(#{status}, '0'),
+            #{startTime}, #{dueTime}, #{finishTime}, #{submitTime}, ifnull(#{rejectCount}, 0),
+            #{creatorId}, #{auditorId}, ifnull(#{source}, '1'), #{recurId}, #{generateDate},
+            ifnull(#{overdueFlag}, '0'), #{deptId}, ifnull(#{createBy}, 'system'), sysdate()
+        )
+        on duplicate key update update_time = update_time
+    </insert>
+
+    <update id="updateTask" parameterType="com.ruoyi.oa.task.domain.OaTask">
+        update oa_task
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="assigneeId != null">assignee_id = #{assigneeId},</if>
+            <if test="auditorId != null">auditor_id = #{auditorId},</if>
+            <if test="priority != null">priority = #{priority},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="dueTime != null">due_time = #{dueTime},</if>
+            <if test="overdueFlag != null">overdue_flag = #{overdueFlag},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        where task_id = #{taskId}
+    </update>
+
+    <update id="startTask">
+        update oa_task
+        set status = '1', start_time = sysdate(), update_time = sysdate()
+        where task_id = #{taskId} and status = '0'
+    </update>
+
+    <update id="submitTask">
+        update oa_task
+        set status = '2', submit_time = sysdate(), update_time = sysdate()
+        where task_id = #{taskId} and status = '1'
+    </update>
+
+    <update id="finishTask">
+        update oa_task
+        set status = '3', finish_time = sysdate(), update_time = sysdate()
+        where task_id = #{taskId} and status = '2'
+    </update>
+
+    <update id="rejectTask">
+        update oa_task
+        set status = '1', reject_count = reject_count + 1, update_time = sysdate()
+        where task_id = #{taskId} and status = '2'
+    </update>
+
+    <update id="cancelTask">
+        update oa_task
+        set status = '4', update_time = sysdate()
+        where task_id = #{taskId} and status in ('0', '1')
+    </update>
+
+    <select id="selectChildren" parameterType="java.lang.Long" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.parent_id = #{parentId}
+        order by t.task_id asc
+    </select>
+
+    <select id="countUnfinishedChildren" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select count(*) from oa_task where parent_id = #{parentId} and status &lt;&gt; '3'
+    </select>
+
+    <select id="selectUnfinishedChildren" parameterType="java.lang.Long" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.parent_id = #{parentId} and t.status &lt;&gt; '3'
+        order by t.task_id asc
+    </select>
+
+    <select id="selectUnfinishedByAssignee" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.assignee_id = #{userId} and t.status in ('0', '1')
+        order by t.task_id asc
+        limit #{offset}, #{limit}
+    </select>
+
+    <update id="cancelUnfinishedByAssignee">
+        update oa_task
+        set status = '4', update_time = sysdate()
+        where assignee_id = #{userId} and status in ('0', '1')
+    </update>
+
+    <update id="reassignAuditor">
+        update oa_task
+        set auditor_id = #{newUserId}, update_time = sysdate()
+        where auditor_id = #{oldUserId}
+          and #{newUserId} is not null
+          and #{oldUserId} is not null
+          and #{newUserId} &lt;&gt; #{oldUserId}
+    </update>
+
+    <update id="refreshOverdueFlags">
+        update oa_task
+        set overdue_flag = case when status in ('0', '1') and due_time &lt; sysdate() then '1' else '0' end,
+            update_time = sysdate()
+        where overdue_flag &lt;&gt; case when status in ('0', '1') and due_time &lt; sysdate() then '1' else '0' end
+    </update>
+
+    <select id="selectRecurGeneratedByDate" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.source = '1'
+          and t.status in ('0', '1')
+          and t.generate_date is not null
+          and date_format(t.generate_date, '%Y%m%d') = #{generateDate}
+        order by t.task_id asc
+    </select>
+
+    <select id="selectUnfinishedDueBetween" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.status in ('0', '1')
+          and t.due_time &gt;= #{begin}
+          and t.due_time &lt; #{end}
+        order by t.due_time asc, t.task_id asc
+    </select>
+
+    <select id="selectByRecurId" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.recur_id = #{recurId}
+        order by t.task_id desc
+        <if test="limit != null">limit #{limit}</if>
+    </select>
+
+    <select id="selectMaxTaskNoSeq" resultType="java.lang.Long">
+        select max(cast(substring(task_no, 10) as signed))
+        from oa_task
+        where task_no like concat('T', #{datePart}, '%')
+    </select>
+
+    <select id="selectUnfinishedWithInactiveAssignee" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        left join sys_user u on u.user_id = t.assignee_id
+        left join oa_member m on m.user_id = t.assignee_id and m.del_flag = '0'
+        where t.status in ('0', '1')
+          and (u.user_id is null or u.status = '1' or u.del_flag = '2' or m.status in ('1', '2'))
+        order by t.task_id asc
+    </select>
+
+    <select id="selectByAuditor" resultMap="OaTaskResult">
+        select <include refid="taskTableColumns"/>
+        from oa_task t
+        where t.auditor_id = #{auditorId}
+        order by t.task_id asc
+    </select>
+
+    <!-- ==================== 列表 / 我的 / 看板 ==================== -->
+
+    <select id="selectTaskList" parameterType="com.ruoyi.oa.task.dto.TaskQuery" resultMap="TaskListResult">
+        select <include refid="selectTaskVoColumns"/>
+        <include refid="fromTaskVo"/>
+        <where>
+            <include refid="commonFilters"/>
+            <!-- 数据范围 OR 我参与：${params.dataScope} 自带 " AND (...)"，放在恒真括号内避免 AND/OR 优先级错误 -->
+            and (1 = 1 ${params.dataScope}
+                 or t.assignee_id = #{params.me}
+                 or t.creator_id = #{params.me}
+                 or t.auditor_id = #{params.me}
+                 or exists (select 1 from oa_task_collaborator c
+                            where c.task_id = t.task_id and c.user_id = #{params.me}))
+            <if test="excludeArchived != null and excludeArchived">
+                and (p.status = '0' or t.project_id is null)
+            </if>
+        </where>
+        <include refid="taskOrderBy"/>
+    </select>
+
+    <select id="selectMyTaskList" parameterType="com.ruoyi.oa.task.dto.TaskQuery" resultMap="TaskListResult">
+        select <include refid="selectTaskVoColumns"/>
+        <include refid="fromTaskVo"/>
+        <where>
+            <include refid="commonFilters"/>
+            and <include refid="participateCondition"/>
+            <!-- 归档项目任务不进出待办（TR6） -->
+            and (p.status = '0' or t.project_id is null)
+            <if test="tab != null and tab.equals('today')">
+                and t.status in ('0', '1') and t.due_time &lt; date_add(curdate(), interval 1 day)
+            </if>
+            <if test="tab != null and tab.equals('week')">
+                and t.status in ('0', '1')
+                and t.due_time &gt;= date_sub(curdate(), interval weekday(curdate()) day)
+                and t.due_time &lt; date_add(date_sub(curdate(), interval weekday(curdate()) day), interval 7 day)
+            </if>
+            <if test="tab != null and tab.equals('created')">
+                and t.creator_id = #{params.me}
+            </if>
+            <!-- 已取消默认不出现（显式按 status=4 查时才返回） -->
+            <if test="status == null or status == ''">
+                and t.status &lt;&gt; '4'
+            </if>
+        </where>
+        <include refid="taskOrderBy"/>
+    </select>
+
+    <select id="selectBoardTasks" parameterType="com.ruoyi.oa.task.dto.TaskQuery" resultMap="TaskListResult">
+        select <include refid="selectTaskVoColumns"/>
+        <include refid="fromTaskVo"/>
+        <where>
+            <include refid="commonFilters"/>
+            and t.status in ('0', '1', '2', '3')
+            and (p.status = '0' or t.project_id is null)
+            and (1 = 1 ${params.dataScope}
+                 or t.assignee_id = #{params.me}
+                 or t.creator_id = #{params.me}
+                 or t.auditor_id = #{params.me}
+                 or exists (select 1 from oa_task_collaborator c
+                            where c.task_id = t.task_id and c.user_id = #{params.me}))
+        </where>
+        <include refid="taskOrderBy"/>
+    </select>
+
+    <select id="countBoardCanceled" parameterType="com.ruoyi.oa.task.dto.TaskQuery" resultType="java.lang.Long">
+        select count(*)
+        from oa_task t
+        left join oa_project p on p.project_id = t.project_id
+        <where>
+            <if test="projectId != null">and t.project_id = #{projectId}</if>
+            <if test="assigneeId != null">and t.assignee_id = #{assigneeId}</if>
+            <if test="keyword != null and keyword != ''">
+                and (t.title like concat('%', #{keyword}, '%') or t.task_no like concat(#{keyword}, '%'))
+            </if>
+            and t.status = '4'
+            and (p.status = '0' or t.project_id is null)
+            and (1 = 1 ${params.dataScope}
+                 or t.assignee_id = #{params.me}
+                 or t.creator_id = #{params.me}
+                 or t.auditor_id = #{params.me}
+                 or exists (select 1 from oa_task_collaborator c
+                            where c.task_id = t.task_id and c.user_id = #{params.me}))
+        </where>
+    </select>
+
+    <select id="selectMyCounts" resultType="com.ruoyi.oa.task.vo.TaskCountsVO">
+        select
+            coalesce(sum(case when t.status in ('0', '1')
+                              and t.due_time &lt; date_add(curdate(), interval 1 day) then 1 else 0 end), 0) as today,
+            coalesce(sum(case when t.status in ('0', '1')
+                              and t.due_time &gt;= date_sub(curdate(), interval weekday(curdate()) day)
+                              and t.due_time &lt; date_add(date_sub(curdate(), interval weekday(curdate()) day), interval 7 day)
+                         then 1 else 0 end), 0) as week,
+            coalesce(sum(case when t.status in ('0', '1') and t.due_time &lt; sysdate() then 1 else 0 end), 0) as overdue,
+            coalesce(sum(case when t.status = '2'
+                              and (t.auditor_id = #{me} or t.creator_id = #{me}) then 1 else 0 end), 0) as toAudit,
+            coalesce(sum(case when t.creator_id = #{me} then 1 else 0 end), 0) as created,
+            count(*) as total
+        from oa_task t
+        left join oa_project p on p.project_id = t.project_id
+        where (t.assignee_id = #{me}
+               or t.creator_id = #{me}
+               or t.auditor_id = #{me}
+               or exists (select 1 from oa_task_collaborator c where c.task_id = t.task_id and c.user_id = #{me}))
+          and (p.status = '0' or t.project_id is null)
+    </select>
+
+    <select id="selectTaskDetailBase" parameterType="java.lang.Long" resultMap="TaskDetailResult">
+        select <include refid="selectTaskVoColumns"/>
+        <include refid="fromTaskVo"/>
+        where t.task_id = #{taskId}
+    </select>
+
+    <select id="selectChildVoList" parameterType="java.lang.Long" resultMap="TaskListResult">
+        select <include refid="selectTaskVoColumns"/>
+        <include refid="fromTaskVo"/>
+        where t.parent_id = #{parentId}
+        order by t.task_id asc
+    </select>
+
+    <!-- ==================== 轻量关联查询 ==================== -->
+
+    <select id="selectUserBrief" parameterType="java.lang.Long" resultMap="UserBriefResult">
+        select u.user_id,
+               ifnull(nullif(u.nick_name, ''), u.user_name) as user_name,
+               u.dept_id, d.dept_name
+        from sys_user u
+        left join sys_dept d on d.dept_id = u.dept_id
+        where u.user_id = #{userId}
+    </select>
+
+    <select id="selectActiveUserBrief" parameterType="java.lang.Long" resultMap="UserBriefResult">
+        select u.user_id,
+               ifnull(nullif(u.nick_name, ''), u.user_name) as user_name,
+               u.dept_id, d.dept_name
+        from sys_user u
+        left join sys_dept d on d.dept_id = u.dept_id
+        where u.user_id = #{userId}
+          and u.status = '0'
+          and u.del_flag = '0'
+          and not exists (select 1 from oa_member m
+                          where m.user_id = u.user_id and m.del_flag = '0' and m.status in ('1', '2'))
+    </select>
+
+    <select id="selectUserBriefs" resultMap="UserBriefResult">
+        select u.user_id,
+               ifnull(nullif(u.nick_name, ''), u.user_name) as user_name,
+               u.dept_id, d.dept_name
+        from sys_user u
+        left join sys_dept d on d.dept_id = u.dept_id
+        where u.user_id in
+        <foreach collection="userIds" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </select>
+
+    <select id="selectProjectStatus" parameterType="java.lang.Long" resultType="java.lang.String">
+        select status from oa_project where project_id = #{projectId}
+    </select>
+
+    <select id="selectProjectOwnerId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select owner_id from oa_project where project_id = #{projectId}
+    </select>
+
+    <select id="selectProjectName" parameterType="java.lang.Long" resultType="java.lang.String">
+        select name from oa_project where project_id = #{projectId}
+    </select>
+
+    <select id="countProjectMember" resultType="java.lang.Integer">
+        select count(*) from oa_project_member where project_id = #{projectId} and user_id = #{userId}
+    </select>
+
+    <update id="updateChildrenProjectId">
+        update oa_task
+        set project_id = #{projectId}, update_time = sysdate()
+        where parent_id = #{parentId}
+    </update>
+
+    <!-- ==================== 删除（追加需求，契约 §9） ==================== -->
+
+    <delete id="deleteByTaskIds">
+        delete from oa_task
+        where task_id in
+        <choose>
+            <when test="taskIds != null and taskIds.length > 0">
+                <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">
+                    #{taskId}
+                </foreach>
+            </when>
+            <otherwise>(null)</otherwise>
+        </choose>
+    </delete>
+
+    <update id="clearRecurIdByRecurIds">
+        update oa_task
+        set recur_id = null, update_time = sysdate()
+        where recur_id in
+        <choose>
+            <when test="recurIds != null and recurIds.length > 0">
+                <foreach collection="recurIds" item="recurId" open="(" separator="," close=")">
+                    #{recurId}
+                </foreach>
+            </when>
+            <otherwise>(null)</otherwise>
+        </choose>
+    </update>
+
+    <select id="countByProjectIds" resultType="java.lang.Integer">
+        select count(*) from oa_task
+        where project_id in
+        <choose>
+            <when test="projectIds != null and projectIds.length > 0">
+                <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+                    #{projectId}
+                </foreach>
+            </when>
+            <otherwise>(null)</otherwise>
+        </choose>
+    </select>
+
+</mapper>

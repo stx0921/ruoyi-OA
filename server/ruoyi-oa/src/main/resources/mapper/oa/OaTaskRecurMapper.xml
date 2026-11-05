@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.recur.mapper.OaTaskRecurMapper">
+
+    <resultMap type="OaTaskRecur" id="OaTaskRecurResult">
+        <id     property="recurId"      column="recur_id"/>
+        <result property="title"        column="title"/>
+        <result property="description"  column="description"/>
+        <result property="projectId"    column="project_id"/>
+        <result property="weekDays"     column="week_days"/>
+        <result property="dueTime"      column="due_time"/>
+        <result property="assigneeId"   column="assignee_id"/>
+        <result property="priority"     column="priority"/>
+        <result property="tags"         column="tags"/>
+        <result property="startDate"    column="start_date"/>
+        <result property="status"       column="status"/>
+        <result property="nextDate"     column="next_date"/>
+        <result property="creatorId"    column="creator_id"/>
+        <result property="deptId"       column="dept_id"/>
+        <result property="projectName"  column="project_name"/>
+        <result property="assigneeName" column="assignee_name"/>
+        <result property="creatorName"  column="creator_name"/>
+        <result property="createBy"     column="create_by"/>
+        <result property="createTime"   column="create_time"/>
+        <result property="updateBy"     column="update_by"/>
+        <result property="updateTime"   column="update_time"/>
+    </resultMap>
+
+    <sql id="selectRecurColumns">
+        r.recur_id, r.title, r.description, r.project_id, r.week_days, r.due_time, r.assignee_id,
+        r.priority, r.tags, r.start_date, r.status, r.next_date, r.creator_id, r.dept_id,
+        r.create_by, r.create_time, r.update_by, r.update_time
+    </sql>
+
+    <sql id="selectRecurVo">
+        select <include refid="selectRecurColumns"/>,
+               p.name as project_name,
+               coalesce(ua.nick_name, ua.user_name) as assignee_name,
+               coalesce(uc.nick_name, uc.user_name) as creator_name
+        from oa_task_recur r
+        left join oa_project p on p.project_id = r.project_id
+        left join sys_user ua on ua.user_id = r.assignee_id
+        left join sys_user uc on uc.user_id = r.creator_id
+    </sql>
+
+    <select id="selectRecurList" resultMap="OaTaskRecurResult">
+        <include refid="selectRecurVo"/>
+        <where>
+            <if test="status != null and status != ''">
+                and r.status = #{status}
+            </if>
+            <if test="assigneeId != null">
+                and r.assignee_id = #{assigneeId}
+            </if>
+            <if test="projectId != null">
+                and r.project_id = #{projectId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and r.title like concat('%', #{keyword}, '%')
+            </if>
+            ${params.dataScope}
+        </where>
+        order by r.status asc, r.recur_id desc
+    </select>
+
+    <select id="selectById" parameterType="Long" resultMap="OaTaskRecurResult">
+        <include refid="selectRecurVo"/>
+        where r.recur_id = #{recurId}
+    </select>
+
+    <select id="selectByIdForUpdate" parameterType="Long" resultMap="OaTaskRecurResult">
+        select <include refid="selectRecurColumns"/>
+        from oa_task_recur r
+        where r.recur_id = #{recurId}
+        for update
+    </select>
+
+    <insert id="insertRecur" parameterType="OaTaskRecur" useGeneratedKeys="true" keyProperty="recurId">
+        insert into oa_task_recur
+            (title, description, project_id, week_days, due_time, assignee_id, priority, tags,
+             start_date, status, next_date, creator_id, dept_id, create_by, create_time)
+        values
+            (#{title}, #{description}, #{projectId,jdbcType=BIGINT}, #{weekDays}, #{dueTime}, #{assigneeId},
+             #{priority}, #{tags}, #{startDate}, '0', #{nextDate,jdbcType=DATE}, #{creatorId},
+             #{deptId,jdbcType=BIGINT}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateRecur" parameterType="OaTaskRecur">
+        update oa_task_recur
+        set title       = #{title},
+            description = #{description},
+            project_id  = #{projectId,jdbcType=BIGINT},
+            week_days   = #{weekDays},
+            due_time    = #{dueTime},
+            assignee_id = #{assigneeId},
+            priority    = #{priority},
+            tags        = #{tags},
+            start_date  = #{startDate},
+            next_date   = #{nextDate,jdbcType=DATE},
+            update_by   = #{updateBy},
+            update_time = sysdate()
+        where recur_id = #{recurId}
+          and status &lt;&gt; '2'
+    </update>
+
+    <update id="updateStatus">
+        update oa_task_recur
+        set status      = #{status},
+            next_date   = #{nextDate,jdbcType=DATE},
+            update_time = sysdate()
+        where recur_id = #{recurId}
+          and status &lt;&gt; '2'
+    </update>
+
+    <update id="updateNextDate">
+        update oa_task_recur
+        set next_date   = #{nextDate,jdbcType=DATE},
+            update_time = sysdate()
+        where recur_id = #{recurId}
+          and status &lt;&gt; '2'
+    </update>
+
+    <select id="selectDueRules" resultMap="OaTaskRecurResult">
+        select <include refid="selectRecurColumns"/>
+        from oa_task_recur r
+        where r.status = '0'
+          and r.start_date &lt;= #{today}
+          and find_in_set(#{weekday}, r.week_days)
+        order by r.recur_id asc
+    </select>
+
+    <select id="selectActiveByAssignee" parameterType="Long" resultMap="OaTaskRecurResult">
+        select <include refid="selectRecurColumns"/>
+        from oa_task_recur r
+        where r.status = '0' and r.assignee_id = #{assigneeId}
+        order by r.recur_id asc
+    </select>
+
+    <select id="selectActiveByProject" parameterType="Long" resultMap="OaTaskRecurResult">
+        select <include refid="selectRecurColumns"/>
+        from oa_task_recur r
+        where r.status = '0' and r.project_id = #{projectId}
+        order by r.recur_id asc
+    </select>
+
+    <delete id="deleteByIds">
+        delete from oa_task_recur where recur_id in
+        <foreach collection="recurIds" item="recurId" open="(" separator="," close=")">
+            #{recurId}
+        </foreach>
+    </delete>
+
+    <select id="countByProjectIds" resultType="int">
+        select count(1) from oa_task_recur where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </select>
+
+</mapper>

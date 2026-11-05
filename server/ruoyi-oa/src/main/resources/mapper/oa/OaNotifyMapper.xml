@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.notify.mapper.OaNotifyMapper">
+
+    <resultMap type="OaNotify" id="OaNotifyResult">
+        <id     property="notifyId"  column="notify_id"/>
+        <result property="userId"    column="user_id"/>
+        <result property="type"      column="type"/>
+        <result property="title"     column="title"/>
+        <result property="content"   column="content"/>
+        <result property="bizType"   column="biz_type"/>
+        <result property="bizId"     column="biz_id"/>
+        <result property="readFlag"  column="read_flag"/>
+        <result property="readTime"  column="read_time"/>
+        <result property="dedupeKey" column="dedupe_key"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectNotifyVo">
+        select n.notify_id, n.user_id, n.type, n.title, n.content, n.biz_type, n.biz_id,
+               n.read_flag, n.read_time, n.dedupe_key, n.create_time
+        from oa_notify n
+    </sql>
+
+    <insert id="insertIgnore" parameterType="OaNotify" useGeneratedKeys="true" keyProperty="notifyId">
+        insert ignore into oa_notify
+            (user_id, type, title, content, biz_type, biz_id, read_flag, read_time, dedupe_key, create_time)
+        values
+            (#{userId}, #{type}, #{title}, #{content}, #{bizType}, #{bizId}, '0', null, #{dedupeKey},
+             #{createTime})
+    </insert>
+
+    <insert id="insertBatchIgnore">
+        insert ignore into oa_notify
+            (user_id, type, title, content, biz_type, biz_id, read_flag, read_time, dedupe_key, create_time)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.type}, #{item.title}, #{item.content}, #{item.bizType}, #{item.bizId},
+             '0', null, #{item.dedupeKey}, #{item.createTime})
+        </foreach>
+    </insert>
+
+    <select id="countUnread" resultType="java.lang.Long">
+        select count(1) from oa_notify where user_id = #{userId} and read_flag = '0'
+    </select>
+
+    <select id="selectNotifyList" resultMap="OaNotifyResult">
+        <include refid="selectNotifyVo"/>
+        <where>
+            and n.user_id = #{userId}
+            <if test="unreadOnly != null and unreadOnly">
+                and n.read_flag = '0'
+            </if>
+        </where>
+        order by n.create_time desc, n.notify_id desc
+    </select>
+
+    <update id="markRead">
+        update oa_notify
+        set read_flag = '1', read_time = sysdate()
+        where user_id = #{userId} and read_flag = '0'
+          and notify_id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="markAllRead">
+        update oa_notify
+        set read_flag = '1', read_time = sysdate()
+        where user_id = #{userId} and read_flag = '0'
+    </update>
+
+    <delete id="deleteByBiz">
+        delete from oa_notify where biz_type = #{bizType} and biz_id = #{bizId}
+    </delete>
+
+</mapper>

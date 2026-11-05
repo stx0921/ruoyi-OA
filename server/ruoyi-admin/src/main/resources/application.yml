@@ -177,3 +177,19 @@ oa:
   sensitive:
     # 干事视角是否打码（R12：部长/主席团/管理员/本人明文）
     mask-staff: true
+  # 任务协作（任务派发 / 周期任务）模块配置
+  task:
+    job:
+      # 三个定时任务总开关（维护期可关）
+      enabled: true
+    # 看板单列最大卡片数
+    board-max-cards: 300
+    # 单用户单次提醒超过该数量时合并为一条汇总
+    remind-merge-threshold: 10
+    # 站内信批量写入大小
+    notify-batch-size: 200
+    # 退会联动批量取消任务大小
+    retire-cancel-batch: 100
+    # 截止前 N 天提醒（基线=1）
+    due-remind-days: 1
+

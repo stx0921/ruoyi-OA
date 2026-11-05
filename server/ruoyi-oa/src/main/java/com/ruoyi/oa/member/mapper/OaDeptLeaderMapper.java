@@ -37,6 +37,11 @@ public interface OaDeptLeaderMapper
     int countByUserId(Long userId);
 
     /**
+     * 删除某账号担任的全部部门负责人配置（退会 / 账号失效时清理）
+     */
+    int deleteByUserId(@Param("userId") Long userId);
+
+    /**
      * 删除某部门全部负责人
      */
     int deleteByDeptId(Long deptId);

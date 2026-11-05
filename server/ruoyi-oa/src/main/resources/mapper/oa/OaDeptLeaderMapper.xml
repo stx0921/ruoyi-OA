@@ -47,6 +47,10 @@
         delete from oa_dept_leader where dept_id = #{deptId}
     </delete>
 
+    <delete id="deleteByUserId">
+        delete from oa_dept_leader where user_id = #{userId}
+    </delete>
+
     <insert id="insertLeader" parameterType="OaDeptLeader" useGeneratedKeys="true" keyProperty="id">
         insert into oa_dept_leader (dept_id, user_id, leader_type, sort, create_by, create_time)
         values (#{deptId}, #{userId}, #{leaderType}, #{sort}, #{createBy}, sysdate())

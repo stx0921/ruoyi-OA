@@ -32,4 +32,14 @@ public interface OaFileMapper
      */
     List<OaFile> selectFileByIds(@Param("fileIds") List<Long> fileIds);
 
+    /**
+     * 按业务类型 + 业务 ID 查询附件（任务详情）
+     */
+    List<OaFile> selectFilesByBiz(@Param("bizType") String bizType, @Param("bizId") Long bizId);
+
+    /**
+     * 按业务删除附件记录（任务/项目硬删除时清理，物理文件保留）
+     */
+    int deleteByBiz(@Param("bizType") String bizType, @Param("bizId") Long bizId);
+
 }

@@ -46,4 +46,15 @@
         </foreach>
     </select>
 
+    <select id="selectFilesByBiz" resultMap="OaFileResult">
+        select file_id, file_name, original_name, file_path, biz_type, biz_id, file_size, uploader_id, create_time
+        from oa_file
+        where biz_type = #{bizType} and biz_id = #{bizId}
+        order by file_id asc
+    </select>
+
+    <delete id="deleteByBiz">
+        delete from oa_file where biz_type = #{bizType} and biz_id = #{bizId}
+    </delete>
+
 </mapper>

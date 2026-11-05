@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.project.mapper.OaProjectMemberMapper">
+
+    <resultMap type="OaProjectMember" id="OaProjectMemberResult">
+        <id     property="id"        column="id"/>
+        <result property="projectId" column="project_id"/>
+        <result property="userId"    column="user_id"/>
+        <result property="memberId"  column="member_id"/>
+        <result property="joinTime"  column="join_time"/>
+        <result property="createBy"  column="create_by"/>
+        <result property="userName"  column="user_name"/>
+        <result property="nickName"  column="nick_name"/>
+        <result property="deptId"    column="dept_id"/>
+        <result property="deptName"  column="dept_name"/>
+    </resultMap>
+
+    <select id="selectByProjectId" parameterType="Long" resultMap="OaProjectMemberResult">
+        select m.id, m.project_id, m.user_id, m.member_id, m.join_time, m.create_by,
+               u.user_name, u.nick_name, u.dept_id, d.dept_name
+        from oa_project_member m
+        left join sys_user u on u.user_id = m.user_id
+        left join sys_dept d on d.dept_id = u.dept_id
+        where m.project_id = #{projectId}
+        order by m.id asc
+    </select>
+
+    <select id="isMember" resultType="boolean">
+        select count(1) from oa_project_member
+        where project_id = #{projectId} and user_id = #{userId}
+    </select>
+
+    <insert id="insertMember" parameterType="OaProjectMember" useGeneratedKeys="true" keyProperty="id">
+        insert ignore into oa_project_member (project_id, user_id, member_id, join_time, create_by)
+        values (#{projectId}, #{userId}, #{memberId}, #{joinTime}, #{createBy})
+    </insert>
+
+    <insert id="insertBatch">
+        insert ignore into oa_project_member (project_id, user_id, member_id, join_time, create_by)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.projectId}, #{item.userId}, #{item.memberId}, #{item.joinTime}, #{item.createBy})
+        </foreach>
+    </insert>
+
+    <delete id="deleteByProjectId" parameterType="Long">
+        delete from oa_project_member where project_id = #{projectId}
+    </delete>
+
+    <select id="selectUserIdsByProjectId" parameterType="Long" resultType="java.lang.Long">
+        select user_id from oa_project_member where project_id = #{projectId}
+    </select>
+
+    <delete id="deleteByProjectIds">
+        delete from oa_project_member where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+</mapper>

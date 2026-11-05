@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.project.mapper.OaProjectMapper">
+
+    <resultMap type="OaProject" id="OaProjectResult">
+        <id     property="projectId"   column="project_id"/>
+        <result property="projectNo"   column="project_no"/>
+        <result property="name"        column="name"/>
+        <result property="ownerId"     column="owner_id"/>
+        <result property="ownerName"   column="owner_name"/>
+        <result property="status"      column="status"/>
+        <result property="startDate"   column="start_date"/>
+        <result property="endDate"     column="end_date"/>
+        <result property="finishTime"  column="finish_time"/>
+        <result property="description" column="description"/>
+        <result property="deptId"      column="dept_id"/>
+        <result property="deptName"    column="dept_name"/>
+        <result property="createBy"    column="create_by"/>
+        <result property="createTime"  column="create_time"/>
+        <result property="updateBy"    column="update_by"/>
+        <result property="updateTime"  column="update_time"/>
+        <result property="memberCount" column="member_count"/>
+        <result property="taskCount"   column="task_count"/>
+        <result property="doneCount"   column="done_count"/>
+    </resultMap>
+
+    <sql id="selectProjectVo">
+        select p.project_id, p.project_no, p.name, p.owner_id, p.owner_name, p.status,
+               p.start_date, p.end_date, p.finish_time, p.description, p.dept_id,
+               d.dept_name, p.create_by, p.create_time, p.update_by, p.update_time,
+               (select count(1) from oa_project_member m where m.project_id = p.project_id) as member_count,
+               (select count(1) from oa_task t where t.project_id = p.project_id) as task_count,
+               (select count(1) from oa_task t where t.project_id = p.project_id and t.status = '3') as done_count
+        from oa_project p
+        left join sys_dept d on d.dept_id = p.dept_id
+    </sql>
+
+    <select id="selectProjectList" resultMap="OaProjectResult">
+        <include refid="selectProjectVo"/>
+        <where>
+            <if test="status != null and status != ''">
+                and p.status = #{status}
+            </if>
+            <if test="ownerId != null">
+                and p.owner_id = #{ownerId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (p.name like concat('%', #{keyword}, '%') or p.project_no like concat(#{keyword}, '%'))
+            </if>
+            ${params.dataScope}
+        </where>
+        order by p.status asc, p.project_id desc
+    </select>
+
+    <select id="selectProjectById" parameterType="Long" resultMap="OaProjectResult">
+        <include refid="selectProjectVo"/>
+        where p.project_id = #{projectId}
+    </select>
+
+    <select id="selectProjectByIdForUpdate" parameterType="Long" resultMap="OaProjectResult">
+        select p.project_id, p.project_no, p.name, p.owner_id, p.owner_name, p.status,
+               p.start_date, p.end_date, p.finish_time, p.description, p.dept_id,
+               p.create_by, p.create_time, p.update_by, p.update_time
+        from oa_project p
+        where p.project_id = #{projectId}
+        for update
+    </select>
+
+    <insert id="insertProject" parameterType="OaProject" useGeneratedKeys="true" keyProperty="projectId">
+        insert into oa_project
+            (project_no, name, owner_id, owner_name, status, start_date, end_date, finish_time,
+             description, dept_id, create_by, create_time)
+        values
+            (#{projectNo}, #{name}, #{ownerId}, #{ownerName}, '0', #{startDate}, #{endDate}, null,
+             #{description}, #{deptId}, #{createBy}, sysdate())
+    </insert>
+
+    <update id="updateProject" parameterType="OaProject">
+        update oa_project
+        set name        = #{name},
+            owner_id    = #{ownerId},
+            owner_name  = #{ownerName},
+            start_date  = #{startDate},
+            end_date    = #{endDate},
+            description = #{description},
+            dept_id     = #{deptId},
+            update_by   = #{updateBy},
+            update_time = sysdate()
+        where project_id = #{projectId}
+          and status = '0'
+    </update>
+
+    <update id="finishProject">
+        update oa_project
+        set status      = '1',
+            finish_time = #{finishTime},
+            update_by   = #{updateBy},
+            update_time = sysdate()
+        where project_id = #{projectId}
+          and status = '0'
+    </update>
+
+    <select id="isFinished" parameterType="Long" resultType="boolean">
+        select count(1) from oa_project where project_id = #{projectId} and status = '1'
+    </select>
+
+    <select id="countUnfinishedTasks" parameterType="Long" resultType="int">
+        select count(1) from oa_task where project_id = #{projectId} and status in ('0', '1', '2')
+    </select>
+
+    <select id="selectMaxProjectNo" resultType="java.lang.String">
+        select max(project_no) from oa_project where project_no like concat(#{prefix}, '%')
+    </select>
+
+    <delete id="deleteByIds">
+        delete from oa_project where project_id in
+        <foreach collection="projectIds" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+</mapper>

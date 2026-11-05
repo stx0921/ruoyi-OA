@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.task.mapper.OaTaskCollaboratorMapper">
+
+    <resultMap type="com.ruoyi.oa.task.vo.UserBriefVO" id="UserBriefResult">
+        <id     property="userId"   column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="deptId"   column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+    </resultMap>
+
+    <insert id="insertBatch">
+        insert into oa_task_collaborator (task_id, user_id, create_by, create_time) values
+        <foreach collection="userIds" item="userId" separator=",">
+            (#{taskId}, #{userId}, ifnull(#{createBy}, ''), sysdate())
+        </foreach>
+    </insert>
+
+    <delete id="deleteByTaskId" parameterType="java.lang.Long">
+        delete from oa_task_collaborator where task_id = #{taskId}
+    </delete>
+
+    <select id="selectUserIdsByTaskId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select user_id from oa_task_collaborator where task_id = #{taskId} order by id asc
+    </select>
+
+    <select id="selectCollaborators" parameterType="java.lang.Long" resultMap="UserBriefResult">
+        select c.user_id,
+               ifnull(nullif(u.nick_name, ''), u.user_name) as user_name,
+               u.dept_id, d.dept_name
+        from oa_task_collaborator c
+        left join sys_user u on u.user_id = c.user_id
+        left join sys_dept d on d.dept_id = u.dept_id
+        where c.task_id = #{taskId}
+        order by c.id asc
+    </select>
+
+    <select id="countByTaskId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        select count(*) from oa_task_collaborator where task_id = #{taskId}
+    </select>
+
+    <select id="countByTaskAndUser" resultType="java.lang.Integer">
+        select count(*) from oa_task_collaborator where task_id = #{taskId} and user_id = #{userId}
+    </select>
+
+    <delete id="deleteByTaskIds">
+        delete from oa_task_collaborator
+        where task_id in
+        <choose>
+            <when test="taskIds != null and taskIds.length > 0">
+                <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">
+                    #{taskId}
+                </foreach>
+            </when>
+            <otherwise>(null)</otherwise>
+        </choose>
+    </delete>
+
+</mapper>

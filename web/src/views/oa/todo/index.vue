@@ -224,7 +224,7 @@
 </template>
 
 <script setup name="Todo">
-import { listTodoTask, listDoneTask } from '@/api/oa/task'
+import { listTodoTask, listDoneTask } from '@/api/oa/leaveTask'
 import { listLeave, getLeaveTrace, submitLeave, revokeLeave } from '@/api/oa/leave'
 import { listUser } from '@/api/system/user'
 import {

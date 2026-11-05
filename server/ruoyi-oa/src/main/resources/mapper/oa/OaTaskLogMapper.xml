@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.task.mapper.OaTaskLogMapper">
+
+    <resultMap type="com.ruoyi.oa.task.vo.TaskLogVO" id="TaskLogResult">
+        <id     property="logId"        column="log_id"/>
+        <result property="action"       column="action"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark"       column="remark"/>
+        <result property="beforeJson"   column="before_json"/>
+        <result property="afterJson"    column="after_json"/>
+        <result property="createTime"   column="create_time"/>
+    </resultMap>
+
+    <insert id="insertTaskLog" parameterType="com.ruoyi.oa.task.domain.OaTaskLog"
+            useGeneratedKeys="true" keyProperty="logId">
+        insert into oa_task_log (
+            task_id, action, operator_id, operator_name, remark, before_json, after_json, create_time
+        ) values (
+            #{taskId}, #{action}, #{operatorId}, ifnull(#{operatorName}, ''), ifnull(#{remark}, ''),
+            #{beforeJson}, #{afterJson}, ifnull(#{createTime}, sysdate())
+        )
+    </insert>
+
+    <insert id="insertLog">
+        insert into oa_task_log (
+            task_id, action, operator_id, operator_name, remark, before_json, after_json, create_time
+        ) values (
+            #{taskId}, #{action}, #{operatorId}, ifnull(#{operatorName}, ''), ifnull(#{remark}, ''),
+            #{beforeJson}, #{afterJson}, sysdate()
+        )
+    </insert>
+
+    <select id="selectTaskLogs" parameterType="java.lang.Long" resultMap="TaskLogResult">
+        select log_id, action, operator_name, remark, before_json, after_json, create_time
+        from oa_task_log
+        where task_id = #{taskId}
+        order by log_id desc
+    </select>
+    <delete id="deleteByTaskIds">
+        delete from oa_task_log
+        where task_id in
+        <choose>
+            <when test="taskIds != null and taskIds.length > 0">
+                <foreach collection="taskIds" item="taskId" open="(" separator="," close=")">
+                    #{taskId}
+                </foreach>
+            </when>
+            <otherwise>(null)</otherwise>
+        </choose>
+    </delete>
+
+</mapper>

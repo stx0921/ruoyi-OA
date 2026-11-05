@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import com.ruoyi.oa.member.dto.MemberSelfDTO;
 import com.ruoyi.oa.member.dto.MemberStatusDTO;
 import com.ruoyi.oa.member.dto.MemberTransferDTO;
 import com.ruoyi.oa.member.dto.MemberUpdateDTO;
+import com.ruoyi.oa.member.event.MemberStatusChangedEvent;
 import com.ruoyi.oa.member.mapper.OaAccountMapper;
 import com.ruoyi.oa.member.mapper.OaDeptLeaderMapper;
 import com.ruoyi.oa.member.mapper.OaMemberLogMapper;
@@ -42,6 +44,7 @@ import com.ruoyi.oa.support.OaLockService;
 import com.ruoyi.oa.support.OaMemberLogService;
 import com.ruoyi.oa.support.OaMemberVoAssembler;
 import com.ruoyi.oa.support.RoleSyncService;
+import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.service.ISysDeptService;
 
 /**
@@ -87,6 +90,12 @@ public class OaMemberServiceImpl implements IOaMemberService
 
     @Autowired
     private ISysDeptService deptService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private SysUserMapper userMapper;
 
     @Override
     @DataScope(deptAlias = "d")
@@ -345,6 +354,7 @@ public class OaMemberServiceImpl implements IOaMemberService
             throw new ServiceException("状态未变更", 400);
         }
         Date leaveDate = dto.getLeaveDate();
+        String oldStatus = member.getStatus();
         if (OaMemberConstants.MEMBER_STATUS_ACTIVE.equals(dto.getStatus()))
         {
             leaveDate = null;
@@ -366,6 +376,11 @@ public class OaMemberServiceImpl implements IOaMemberService
         else
         {
             accountService.disableAccount(member.getUserId());
+            // 退会 / 毕业的成员不应继续担任部门负责人：同步解除，避免留下失效负责人挡住后续操作
+            if (member.getUserId() != null)
+            {
+                deptLeaderMapper.deleteByUserId(member.getUserId());
+            }
         }
         member.setStatus(dto.getStatus());
         member.setLeaveDate(leaveDate);
@@ -375,6 +390,13 @@ public class OaMemberServiceImpl implements IOaMemberService
         }
         String action = OaMemberConstants.MEMBER_STATUS_ACTIVE.equals(dto.getStatus()) ? "恢复" : "状态变更";
         memberLogService.record(member, action, before, memberLogService.snapshot(member));
+        // 退会 / 毕业：事务提交后通知任务模块取消未完成任务、暂停周期规则（TR7）
+        if (OaMemberConstants.MEMBER_STATUS_LEFT.equals(dto.getStatus())
+                || OaMemberConstants.MEMBER_STATUS_GRADUATED.equals(dto.getStatus()))
+        {
+            eventPublisher.publishEvent(new MemberStatusChangedEvent(member.getUserId(), member.getMemberId(), oldStatus,
+                    dto.getStatus(), currentUser.userId(), currentUser.nickName()));
+        }
     }
 
     @Override
@@ -416,14 +438,52 @@ public class OaMemberServiceImpl implements IOaMemberService
             accountService.syncDept(member.getUserId(), newDeptId);
             roleSyncService.sync(member.getUserId(), newPosition);
             boolean deptChanged = !newDeptId.equals(member.getDeptId());
+            String oldPosition = member.getPosition();
+            boolean positionChanged = !newPosition.equals(oldPosition);
             member.setDeptId(newDeptId);
             member.setPosition(newPosition);
-            memberLogService.record(member, deptChanged ? "调部门" : "升职", before,
+            memberLogService.record(member, actionOfTransfer(deptChanged, positionChanged, oldPosition, newPosition), before,
                     memberLogService.snapshot(member));
         }
         finally
         {
             lockService.unlock(lockKey);
+        }
+    }
+
+    /**
+     * 调部门 / 升职 / 降职 的操作类型文案（职务值越小级别越高：1 会长 … 5 干事）
+     */
+    private String actionOfTransfer(boolean deptChanged, boolean positionChanged, String oldPosition, String newPosition)
+    {
+        if (deptChanged && positionChanged)
+        {
+            return "调部门并调整职务";
+        }
+        if (deptChanged)
+        {
+            return "调部门";
+        }
+        if (!positionChanged)
+        {
+            return "调部门";
+        }
+        return positionRank(newPosition) < positionRank(oldPosition) ? "升职" : "降职";
+    }
+
+    private int positionRank(String position)
+    {
+        if (StringUtils.isEmpty(position))
+        {
+            return Integer.MAX_VALUE;
+        }
+        try
+        {
+            return Integer.parseInt(position);
+        }
+        catch (NumberFormatException e)
+        {
+            return Integer.MAX_VALUE;
         }
     }
 
@@ -459,8 +519,20 @@ public class OaMemberServiceImpl implements IOaMemberService
             }
             if (member.getUserId() != null && deptLeaderMapper.countByUserId(member.getUserId()) > 0)
             {
-                throw new ServiceException("成员「" + member.getName() + "」是部门负责人，请先在「部门与负责人」中更换负责人后再删除",
-                        400);
+                SysUser leaderAccount = userMapper.selectUserById(member.getUserId());
+                boolean accountInvalid = leaderAccount == null
+                        || !"0".equals(leaderAccount.getStatus())
+                        || !"0".equals(leaderAccount.getDelFlag());
+                if (accountInvalid)
+                {
+                    // 负责人账号已被删除/停用：配置本身已失效，直接清理，避免历史脏数据把删除永久卡死
+                    deptLeaderMapper.deleteByUserId(member.getUserId());
+                }
+                else
+                {
+                    throw new ServiceException("成员「" + member.getName() + "」是部门负责人，请先在「部门与负责人」中更换负责人后再删除",
+                            400);
+                }
             }
             target.add(member);
         }
@@ -479,6 +551,10 @@ public class OaMemberServiceImpl implements IOaMemberService
             // 账号停用但保留数据；档案通过 del_flag 隐藏
             accountService.disableAccount(member.getUserId());
             memberLogService.record(member, "删除", memberLogService.snapshot(member), null);
+            // 软删除等价于离职：事务提交后通知任务模块（TR7）
+            eventPublisher.publishEvent(new MemberStatusChangedEvent(member.getUserId(), member.getMemberId(),
+                    member.getStatus(), OaMemberConstants.MEMBER_STATUS_LEFT, currentUser.userId(),
+                    currentUser.nickName()));
         }
     }
 

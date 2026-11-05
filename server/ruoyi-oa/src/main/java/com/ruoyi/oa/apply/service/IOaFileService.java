@@ -56,4 +56,28 @@ public interface IOaFileService
      */
     void download(Long fileId, HttpServletResponse response);
 
+    /**
+     * 绑定附件到业务（任务保存/提交/验收时回填 biz_type=task、biz_id=taskId）
+     *
+     * @param fileId  附件 ID
+     * @param bizType 业务类型
+     * @param bizId   业务主键
+     */
+    void bindBiz(Long fileId, String bizType, Long bizId);
+
+    /**
+     * 批量绑定附件到业务
+     */
+    void bindBiz(java.util.List<Long> fileIds, String bizType, Long bizId);
+
+    /**
+     * 查询业务附件（如任务详情附件）
+     */
+    java.util.List<OaFile> selectByBiz(String bizType, Long bizId);
+
+    /**
+     * 删除业务附件记录（任务/项目硬删除时清理；物理文件保留）
+     */
+    void deleteByBiz(String bizType, Long bizId);
+
 }

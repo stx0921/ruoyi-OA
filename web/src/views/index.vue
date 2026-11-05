@@ -3,37 +3,38 @@
     <!-- 顶部问候 -->
     <div class="oa-page-title wb-head">
       <span>{{ greeting }}，{{ userStore.nickName }}</span>
-      <small>今天有 {{ todoTotal }} 条待办需要你处理</small>
+      <small>{{ headHint }}</small>
       <span class="wb-head__date">{{ todayLabel }}</span>
     </div>
 
-    <!-- 4 个统计卡 -->
+    <!-- 4 个统计卡（学生组织口径） -->
     <div class="wb-stats">
-      <OaStatCard label="待我审批" :value="todoTotal" tone="blue" icon="Tickets" />
-      <OaStatCard label="我发起的" :value="myLeaveTotal" tone="orange" icon="Document" />
-      <OaStatCard label="本月已办" :value="monthDoneCount" tone="green" icon="CircleCheck" />
-      <OaStatCard label="平均审批时长" :value="avgDoneText" tone="red" icon="Timer" />
+      <OaStatCard label="在册成员" :value="stats.total" tone="blue" icon="User" />
+      <OaStatCard label="待审批入会" :value="stats.pendingApply" tone="orange" icon="Tickets" />
+      <OaStatCard label="本月新增" :value="stats.monthJoin" tone="green" icon="CirclePlus" />
+      <OaStatCard label="本月退会/毕业" :value="stats.monthLeave" tone="red" icon="Remove" />
     </div>
 
     <div class="oa-grid-2 wb-grid">
-      <!-- 我的待办 -->
-      <div v-loading="loading.todo" class="oa-card">
+      <!-- 我的任务 -->
+      <div v-loading="loading.task" class="oa-card">
         <div class="oa-card-head">
-          <h3>我的待办</h3>
-          <span class="oa-link" @click="go('/oa/todo')">查看全部</span>
+          <h3>我的任务</h3>
+          <span class="oa-link" @click="go('/task/my')">查看全部</span>
         </div>
-        <template v-if="todoList.length">
-          <div v-for="item in todoList" :key="item.taskId" class="oa-list-row">
-            <span class="oa-list-row__dot"></span>
+        <template v-if="myTasks.length">
+          <div v-for="task in myTasks" :key="task.taskId" class="oa-list-row">
+            <span class="oa-list-row__dot" :style="{ background: statusMeta(task.status).color }"></span>
             <div class="oa-list-row__main">
-              <div class="oa-list-row__title">{{ todoTitle(item) }}</div>
-              <div class="oa-list-row__sub">{{ todoSub(item) }}</div>
+              <div class="oa-list-row__title">{{ task.title }}</div>
+              <div class="oa-list-row__sub">{{ taskSub(task) }}</div>
             </div>
-            <span class="oa-pill oa-pill--orange">待审批</span>
-            <el-button size="small" @click="go('/oa/todo')">去处理</el-button>
+            <span class="oa-pill" :style="pillStyle(task.status)">
+              {{ task.statusLabel || statusMeta(task.status).label }}
+            </span>
           </div>
         </template>
-        <div v-else class="oa-empty">暂无待办</div>
+        <div v-else class="oa-empty">{{ canTask ? '暂无待处理任务' : '当前账号无任务模块权限' }}</div>
       </div>
 
       <!-- 快捷入口 + 系统公告 -->
@@ -51,6 +52,7 @@
             <div class="wb-quick__ico" :class="'is-' + entry.tone">{{ entry.text }}</div>
             <span class="wb-quick__txt">{{ entry.title }}</span>
           </div>
+          <div v-if="!quickEntries.length" class="oa-empty wb-quick__empty">当前账号暂无可用入口</div>
         </div>
 
         <div class="oa-card-head wb-notice-head">
@@ -66,29 +68,30 @@
               </div>
             </div>
           </template>
-          <div v-else class="oa-empty">暂无公告</div>
+          <div v-else class="oa-empty">{{ canNotice ? '暂无公告' : '当前账号无公告查看权限' }}</div>
         </div>
       </div>
     </div>
 
     <div class="oa-grid-2 wb-grid">
-      <!-- 近 7 日审批量 -->
+      <!-- 任务状态分布 -->
       <div class="oa-card">
         <div class="oa-card-head">
-          <h3>近 7 日审批量</h3>
-          <span class="oa-muted">单位：单</span>
+          <h3>任务状态分布</h3>
+          <span class="oa-muted">单位：个</span>
         </div>
-        <OaChart :option="trendOption" height="260px" />
+        <OaChart v-if="taskTotal" :option="taskOption" height="260px" />
+        <div v-else class="oa-empty">{{ canTask ? '暂无任务数据' : '当前账号无任务模块权限' }}</div>
       </div>
 
-      <!-- 请假类型分布 -->
+      <!-- 入会申请状态分布 -->
       <div class="oa-card">
         <div class="oa-card-head">
-          <h3>请假类型分布</h3>
-          <span class="oa-muted">近 200 条请假单</span>
+          <h3>入会申请状态</h3>
+          <span class="oa-muted">近 200 条</span>
         </div>
-        <OaChart v-if="leaveTypeStats.length" :option="typeOption" height="260px" />
-        <div v-else class="oa-empty">暂无请假数据</div>
+        <OaChart v-if="applyRows.length" :option="applyOption" height="260px" />
+        <div v-else class="oa-empty">{{ canApply ? '暂无申请数据' : '当前账号无审批权限' }}</div>
       </div>
     </div>
   </div>
@@ -98,21 +101,14 @@
 import { computed, getCurrentInstance, onActivated, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import useUserStore from '@/store/modules/user'
-import { useDict } from '@/utils/dict'
-import { listLeave } from '@/api/oa/leave'
-import { listDoneTask, listTodoTask } from '@/api/oa/task'
+import { getMemberStats } from '@/api/oa/member'
+import { listApply } from '@/api/oa/apply'
+import { getTaskBoard, listMyTask } from '@/api/oa/task'
 import { listNotice } from '@/api/system/notice'
 import OaStatCard from '@/components/oa/OaStatCard.vue'
 import OaChart from '@/components/oa/OaChart.vue'
-import {
-  leaveTypeText,
-  oaAvgMinutes,
-  oaDate,
-  oaDateTime,
-  oaGroupCount,
-  oaHumanSpan,
-  oaTimestamp
-} from '@/utils/oa'
+import { oaDate } from '@/utils/oa'
+import { TASK_STATUS_MAP } from '@/utils/oaTask'
 
 const WEEK_LABELS = ['日', '一', '二', '三', '四', '五', '六']
 const PIE_COLORS = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7bfa']
@@ -120,27 +116,52 @@ const PIE_COLORS = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7
 const router = useRouter()
 const userStore = useUserStore()
 const { proxy } = getCurrentInstance()
-const { oa_leave_type } = useDict('oa_leave_type')
 
-const todoList = ref([])
-const todoTotal = ref(0)
-const myLeaveTotal = ref(0)
-const doneRows = ref([])
-const leaveRows = ref([])
+/**
+ * 工作台的每个数据块后端都有 @PreAuthorize，缺权限时直接跳过请求，
+ * 否则未授权角色打开工作台会被 403 提示刷屏、页面一片空白。
+ */
+function can(perm) {
+  try {
+    return proxy.$auth.hasPermi(perm)
+  } catch (e) {
+    return false
+  }
+}
+
+const canMember = computed(() => can('oa:member:list'))
+const canTask = computed(() => can('oa:task:list'))
+const canApply = computed(() => can('oa:apply:list'))
+const canNotice = computed(() => can('system:notice:list'))
+
+const stats = reactive({ total: 0, pendingApply: 0, monthJoin: 0, monthLeave: 0 })
+const myTasks = ref([])
+const boardColumns = ref([])
+const canceledCount = ref(0)
+const applyRows = ref([])
 const noticeList = ref([])
 
-const loading = reactive({ todo: false, notice: false })
+const loading = reactive({ task: false, notice: false })
 
-const dictTypes = computed(() => oa_leave_type.value || [])
+const headHint = computed(() => {
+  if (!canMember.value) return '当前账号暂无组织人事模块权限'
+  return '共 ' + stats.total + ' 名在册成员，' + stats.pendingApply + ' 条入会申请待审批'
+})
 
-const quickEntries = [
-  { title: '请假申请', text: '假', tone: 'blue', path: '/oa/leave' },
-  { title: '待办中心', text: '审', tone: 'orange', path: '/oa/todo' },
-  { title: '流程跟踪', text: '踪', tone: 'green', path: '/oa/trace' },
-  { title: '员工档案', text: '档', tone: 'blue', path: '/oa/employee' },
-  { title: '统计看板', text: '表', tone: 'green', path: '/oa/report' },
-  { title: '我的已办', text: '办', tone: 'red', path: '/oa/todo', query: { tab: 'done' } }
-]
+/** 快捷入口按当前账号实际拥有权限的菜单生成，避免点进去 404 / 403 */
+const quickEntries = computed(() =>
+  [
+    { title: '成员管理', text: '员', tone: 'blue', path: '/hr/member', perm: 'oa:member:list' },
+    { title: '入会审批', text: '审', tone: 'orange', path: '/hr/apply', perm: 'oa:apply:list' },
+    { title: '批量导入', text: '导', tone: 'green', path: '/hr/import', perm: 'oa:member:import' },
+    { title: '任务看板', text: '板', tone: 'blue', path: '/task/board', perm: 'oa:task:list' },
+    { title: '我的任务', text: '任', tone: 'green', path: '/task/my', perm: 'oa:task:list' },
+    { title: '项目管理', text: '项', tone: 'orange', path: '/task/project', perm: 'oa:project:list' },
+    { title: '周期任务', text: '周', tone: 'red', path: '/task/recur', perm: 'oa:recur:list' },
+    { title: '部门与负责人', text: '部', tone: 'blue', path: '/hr/dept', perm: 'oa:dept:list' },
+    { title: '操作日志', text: '志', tone: 'green', path: '/hr/log', perm: 'oa:log:list' }
+  ].filter(entry => can(entry.perm))
+)
 
 function pad(num) {
   return String(num).padStart(2, '0')
@@ -162,56 +183,50 @@ const todayLabel = computed(() => {
   return fmtDate(now) + ' 周' + WEEK_LABELS[now.getDay()]
 })
 
-/** 本月已办：已办任务按 endTime 落在当前自然月 */
-const monthDoneCount = computed(() => {
-  const now = new Date()
-  const prefix = now.getFullYear() + '-' + pad(now.getMonth() + 1)
-  return doneRows.value.filter(row => oaDate(row.endTime).indexOf(prefix) === 0).length
+function statusMeta(status) {
+  return TASK_STATUS_MAP[String(status)] || { label: '—', color: '#909399', bg: '#f4f4f5' }
+}
+
+function pillStyle(status) {
+  const meta = statusMeta(status)
+  return { background: meta.bg, color: meta.color }
+}
+
+function taskSub(task) {
+  const prefix = task.projectName ? task.projectName + ' · ' : ''
+  const overdue = String(task.overdueFlag) === '1' ? ' · 已逾期' : ''
+  return prefix + '截止 ' + oaDate(task.dueTime) + overdue
+}
+
+function noticeDot(notice) {
+  if (String(notice.noticeType) === '1') return '#409eff'
+  if (String(notice.noticeType) === '2') return '#67c23a'
+  return '#909399'
+}
+
+/** 任务总数（4 列合计 + 已取消） */
+const taskTotal = computed(() => {
+  const sum = boardColumns.value.reduce((acc, column) => acc + (Number(column.count) || 0), 0)
+  return sum + (Number(canceledCount.value) || 0)
 })
 
-/** 平均审批时长：同批已办记录的 createTime → endTime */
-const avgDoneText = computed(() => oaHumanSpan(oaAvgMinutes(doneRows.value)))
-
-/** 请假类型分布（近 200 条） */
-const leaveTypeStats = computed(() =>
-  oaGroupCount(leaveRows.value, row => leaveTypeText(row.leaveType, dictTypes.value))
-)
-
-/** 最近 7 天（含今天），标签形如「周一\n10-24」 */
-const recentDays = computed(() => {
-  const days = []
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  for (let i = 6; i >= 0; i--) {
-    const day = new Date(today)
-    day.setDate(day.getDate() - i)
-    days.push({
-      label: '周' + WEEK_LABELS[day.getDay()] + '\n' + pad(day.getMonth() + 1) + '-' + pad(day.getDate()),
-      start: day.getTime(),
-      end: day.getTime() + 24 * 60 * 60 * 1000
-    })
+/** 任务状态条形图 */
+const taskOption = computed(() => {
+  const labels = boardColumns.value.map(column => column.statusLabel)
+  const values = boardColumns.value.map(column => Number(column.count) || 0)
+  if (Number(canceledCount.value) > 0) {
+    labels.push('已取消')
+    values.push(Number(canceledCount.value))
   }
-  return days
-})
-
-/** 近 7 日审批量：按已办任务 endTime 分天统计 */
-const trendOption = computed(() => {
-  const days = recentDays.value
-  const counts = days.map(day => {
-    return doneRows.value.filter(row => {
-      const time = oaTimestamp(row.endTime)
-      return time >= day.start && time < day.end
-    }).length
-  })
   return {
     grid: { left: 4, right: 12, top: 18, bottom: 4, containLabel: true },
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     xAxis: {
       type: 'category',
-      data: days.map(day => day.label),
+      data: labels,
       axisTick: { show: false },
       axisLine: { lineStyle: { color: '#e4e7ed' } },
-      axisLabel: { color: '#909399', fontSize: 12, lineHeight: 16 }
+      axisLabel: { color: '#909399', fontSize: 12 }
     },
     yAxis: {
       type: 'value',
@@ -221,19 +236,30 @@ const trendOption = computed(() => {
     },
     series: [
       {
-        name: '审批量',
+        name: '任务数',
         type: 'bar',
-        data: counts,
+        data: values,
         barWidth: '46%',
-        itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] }
+        itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] },
+        label: { show: true, position: 'top', color: '#909399', fontSize: 12 }
       }
     ]
   }
 })
 
-/** 请假类型环形图，中心显示近 200 条总数 */
-const typeOption = computed(() => ({
-  tooltip: { trigger: 'item', formatter: '{b}：{c} 单（{d}%）' },
+/** 入会申请按状态分组 */
+const applyStats = computed(() => {
+  const map = new Map()
+  applyRows.value.forEach(row => {
+    const name = row.statusLabel || '未知'
+    map.set(name, (map.get(name) || 0) + 1)
+  })
+  return Array.from(map, ([name, value]) => ({ name, value }))
+})
+
+/** 入会申请环形图 */
+const applyOption = computed(() => ({
+  tooltip: { trigger: 'item', formatter: '{b}：{c} 条（{d}%）' },
   legend: {
     bottom: 0,
     left: 'center',
@@ -244,8 +270,8 @@ const typeOption = computed(() => ({
   },
   color: PIE_COLORS,
   title: {
-    text: String(leaveRows.value.length),
-    subtext: '请假单',
+    text: String(applyRows.value.length),
+    subtext: '申请',
     left: 'center',
     top: '38%',
     itemGap: 4,
@@ -262,88 +288,78 @@ const typeOption = computed(() => ({
       label: { show: false },
       labelLine: { show: false },
       emphasis: { scale: false, label: { show: true, fontSize: 13, fontWeight: 600, formatter: '{b}\n{d}%' } },
-      data: leaveTypeStats.value.map(item => ({ name: item.name, value: item.value }))
+      data: applyStats.value
     }
   ]
 }))
 
-function todoTitle(row) {
-  const type = leaveTypeText(row.leaveType, dictTypes.value)
-  const duration = row.duration === null || row.duration === undefined || row.duration === '' ? '—' : row.duration
-  return (row.applyUserName || '—') + '的请假申请（' + type + ' ' + duration + ' 天）'
-}
-
-function todoSub(row) {
-  return oaDateTime(row.createTime) + ' · 流程：请假审批'
-}
-
-function noticeDot(notice) {
-  if (String(notice.noticeType) === '1') return '#409eff'
-  if (String(notice.noticeType) === '2') return '#67c23a'
-  return '#909399'
-}
-
-function canViewNotice() {
+async function fetchStats() {
+  if (!canMember.value) return
   try {
-    return proxy.$auth.hasPermi('system:notice:list')
+    const res = await getMemberStats()
+    const data = res.data || {}
+    stats.total = Number(data.total) || 0
+    stats.pendingApply = Number(data.pendingApply) || 0
+    stats.monthJoin = Number(data.monthJoin) || 0
+    stats.monthLeave = Number(data.monthLeave) || 0
   } catch (e) {
-    return false
+    console.warn('[工作台] 成员统计加载失败', e)
   }
 }
 
-async function fetchTodo() {
-  loading.todo = true
+async function fetchMyTasks() {
+  if (!canTask.value) {
+    myTasks.value = []
+    return
+  }
+  loading.task = true
   try {
-    const res = await listTodoTask({ pageNum: 1, pageSize: 5 })
-    todoTotal.value = Number(res.total) || 0
-    todoList.value = res.rows || []
+    const res = await listMyTask({ pageNum: 1, pageSize: 5 })
+    myTasks.value = res.rows || []
   } catch (e) {
-    console.warn('[工作台] 待办加载失败', e)
-    todoTotal.value = 0
-    todoList.value = []
+    console.warn('[工作台] 我的任务加载失败', e)
+    myTasks.value = []
   } finally {
-    loading.todo = false
+    loading.task = false
   }
 }
 
-async function fetchMine() {
-  if (!userStore.id) {
-    myLeaveTotal.value = 0
+async function fetchBoard() {
+  if (!canTask.value) {
+    boardColumns.value = []
+    canceledCount.value = 0
     return
   }
   try {
-    const res = await listLeave({ applyUserId: userStore.id, pageNum: 1, pageSize: 1 })
-    myLeaveTotal.value = Number(res.total) || 0
+    const res = await getTaskBoard()
+    const data = res.data || {}
+    boardColumns.value = data.columns || []
+    canceledCount.value = Number(data.canceledCount) || 0
   } catch (e) {
-    console.warn('[工作台] 我发起的加载失败', e)
-    myLeaveTotal.value = 0
+    console.warn('[工作台] 任务看板加载失败', e)
+    boardColumns.value = []
+    canceledCount.value = 0
   }
 }
 
-async function fetchDone() {
-  try {
-    const res = await listDoneTask({ pageNum: 1, pageSize: 200 })
-    doneRows.value = res.rows || []
-  } catch (e) {
-    console.warn('[工作台] 已办加载失败', e)
-    doneRows.value = []
+async function fetchApply() {
+  if (!canApply.value) {
+    applyRows.value = []
+    return
   }
-}
-
-async function fetchLeaveRows() {
   try {
-    const res = await listLeave({ pageNum: 1, pageSize: 200 })
-    leaveRows.value = res.rows || []
+    const res = await listApply({ pageNum: 1, pageSize: 200 })
+    applyRows.value = res.rows || []
   } catch (e) {
-    console.warn('[工作台] 请假单加载失败', e)
-    leaveRows.value = []
+    console.warn('[工作台] 入会申请加载失败', e)
+    applyRows.value = []
   }
 }
 
 async function fetchNotice() {
   noticeList.value = []
   // 无公告权限时直接展示空态，避免触发一次注定失败的请求（以及全局错误提示）
-  if (!canViewNotice()) return
+  if (!canNotice.value) return
   loading.notice = true
   try {
     const res = await listNotice({ pageNum: 1, pageSize: 5 })
@@ -357,10 +373,10 @@ async function fetchNotice() {
 }
 
 function refresh() {
-  fetchTodo()
-  fetchMine()
-  fetchDone()
-  fetchLeaveRows()
+  fetchStats()
+  fetchMyTasks()
+  fetchBoard()
+  fetchApply()
   fetchNotice()
 }
 
@@ -469,6 +485,11 @@ onActivated(() => {
     &__txt {
       font-size: 12px;
       color: #606266;
+    }
+
+    &__empty {
+      grid-column: 1 / -1;
+      padding: 12px 0;
     }
   }
 

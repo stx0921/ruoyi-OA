@@ -115,6 +115,34 @@ export const constantRoutes = [
         meta: { title: '干事门户' }
       }
     ]
+  },
+  {
+    // H5（任务协作）：我的任务（需登录，不渲染 PC 侧边栏）
+    path: '/h5/task',
+    component: () => import('@/views/h5/task/index.vue'),
+    hidden: true,
+    meta: { title: '我的任务' }
+  },
+  {
+    // H5（任务协作）：任务详情 / 提交 / 验收
+    path: '/h5/task/detail/:id(\\d+)',
+    component: () => import('@/views/h5/task/detail.vue'),
+    hidden: true,
+    meta: { title: '任务详情' }
+  },
+  {
+    // 站内信完整列表页（站内信铃铛「查看全部」入口，菜单不下发此页）
+    path: '/oa/notify',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/oa/notify/index.vue'),
+        name: 'OaNotify',
+        meta: { title: '站内信', activeMenu: '/task/my' }
+      }
+    ]
   }
 ]
 

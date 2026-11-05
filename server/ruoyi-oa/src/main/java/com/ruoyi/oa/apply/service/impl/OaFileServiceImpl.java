@@ -3,6 +3,7 @@ package com.ruoyi.oa.apply.service.impl;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
@@ -42,11 +43,17 @@ public class OaFileServiceImpl implements IOaFileService
     /** 业务类型：导入错误明细 */
     public static final String BIZ_IMPORT_ERROR = "import_error";
 
+    /** 业务类型：任务附件 */
+    public static final String BIZ_TASK = "task";
+
     /** 照片允许扩展名 */
     private static final String[] PHOTO_EXTENSION = { "jpg", "jpeg", "png" };
 
     /** 学生证允许扩展名 */
     private static final String[] CARD_EXTENSION = { "jpg", "jpeg", "png", "pdf" };
+
+    /** 任务附件允许扩展名 */
+    private static final String[] TASK_EXTENSION = { "jpg", "jpeg", "png", "pdf", "docx", "xlsx" };
 
     /** 照片最大 2MB */
     private static final long PHOTO_MAX_SIZE = 2 * 1024 * 1024L;
@@ -54,11 +61,15 @@ public class OaFileServiceImpl implements IOaFileService
     /** 学生证最大 5MB */
     private static final long CARD_MAX_SIZE = 5 * 1024 * 1024L;
 
+    /** 任务附件最大 10MB */
+    private static final long TASK_MAX_SIZE = 10 * 1024 * 1024L;
+
     /** H5/PC 上传目录（相对 ruoyi.profile） */
     private static final String OA_UPLOAD_DIR = "/oa/upload";
 
     /** 常见文件扩展名（用于解析存储名） */
-    private static final Collection<String> ALLOWED_BIZ_TYPES = Arrays.asList(BIZ_MEMBER_PHOTO, BIZ_MEMBER_CARD);
+    private static final Collection<String> ALLOWED_BIZ_TYPES = Arrays.asList(BIZ_MEMBER_PHOTO, BIZ_MEMBER_CARD,
+            BIZ_TASK);
 
     @Autowired
     private OaFileMapper fileMapper;
@@ -71,7 +82,8 @@ public class OaFileServiceImpl implements IOaFileService
     {
         assertUploadAllowed(file, bizType);
         String baseDir = RuoYiConfig.getProfile() + OA_UPLOAD_DIR;
-        String[] allowed = BIZ_MEMBER_CARD.equals(bizType) ? CARD_EXTENSION : PHOTO_EXTENSION;
+        String[] allowed = BIZ_MEMBER_CARD.equals(bizType) ? CARD_EXTENSION
+                : (BIZ_TASK.equals(bizType) ? TASK_EXTENSION : PHOTO_EXTENSION);
         String filePath;
         try
         {
@@ -98,6 +110,11 @@ public class OaFileServiceImpl implements IOaFileService
     public FileUploadVO uploadPublic(MultipartFile file, String bizType, String verifyToken)
     {
         captchaService.requireVerifyToken(verifyToken);
+        // 匿名上传仅开放给人员报名附件，避免匿名写任务/导入类附件
+        if (!BIZ_MEMBER_PHOTO.equals(bizType) && !BIZ_MEMBER_CARD.equals(bizType))
+        {
+            throw new ServiceException("匿名上传不支持的业务类型", 400);
+        }
         OaFile oaFile = upload(file, bizType, null);
         FileUploadVO vo = new FileUploadVO();
         vo.setFileId(oaFile.getFileId());
@@ -139,6 +156,52 @@ public class OaFileServiceImpl implements IOaFileService
             return null;
         }
         return fileMapper.selectFileById(fileId);
+    }
+
+    @Override
+    public void bindBiz(Long fileId, String bizType, Long bizId)
+    {
+        if (fileId == null || bizId == null)
+        {
+            return;
+        }
+        fileMapper.updateFileBiz(fileId, bizType, bizId);
+    }
+
+    @Override
+    public void bindBiz(List<Long> fileIds, String bizType, Long bizId)
+    {
+        if (fileIds == null || fileIds.isEmpty() || bizId == null)
+        {
+            return;
+        }
+        for (Long fileId : fileIds)
+        {
+            if (fileId != null)
+            {
+                fileMapper.updateFileBiz(fileId, bizType, bizId);
+            }
+        }
+    }
+
+    @Override
+    public List<OaFile> selectByBiz(String bizType, Long bizId)
+    {
+        if (StringUtils.isEmpty(bizType) || bizId == null)
+        {
+            return java.util.Collections.emptyList();
+        }
+        return fileMapper.selectFilesByBiz(bizType, bizId);
+    }
+
+    @Override
+    public void deleteByBiz(String bizType, Long bizId)
+    {
+        if (StringUtils.isEmpty(bizType) || bizId == null)
+        {
+            return;
+        }
+        fileMapper.deleteByBiz(bizType, bizId);
     }
 
     @Override
@@ -199,6 +262,18 @@ public class OaFileServiceImpl implements IOaFileService
             throw new ServiceException("不支持的业务类型：" + bizType, 400);
         }
         String extension = getExtension(file.getOriginalFilename());
+        if (BIZ_TASK.equals(bizType))
+        {
+            if (!Arrays.asList(TASK_EXTENSION).contains(extension))
+            {
+                throw new ServiceException("附件仅支持 jpg / png / pdf / docx / xlsx", 400);
+            }
+            if (file.getSize() > TASK_MAX_SIZE)
+            {
+                throw new ServiceException("单个文件不能超过 10MB", 400);
+            }
+            return;
+        }
         boolean photo = BIZ_MEMBER_PHOTO.equals(bizType);
         String[] allowed = photo ? PHOTO_EXTENSION : CARD_EXTENSION;
         if (!Arrays.asList(allowed).contains(extension))
