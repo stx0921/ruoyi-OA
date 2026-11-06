@@ -33,16 +33,16 @@
       <template v-else>
         <div class="h5-hero">
           <div class="h5-hero__org">
-            <div class="h5-hero__logo">学生会</div>
-            <div class="h5-hero__meta">校学生会 · 组织人事<br />招新报名</div>
+            <div class="h5-hero__logo">青蟹堡</div>
+            <div class="h5-hero__meta">青蟹堡 · 入住服务<br />入住报名</div>
           </div>
-          <h2>{{ resubmitMode ? '修改报名申请' : '学生会招新报名' }}</h2>
+          <h2>{{ resubmitMode ? '修改报名申请' : '青蟹堡入住报名' }}</h2>
           <p v-if="resubmitMode">
             正在修改申请 <b>{{ resubmitApplyNo || '—' }}</b
             ><span v-if="resubmitDeptName">（{{ resubmitDeptName }}）</span>，请核对并完善信息后重新提交
           </p>
           <p v-else>
-            填写报名信息并提交，部长将在 1–3 个工作日内完成审核；<br />
+            填写入住信息并提交，管理员将在 1–3 个工作日内完成审核；<br />
             审核结果可凭手机号 + 图形验证码在「报名进度」查询
           </p>
         </div>
@@ -398,10 +398,11 @@
     <!-- 底部固定操作条 -->
     <div v-if="!success" class="h5-submit-bar">
       <button v-if="step > 1" type="button" class="h5-btn-text" @click="prevStep">上一步</button>
+      <!-- 未勾选须知时不禁用按钮：否则用户点不动也看不到提示，改为点击后由 doSubmit 弹 warning -->
       <button
         type="button"
         class="h5-submit"
-        :disabled="(step === 3 && !agreed) || submitting || verifying"
+        :disabled="submitting || verifying"
         @click="handleNext"
       >
         {{ primaryText }}
@@ -508,7 +509,7 @@ const resubmitQueryToken = ref('')
 const originalPhotoFileId = ref(null)
 const originalCardFileId = ref(null)
 
-const pageTitle = computed(() => (success.value ? '报名成功' : resubmitMode.value ? '修改重提' : '报名申请'))
+const pageTitle = computed(() => (success.value ? '报名成功' : resubmitMode.value ? '修改重提' : '入住报名'))
 const primaryText = computed(() => {
   if (submitting.value) return '提交中…'
   if (verifying.value) return '验证中…'
@@ -724,6 +725,17 @@ function isVerifyValid() {
   return !!verifyToken.value && Date.now() < verifyExpireAt.value
 }
 
+/**
+ * 第 1 步需要校验的字段。
+ * 验证成功后 captchaCode 会被清空（见 ensureVerify），若此时仍把 captchaCode 纳入校验，
+ * 用户回退到第 1 步再点「下一步」会必然报「请输入图形验证码」；
+ * 因此 verifyToken 仍在有效期内时跳过该字段校验。
+ */
+function step1FieldsToValidate() {
+  if (!isVerifyValid()) return step1Fields.value
+  return step1Fields.value.filter(field => field !== 'captchaCode')
+}
+
 async function ensureVerify() {
   if (!validateField('captchaCode')) return false
   verifying.value = true
@@ -737,8 +749,11 @@ async function ensureVerify() {
     errors.captchaCode = ''
     return true
   } catch (e) {
+    // 验证码错误 / 校验接口失败：给出明确提示并换一张，避免用户以为按钮没反应
     captchaCode.value = ''
-    refreshCaptcha()
+    await refreshCaptcha()
+    errors.captchaCode = '验证码错误，请重新输入'
+    ElMessage.error('验证码错误，请重新输入')
     return false
   } finally {
     verifying.value = false
@@ -749,8 +764,10 @@ async function ensureVerify() {
 async function handleNext() {
   if (submitting.value || verifying.value) return
   if (step.value === 1) {
-    if (!validateStep(step1Fields.value)) {
-      focusFirstError(step1Fields.value)
+    // 已验证通过（30 分钟内）时跳过 captchaCode 校验，直接进入下一步
+    const fields = step1FieldsToValidate()
+    if (!validateStep(fields)) {
+      focusFirstError(fields)
       return
     }
     if (!isVerifyValid()) {
@@ -834,9 +851,11 @@ async function doSubmit() {
     ElMessage.warning('请先阅读并同意《入会须知》')
     return
   }
-  if (!validateStep(step1Fields.value)) {
+  // 提交前复检第 1 步：已验证通过时同样跳过 captchaCode（验证成功后该输入已清空）
+  const step1CheckFields = step1FieldsToValidate()
+  if (!validateStep(step1CheckFields)) {
     step.value = 1
-    focusFirstError(step1Fields.value)
+    focusFirstError(step1CheckFields)
     return
   }
   if (!validateStep(step2Fields.value)) {
@@ -1066,10 +1085,10 @@ function removeCard() {
 
 .h5-resubmit-dept {
   padding: 10px 12px;
-  border: 1px solid #b3d8ff;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #ecf5ff;
-  color: #337ecc;
+  background: var(--blue-soft);
+  color: var(--blue);
   font-size: 14px;
   font-weight: 600;
 }
@@ -1095,13 +1114,13 @@ function removeCard() {
 
   h3 {
     margin: 0 0 8px;
-    color: #303133;
+    color: var(--ink);
     font-size: 19px;
   }
 
   &__sub {
     margin: 0 0 18px;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 13px;
     line-height: 1.7;
   }
@@ -1110,19 +1129,19 @@ function removeCard() {
     margin-bottom: 12px;
     padding: 14px;
     border-radius: 8px;
-    background: #ecf5ff;
-    color: #337ecc;
+    background: var(--blue-soft);
+    color: var(--blue);
 
     span {
       display: block;
       margin-bottom: 6px;
-      color: #909399;
+      color: var(--ink-soft);
       font-size: 12px;
     }
 
     b {
       display: block;
-      color: #303133;
+      color: var(--ink);
       font-family: Consolas, Menlo, monospace;
       font-size: 17px;
       letter-spacing: 0.5px;
@@ -1131,7 +1150,7 @@ function removeCard() {
 
   &__meta {
     margin-bottom: 22px;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 12px;
     line-height: 1.9;
   }
@@ -1143,7 +1162,7 @@ function removeCard() {
 
 /* 入会须知 */
 .h5-notice {
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 13px;
   line-height: 1.8;
 

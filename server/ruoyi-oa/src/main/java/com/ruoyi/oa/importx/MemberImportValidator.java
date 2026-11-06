@@ -16,7 +16,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.oa.constant.OaMemberConstants;
 import com.ruoyi.oa.member.domain.OaMember;
-import com.ruoyi.oa.member.mapper.OaDeptMapper;
+import com.ruoyi.oa.member.service.IOaDeptService;
 import com.ruoyi.oa.member.mapper.OaMemberMapper;
 import com.ruoyi.oa.member.vo.DeptOptionVO;
 import com.ruoyi.oa.member.vo.ImportRowErrorVO;
@@ -50,7 +50,7 @@ public class MemberImportValidator
     private OaMemberMapper memberMapper;
 
     @Autowired
-    private OaDeptMapper deptMapper;
+    private IOaDeptService deptService;
 
     /**
      * 逐行校验
@@ -361,7 +361,7 @@ public class MemberImportValidator
         Map<String, Long> deptMap = new HashMap<>();
         try
         {
-            List<DeptOptionVO> options = deptMapper.selectOrgDeptOptions();
+            List<DeptOptionVO> options = deptService.selectAllDeptOptions();
             if (options != null)
             {
                 for (DeptOptionVO option : options)

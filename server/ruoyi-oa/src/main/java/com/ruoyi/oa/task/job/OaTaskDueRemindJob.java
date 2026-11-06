@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.ruoyi.oa.notify.domain.OaNotify;
 import com.ruoyi.oa.notify.service.IOaNotifyService;
 import com.ruoyi.oa.recur.support.RecurDateCalculator;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 import com.ruoyi.oa.support.OaLockService;
 import com.ruoyi.oa.task.domain.OaTask;
 import com.ruoyi.oa.task.mapper.OaTaskMapper;
@@ -67,6 +68,9 @@ public class OaTaskDueRemindJob
     private IOaNotifyService notifyService;
 
     @Autowired
+    private OaDictLabelProvider dictLabels;
+
+    @Autowired
     private OaTaskJobSupport support;
 
     /**
@@ -90,6 +94,8 @@ public class OaTaskDueRemindJob
         try
         {
             List<OaNotify> drafts = new ArrayList<OaNotify>();
+            // 状态文案走字典（oa_task_status），改字典后提醒文案同步变化
+            Map<String, String> statusLabels = dictLabels.labels("oa_task_status", STATUS_LABELS);
             // ① 周期任务当日提醒
             List<OaTask> recurTasks = taskMapper.selectRecurGeneratedByDate(today.format(DAY_FORMATTER));
             if (recurTasks != null)
@@ -122,7 +128,7 @@ public class OaTaskDueRemindJob
                     String dayLabel = remindDays == 1 ? "明天" : ("未来 " + remindDays + " 天");
                     drafts.add(draft(task.getAssigneeId(), "3", dayLabel + "截止：" + task.getTitle(),
                             "任务「" + task.getTitle() + "」将于" + dayLabel + " " + timeText(task.getDueTime())
-                                    + " 截止，当前状态：" + STATUS_LABELS.get(task.getStatus()) + "。",
+                                    + " 截止，当前状态：" + statusLabels.getOrDefault(task.getStatus(), "") + "。",
                             task.getTaskId(), "due:" + task.getTaskId() + ":" + dateText));
                 }
             }

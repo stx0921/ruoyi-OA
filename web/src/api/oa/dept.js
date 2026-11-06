@@ -28,3 +28,41 @@ export function updateDeptLeader(data) {
     data: data
   })
 }
+
+/**
+ * 新增内设部门（挂在组织架构根部门下）
+ *
+ * @param {object} data { deptName, orderNum, status }
+ */
+export function addDept(data) {
+  return request({
+    url: '/oa/dept',
+    method: 'post',
+    data: data
+  })
+}
+
+/**
+ * 编辑内设部门（名称 / 排序 / 状态）
+ *
+ * @param {object} data { deptId, deptName, orderNum, status }
+ */
+export function updateDept(data) {
+  return request({
+    url: '/oa/dept',
+    method: 'put',
+    data: data
+  })
+}
+
+/**
+ * 删除内设部门
+ *
+ * @param {number} deptId 部门 id
+ */
+export function delDept(deptId) {
+  return request({
+    url: '/oa/dept/' + deptId,
+    method: 'delete'
+  })
+}

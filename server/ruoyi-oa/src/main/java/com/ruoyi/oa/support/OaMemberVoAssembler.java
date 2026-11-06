@@ -98,8 +98,11 @@ public class OaMemberVoAssembler
     @Autowired
     private OaCurrentUser currentUser;
 
+    @Autowired
+    private OaDictLabelProvider dictLabels;
+
     /**
-     * 列表装配（一次请求只判定一次脱敏级别）
+     * 列表装配（一次请求只判定一次脱敏级别，也只读一次字典）
      */
     public List<MemberListVO> toListVO(List<OaMember> members)
     {
@@ -109,9 +112,10 @@ public class OaMemberVoAssembler
             return result;
         }
         boolean mask = sensitiveStrategy.mask();
+        Map<String, Map<String, String>> dictMaps = loadDictMaps();
         for (OaMember member : members)
         {
-            result.add(toListVO(member, mask));
+            result.add(toListVO(member, mask, dictMaps));
         }
         return result;
     }
@@ -121,8 +125,13 @@ public class OaMemberVoAssembler
      */
     public MemberListVO toListVO(OaMember member, boolean mask)
     {
+        return toListVO(member, mask, loadDictMaps());
+    }
+
+    private MemberListVO toListVO(OaMember member, boolean mask, Map<String, Map<String, String>> dictMaps)
+    {
         MemberListVO vo = new MemberListVO();
-        fillBase(vo, member, mask);
+        fillBase(vo, member, mask, dictMaps);
         return vo;
     }
 
@@ -133,7 +142,8 @@ public class OaMemberVoAssembler
     {
         MemberDetailVO vo = new MemberDetailVO();
         boolean mask = sensitiveStrategy.mask() && !currentUser.isSelf(member.getUserId());
-        fillBase(vo, member, mask);
+        Map<String, Map<String, String>> dictMaps = loadDictMaps();
+        fillBase(vo, member, mask, dictMaps);
         vo.setCollege(member.getCollege());
         vo.setMajor(member.getMajor());
         vo.setClassName(member.getClassName());
@@ -279,26 +289,27 @@ public class OaMemberVoAssembler
         }
     }
 
-    private void fillBase(MemberListVO vo, OaMember member, boolean mask)
+    private void fillBase(MemberListVO vo, OaMember member, boolean mask,
+            Map<String, Map<String, String>> dictMaps)
     {
         vo.setMemberId(member.getMemberId());
         vo.setMemberNo(member.getMemberNo());
         vo.setName(member.getName());
         vo.setGender(member.getGender());
-        vo.setGenderLabel(GENDER_LABELS.getOrDefault(member.getGender(), ""));
+        vo.setGenderLabel(label(dictMaps, "sys_user_sex", member.getGender()));
         vo.setStudentNo(member.getStudentNo());
         vo.setDeptId(member.getDeptId());
         vo.setDeptName(member.getDeptName());
         vo.setGrade(member.getGrade());
-        vo.setGradeLabel(GRADE_LABELS.getOrDefault(member.getGrade(), ""));
+        vo.setGradeLabel(label(dictMaps, "oa_grade", member.getGrade()));
         vo.setCohort(member.getCohort());
-        vo.setCohortLabel(StringUtils.isEmpty(member.getCohort()) ? "" : member.getCohort() + "届");
+        vo.setCohortLabel(cohortLabel(dictMaps, member.getCohort()));
         vo.setPosition(member.getPosition());
-        vo.setPositionLabel(POSITION_LABELS.getOrDefault(member.getPosition(), ""));
+        vo.setPositionLabel(label(dictMaps, "oa_position", member.getPosition()));
         vo.setStatus(member.getStatus());
-        vo.setStatusLabel(STATUS_LABELS.getOrDefault(member.getStatus(), ""));
+        vo.setStatusLabel(label(dictMaps, "oa_member_status", member.getStatus()));
         vo.setSource(member.getSource());
-        vo.setSourceLabel(SOURCE_LABELS.getOrDefault(member.getSource(), ""));
+        vo.setSourceLabel(label(dictMaps, "oa_member_source", member.getSource()));
         vo.setJoinDate(member.getJoinDate());
         vo.setUserId(member.getUserId());
         vo.setAccountStatus(member.getAccountStatus());
@@ -316,5 +327,41 @@ public class OaMemberVoAssembler
             vo.setWechat(member.getWechat());
             vo.setQq(member.getQq());
         }
+    }
+
+    /**
+     * 一次装配内复用的标签映射：字典优先、硬编码兜底
+     */
+    private Map<String, Map<String, String>> loadDictMaps()
+    {
+        Map<String, Map<String, String>> maps = new HashMap<>();
+        maps.put("sys_user_sex", dictLabels.labels("sys_user_sex", GENDER_LABELS));
+        maps.put("oa_grade", dictLabels.labels("oa_grade", GRADE_LABELS));
+        maps.put("oa_cohort", dictLabels.labels("oa_cohort", null));
+        maps.put("oa_position", dictLabels.labels("oa_position", POSITION_LABELS));
+        maps.put("oa_member_status", dictLabels.labels("oa_member_status", STATUS_LABELS));
+        maps.put("oa_member_source", dictLabels.labels("oa_member_source", SOURCE_LABELS));
+        return maps;
+    }
+
+    private String label(Map<String, Map<String, String>> dictMaps, String dictType, String value)
+    {
+        if (StringUtils.isEmpty(value))
+        {
+            return "";
+        }
+        Map<String, String> dict = dictMaps.get(dictType);
+        return dict == null ? "" : dict.getOrDefault(value, "");
+    }
+
+    /** 届次：字典 oa_cohort 优先，缺省回退「值 + 届」 */
+    private String cohortLabel(Map<String, Map<String, String>> dictMaps, String cohort)
+    {
+        if (StringUtils.isEmpty(cohort))
+        {
+            return "";
+        }
+        String label = label(dictMaps, "oa_cohort", cohort);
+        return StringUtils.isEmpty(label) ? cohort + "届" : label;
     }
 }

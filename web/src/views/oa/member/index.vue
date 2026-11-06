@@ -1121,7 +1121,7 @@ loadDeptOptions()
   cursor: pointer;
 
   &:hover {
-    border-color: #409eff;
+    border-color: #236de9;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   }
 }
@@ -1137,8 +1137,8 @@ loadDeptOptions()
 }
 
 .member-stat.is-blue .member-stat__ico {
-  background: rgba(64, 158, 255, 0.1);
-  color: #409eff;
+  background: rgba(35, 109, 233, 0.1);
+  color: #236de9;
 }
 
 .member-stat.is-orange .member-stat__ico {
@@ -1191,7 +1191,7 @@ loadDeptOptions()
   height: 48px;
   padding: 0 14px;
   margin-bottom: 12px;
-  background: #ecf5ff;
+  background: #edf3fe;
   border: 1px solid #b3d8ff;
   border-radius: 4px;
 }
@@ -1206,7 +1206,7 @@ loadDeptOptions()
 .member-batch-bar__count {
   font-size: 13px;
   font-weight: 600;
-  color: #409eff;
+  color: #236de9;
 }
 
 /* ---------- 骨架 ---------- */

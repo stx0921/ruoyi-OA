@@ -563,7 +563,7 @@ onMounted(() => {
 }
 
 .oa-todo__tab.is-active .oa-todo__badge {
-  background: #409eff;
+  background: #236de9;
   color: #fff;
 }
 

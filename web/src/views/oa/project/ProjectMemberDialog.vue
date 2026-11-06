@@ -174,7 +174,7 @@ defineExpose({ open })
     }
 
     &.is-selected {
-      background: #ecf5ff;
+      background: #edf3fe;
     }
   }
 
@@ -208,7 +208,7 @@ defineExpose({ open })
     color: #606266;
 
     b {
-      color: #409eff;
+      color: #236de9;
     }
   }
 

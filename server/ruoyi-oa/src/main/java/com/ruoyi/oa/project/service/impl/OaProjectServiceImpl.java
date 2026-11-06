@@ -36,6 +36,7 @@ import com.ruoyi.oa.project.vo.ProjectSaveResultVO;
 import com.ruoyi.oa.recur.domain.OaTaskRecur;
 import com.ruoyi.oa.recur.mapper.OaTaskRecurMapper;
 import com.ruoyi.oa.support.OaCurrentUser;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 import com.ruoyi.oa.task.mapper.OaTaskMapper;
 
 /**
@@ -59,6 +60,9 @@ public class OaProjectServiceImpl implements IOaProjectService
         STATUS_LABELS.put("0", "进行中");
         STATUS_LABELS.put("1", "已结束");
     }
+
+    @Autowired
+    private OaDictLabelProvider dictLabels;
 
     @Autowired
     private OaProjectMapper projectMapper;
@@ -91,10 +95,11 @@ public class OaProjectServiceImpl implements IOaProjectService
         ProjectQuery condition = query == null ? new ProjectQuery() : query;
         List<OaProject> list = projectMapper.selectProjectList(condition);
         List<ProjectListVO> result = new ArrayList<ProjectListVO>(list.size());
+        Map<String, String> statusLabels = dictLabels.labels("oa_project_status", STATUS_LABELS);
         for (OaProject project : list)
         {
             ProjectListVO vo = new ProjectListVO();
-            fillListVO(vo, project);
+            fillListVO(vo, project, statusLabels);
             result.add(vo);
         }
         // 保留 PageHelper 分页信息（转换成 VO 后 getDataTable 仍能取到 total）
@@ -122,7 +127,7 @@ public class OaProjectServiceImpl implements IOaProjectService
             throw new ServiceException("项目不存在", 404);
         }
         ProjectDetailVO vo = new ProjectDetailVO();
-        fillListVO(vo, project);
+        fillListVO(vo, project, dictLabels.labels("oa_project_status", STATUS_LABELS));
         List<OaProjectMember> members = projectMemberMapper.selectByProjectId(projectId);
         List<ProjectMemberVO> memberVos = new ArrayList<ProjectMemberVO>(members.size());
         for (OaProjectMember member : members)
@@ -517,7 +522,7 @@ public class OaProjectServiceImpl implements IOaProjectService
     /**
      * 列表字段装配
      */
-    private void fillListVO(ProjectListVO vo, OaProject project)
+    private void fillListVO(ProjectListVO vo, OaProject project, Map<String, String> statusLabels)
     {
         vo.setProjectId(project.getProjectId());
         vo.setProjectNo(project.getProjectNo());
@@ -525,7 +530,7 @@ public class OaProjectServiceImpl implements IOaProjectService
         vo.setOwnerId(project.getOwnerId());
         vo.setOwnerName(project.getOwnerName());
         vo.setStatus(project.getStatus());
-        vo.setStatusLabel(STATUS_LABELS.get(project.getStatus()));
+        vo.setStatusLabel(statusLabels == null ? "" : statusLabels.getOrDefault(project.getStatus(), ""));
         vo.setStartDate(project.getStartDate());
         vo.setEndDate(project.getEndDate());
         vo.setFinishTime(project.getFinishTime());

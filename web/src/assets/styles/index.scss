@@ -14,8 +14,10 @@ body {
   font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
 }
 
+/* 全局 label 不再加粗到 700：会连 H5 的 <label class="h5-field__label"> 一起命中，
+ * 与设计规范的字重 550 冲突；需要强调的标签在组件内单独声明 */
 label {
-  font-weight: 700;
+  font-weight: 550;
 }
 
 html {

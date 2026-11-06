@@ -511,7 +511,7 @@ onMounted(() => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #409eff, #79bbff);
+  background: linear-gradient(135deg, #236de9, #5b8ff0);
   color: #fff;
   font-size: 12px;
   font-weight: 500;

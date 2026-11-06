@@ -5,9 +5,11 @@ export default {
   title: import.meta.env.VITE_APP_TITLE,
 
   /**
-   * 侧边栏主题 深色主题theme-dark，浅色主题theme-light
+   * 侧边栏主题：
+   * 珍珠玻璃主题下导航轨统一为浅色玻璃面（见 assets/styles/ui.scss 的 .m-rail 段），
+   * 因此默认值改为 theme-light；theme-dark 仅作为历史配置兼容，不再对外提供切换入口。
    */
-  sideTheme: 'theme-dark',
+  sideTheme: 'theme-light',
 
   /**
    * 是否系统布局配置
@@ -62,6 +64,6 @@ export default {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2018-2026 RuoYi. All Rights Reserved.'
+  footerContent: '© 2026 轻量 OA · 企业协同办公平台'
 }
 

@@ -72,7 +72,10 @@ spring:
     # 端口，默认为6379
     port: 6379
     # 数据库索引
-    database: 0
+    # 注意：本机可能同时跑其它若依系项目，务必使用独立库（不要和它们共用 db0），
+    # 否则 login_tokens / sys_dict / sys_config 等同名 key 会互相污染，
+    # 表现为 Redis 里的 LoginUser 反序列化成 JSONObject 后类型转换失败。
+    database: 1
     # 密码
     password:
     # 连接超时时间

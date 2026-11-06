@@ -99,7 +99,7 @@
           <el-col :span="12">
             <el-form-item label="优先级" prop="priority">
               <el-select v-model="form.priority" style="width: 100%">
-                <el-option v-for="item in PRIORITY_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+                <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -135,6 +135,7 @@ import {
   WEEK_DAY_OPTIONS,
   formatDate,
   normalizeWeekDays,
+  resolveOptions,
   searchMemberOptions,
   toDateString,
   todayStr,
@@ -144,7 +145,9 @@ import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
 const emit = defineEmits(['success'])
-const { oa_task_tag } = useDict('oa_task_tag')
+const { oa_task_tag, oa_task_priority } = useDict('oa_task_tag', 'oa_task_priority')
+
+const priorityOptions = computed(() => resolveOptions(oa_task_priority.value, PRIORITY_OPTIONS))
 
 const visible = ref(false)
 const saving = ref(false)
@@ -276,6 +279,11 @@ function open(options = {}) {
 }
 
 function loadProjects() {
+  // 无项目权限时不请求，避免 403
+  if (!proxy.$auth.hasPermi('oa:project:list')) {
+    projectOptions.value = []
+    return
+  }
   listProject({ pageNum: 1, pageSize: 200, status: '0' })
     .then(response => {
       const options = (response.rows || []).map(project => ({ projectId: project.projectId, name: project.name }))
@@ -392,7 +400,7 @@ defineExpose({ open })
   }
 
   .title-preview {
-    color: #409eff;
+    color: #236de9;
   }
 }
 
@@ -419,13 +427,13 @@ defineExpose({ open })
   transition: all 0.15s;
 
   &:hover {
-    border-color: #409eff;
-    color: #409eff;
+    border-color: #236de9;
+    color: #236de9;
   }
 
   &.is-active {
-    border-color: #409eff;
-    background: #409eff;
+    border-color: #236de9;
+    background: #236de9;
     color: #fff;
   }
 }

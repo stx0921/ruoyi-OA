@@ -227,8 +227,8 @@ onMounted(() => {
     flex: 0 0 34px;
 
     &.is-blue {
-      background: #ecf5ff;
-      color: #409eff;
+      background: #edf3fe;
+      color: #236de9;
     }
 
     &.is-orange {
@@ -284,7 +284,7 @@ onMounted(() => {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #409eff;
+    background: #236de9;
   }
 }
 </style>

@@ -27,7 +27,7 @@
           <oa-notify-bell class="right-menu-item hover-effect" />
         </el-tooltip>
 
-        <el-tooltip content="消息通知" effect="dark" placement="bottom">
+        <el-tooltip content="通知公告" effect="dark" placement="bottom">
           <header-notice id="header-notice" class="right-menu-item hover-effect" />
         </el-tooltip>
       </template>
@@ -177,7 +177,8 @@ async function toggleTheme(event) {
   overflow: hidden;
   position: relative;
   background: var(--navbar-bg);
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  /* 顶栏描边由 ui.scss 统一给出，这里不再叠一层若依投影 */
+  box-shadow: none;
   display: flex;
   align-items: center;
   // padding: 0 8px;
@@ -195,7 +196,7 @@ async function toggleTheme(event) {
     margin-right: 8px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.025);
+      background: var(--hover-bg);
     }
   }
 
@@ -233,7 +234,7 @@ async function toggleTheme(event) {
       padding: 0 8px;
       height: 100%;
       font-size: 18px;
-      color: #5a5e66;
+      color: var(--ink-muted);
       vertical-align: text-bottom;
 
       &.hover-effect {
@@ -241,7 +242,7 @@ async function toggleTheme(event) {
         transition: background 0.3s;
 
         &:hover {
-          background: rgba(0, 0, 0, 0.025);
+          background: var(--hover-bg);
         }
       }
 
@@ -264,24 +265,27 @@ async function toggleTheme(event) {
       padding-right: 0px;
 
       .avatar-wrapper {
-        margin-top: 10px;
-        right: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 100%;
+        padding: 0 6px 0 2px;
         position: relative;
 
         .user-avatar {
           cursor: pointer;
           width: 30px;
           height: 30px;
-          margin-right: 8px;
           border-radius: 50%;
+          flex: none;
         }
 
-        .user-nickname{
-          position: relative;
-          left: 0px;
-          bottom: 10px;
-          font-size: 14px;
-          font-weight: bold;
+        .user-nickname {
+          font-size: 13px;
+          font-weight: 600;
+          line-height: 1;
+          color: var(--ink);
+          white-space: nowrap;
         }
 
         i {

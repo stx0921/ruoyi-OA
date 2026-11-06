@@ -29,11 +29,23 @@ export function validateImport(file, updateSupport) {
 }
 
 // 13. 确认导入（{ batchId, updateSupport }；后端重新解析文件并分批入库）
+// 注意：后端 ImportConfirmDTO.updateSupport 是 Boolean，JSON 里传 "1"/"0" 会被 Jackson 拒绝
+// （Cannot deserialize value of type `java.lang.Boolean` from String "1"），这里统一归一为布尔值。
+function toBoolean(value) {
+  if (value === undefined || value === null || value === '') return undefined
+  if (value === true || value === 1 || value === '1' || value === 'true') return true
+  if (value === false || value === 0 || value === '0' || value === 'false') return false
+  return Boolean(value)
+}
+
 export function confirmImport(data) {
   return request({
     url: '/oa/member/import/confirm',
     method: 'post',
-    data: data,
+    data: {
+      ...data,
+      updateSupport: toBoolean(data && data.updateSupport)
+    },
     timeout: 180000
   })
 }

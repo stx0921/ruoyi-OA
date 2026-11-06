@@ -144,7 +144,7 @@ import {
 } from '@/utils/oa'
 
 const PAGE_SIZE = 500
-const PIE_COLORS = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7bfa']
+const PIE_COLORS = ['#236de9', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7bfa']
 
 const { oa_leave_type } = useDict('oa_leave_type')
 
@@ -330,7 +330,7 @@ const trendOption = computed(() => {
         type: 'bar',
         data: weeks.map(week => week.count),
         barWidth: '46%',
-        itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] }
+        itemStyle: { color: '#236de9', borderRadius: [4, 4, 0, 0] }
       }
     ]
   }

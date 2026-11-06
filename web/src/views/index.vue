@@ -111,7 +111,7 @@ import { oaDate } from '@/utils/oa'
 import { TASK_STATUS_MAP } from '@/utils/oaTask'
 
 const WEEK_LABELS = ['日', '一', '二', '三', '四', '五', '六']
-const PIE_COLORS = ['#409eff', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7bfa']
+const PIE_COLORS = ['#236de9', '#67c23a', '#e6a23c', '#f56c6c', '#909399', '#9b7bfa']
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -199,7 +199,7 @@ function taskSub(task) {
 }
 
 function noticeDot(notice) {
-  if (String(notice.noticeType) === '1') return '#409eff'
+  if (String(notice.noticeType) === '1') return '#236de9'
   if (String(notice.noticeType) === '2') return '#67c23a'
   return '#909399'
 }
@@ -240,7 +240,7 @@ const taskOption = computed(() => {
         type: 'bar',
         data: values,
         barWidth: '46%',
-        itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: '#236de9', borderRadius: [4, 4, 0, 0] },
         label: { show: true, position: 'top', color: '#909399', fontSize: 12 }
       }
     ]
@@ -408,7 +408,7 @@ onActivated(() => {
       margin-left: auto;
       font-size: 13px;
       font-weight: 400;
-      color: #909399;
+      color: var(--ink-soft);
     }
   }
 
@@ -446,7 +446,7 @@ onActivated(() => {
 
       &:hover {
         border-color: #c6e2ff;
-        background: #ecf5ff;
+        background: #edf3fe;
         transform: translateY(-1px);
       }
     }
@@ -462,8 +462,8 @@ onActivated(() => {
       font-weight: 600;
 
       &.is-blue {
-        background: #ecf5ff;
-        color: #409eff;
+        background: #edf3fe;
+        color: #236de9;
       }
 
       &.is-green {

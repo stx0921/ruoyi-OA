@@ -281,8 +281,8 @@ onBeforeUnmount(() => {
     margin-top: 2px;
 
     &.is-blue {
-      background: #ecf5ff;
-      color: #409eff;
+      background: #edf3fe;
+      color: #236de9;
     }
 
     &.is-orange {
@@ -340,7 +340,7 @@ onBeforeUnmount(() => {
     height: 6px;
     margin-top: 8px;
     border-radius: 50%;
-    background: #409eff;
+    background: #236de9;
     flex: 0 0 6px;
   }
 

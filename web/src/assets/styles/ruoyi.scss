@@ -68,11 +68,12 @@
   }
 }
 
+/* 表单标签字重由 ui.scss 的 550 统一，这里不再加粗到 700（会命中 H5 的 label） */
 .el-form .el-form-item__label {
-  font-weight: 700;
+  font-weight: 550;
 }
 .el-dialog:not(.is-fullscreen) {
-  margin-top: 6vh !important;
+  margin-top: 6vh;
 }
 
 .el-dialog.scrollbar .el-dialog__body {
@@ -82,14 +83,11 @@
   padding: 10px 20px 0;
 }
 
+/* 表头高度 / 底色 / 字色统一由 ui.scss 的表头令牌控制，这里只保留换行处理 */
 .el-table {
   .el-table__header-wrapper, .el-table__fixed-header-wrapper {
     th {
       word-break: break-word;
-      background-color: #f8f8f9 !important;
-      color: #515a6e;
-      height: 40px !important;
-      font-size: 13px;
     }
   }
   .el-table__body-wrapper {
@@ -169,7 +167,7 @@
 /** 表格更多操作下拉样式 */
 .el-table .el-dropdown-link {
   cursor: pointer;
-  color: #409EFF;
+  color: #236de9;
   margin-left: 10px;
 }
 
@@ -206,13 +204,10 @@
   float: right !important;
 }
 
+/* 卡片内距由 assets/styles/ui.scss 统一控制，这里不再用 !important 抢先定义，
+ * 否则主题层的 16/20 与 20px 内距永远不生效 */
 .el-card__header {
-  padding: 14px 15px 7px !important;
   min-height: 40px;
-}
-
-.el-card__body {
-  padding: 15px 20px 20px 20px !important;
 }
 
 .card-box {
@@ -310,7 +305,7 @@
   color: #333;
   border-bottom: 1px solid #ebeef5;
 }
-.detail-card-title i { margin-right: 5px; color: #409EFF; }
+.detail-card-title i { margin-right: 5px; color: #236de9; }
 
 .detail-row { padding: 0 8px; }
 
@@ -368,7 +363,7 @@
 }
 .code-action .el-button:hover { 
   background: #ffffff;
-  border-color: #409EFF;
+  border-color: #236de9;
 }
 .code-pre {
   margin: 0;

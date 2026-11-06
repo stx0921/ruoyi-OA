@@ -53,6 +53,7 @@ import com.ruoyi.oa.member.domain.OaMember;
 import com.ruoyi.oa.member.mapper.OaMemberMapper;
 import com.ruoyi.oa.support.DeptLeaderResolver;
 import com.ruoyi.oa.support.OaCurrentUser;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 import com.ruoyi.oa.support.OaMemberLogService;
 import com.ruoyi.oa.support.MemberAccountService;
 import com.ruoyi.oa.support.MemberNoGenerator;
@@ -155,6 +156,9 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
     private DeptLeaderResolver deptLeaderResolver;
 
     @Autowired
+    private OaDictLabelProvider dictLabels;
+
+    @Autowired
     private ISysDeptService deptService;
 
     @Autowired
@@ -180,10 +184,13 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
 
         List<OaMemberApply> list = applyMapper.selectApplyList(condition);
         List<ApplyListVO> result = new ArrayList<>(list.size());
+        // 一次请求只读一次字典，改字典后这里立刻生效
+        Map<String, String> gradeLabels = dictLabels.labels("oa_grade", GRADE_LABELS);
+        Map<String, String> statusLabels = dictLabels.labels("oa_apply_status", APPLY_STATUS_LABELS);
         for (OaMemberApply apply : list)
         {
             ApplyListVO vo = new ApplyListVO();
-            fillListVO(vo, apply);
+            fillListVO(vo, apply, gradeLabels, statusLabels);
             vo.setCanAudit(canAudit(apply, me, all));
             result.add(vo);
         }
@@ -220,7 +227,8 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
             throw new ServiceException("没有权限访问该申请", 403);
         }
         ApplyDetailVO vo = new ApplyDetailVO();
-        fillListVO(vo, apply);
+        fillListVO(vo, apply, dictLabels.labels("oa_grade", GRADE_LABELS),
+                dictLabels.labels("oa_apply_status", APPLY_STATUS_LABELS));
         vo.setCollege(apply.getCollege());
         vo.setMajor(apply.getMajor());
         vo.setClassName(apply.getClassName());
@@ -577,6 +585,7 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
 
         List<OaMemberApply> applies = applyMapper.selectApplyByPhone(dto.getPhone());
         List<ProgressApplyVO> list = new ArrayList<>(applies.size());
+        Map<String, String> progressStatusLabels = dictLabels.labels("oa_apply_status", APPLY_STATUS_LABELS);
         for (OaMemberApply apply : applies)
         {
             ProgressApplyVO vo = new ProgressApplyVO();
@@ -586,7 +595,7 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
             vo.setDeptName(StringUtils.isEmpty(apply.getDeptName()) ? getDeptName(apply.getDeptId())
                     : apply.getDeptName());
             vo.setStatus(apply.getStatus());
-            vo.setStatusLabel(APPLY_STATUS_LABELS.get(apply.getStatus()));
+            vo.setStatusLabel(progressStatusLabels.get(apply.getStatus()));
             vo.setCreateTime(apply.getCreateTime());
             vo.setAuditRemark(apply.getAuditRemark());
             vo.setAuditUserName(apply.getAuditUserName());
@@ -849,7 +858,8 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
     /**
      * 列表字段装配
      */
-    private void fillListVO(ApplyListVO vo, OaMemberApply apply)
+    private void fillListVO(ApplyListVO vo, OaMemberApply apply, Map<String, String> gradeLabels,
+            Map<String, String> statusLabels)
     {
         vo.setId(apply.getId());
         vo.setApplyNo(apply.getApplyNo());
@@ -861,9 +871,9 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
         vo.setDeptName(StringUtils.isEmpty(apply.getDeptName()) ? getDeptName(apply.getDeptId())
                 : apply.getDeptName());
         vo.setGrade(apply.getGrade());
-        vo.setGradeLabel(GRADE_LABELS.get(apply.getGrade()));
+        vo.setGradeLabel(gradeLabels.get(apply.getGrade()));
         vo.setStatus(apply.getStatus());
-        vo.setStatusLabel(APPLY_STATUS_LABELS.get(apply.getStatus()));
+        vo.setStatusLabel(statusLabels.get(apply.getStatus()));
         vo.setAuditUserName(apply.getAuditUserName());
         vo.setAuditTime(apply.getAuditTime());
         vo.setAuditRemark(apply.getAuditRemark());

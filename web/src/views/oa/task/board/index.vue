@@ -199,6 +199,11 @@ function searchAssignee(keyword) {
 }
 
 function loadProjects() {
+  // 干事等无项目权限的角色直接跳过，避免 /oa/project/list 403 弹错
+  if (!proxy.$auth.hasPermi('oa:project:list')) {
+    projectOptions.value = []
+    return
+  }
   listProject({ pageNum: 1, pageSize: 200 })
     .then(response => {
       projectOptions.value = (response.rows || []).map(project => ({ projectId: project.projectId, name: project.name }))

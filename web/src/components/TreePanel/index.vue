@@ -589,11 +589,11 @@ onBeforeUnmount(() => {
   transition: background 0.2s;
   
   &:hover {
-    background: rgba(64, 158, 255, 0.3);
+    background: rgba(35, 109, 233, 0.3);
   }
   
   &.active {
-    background: rgba(64, 158, 255, 0.5);
+    background: rgba(35, 109, 233, 0.5);
   }
 }
 
@@ -633,8 +633,8 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
   
   &:hover {
-    color: #409eff;
-    background: #ecf5ff;
+    color: #236de9;
+    background: #edf3fe;
   }
 }
 
@@ -659,7 +659,7 @@ onBeforeUnmount(() => {
     gap: 5px;
 
     .el-icon {
-      color: #409eff;
+      color: #236de9;
       font-size: 16px;
     }
   }
@@ -681,8 +681,8 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
 
   &:hover {
-    color: #409eff;
-    background: #ecf5ff;
+    color: #236de9;
+    background: #edf3fe;
   }
 }
 
@@ -725,11 +725,11 @@ onBeforeUnmount(() => {
 
   :deep(.el-tree-node.is-current > .el-tree-node__content) {
     background: #e6f0fd;
-    color: #409eff;
+    color: #236de9;
     font-weight: 600;
 
     .node-icon {
-      color: #409eff !important;
+      color: #236de9 !important;
     }
   }
 }

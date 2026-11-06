@@ -717,13 +717,13 @@ onMounted(() => {
   transition: color 0.2s;
 
   &:hover {
-    color: #409eff;
+    color: #236de9;
   }
 
   &.is-active {
-    color: #409eff;
+    color: #236de9;
     font-weight: 600;
-    border-bottom-color: #409eff;
+    border-bottom-color: #236de9;
   }
 }
 
@@ -740,8 +740,8 @@ onMounted(() => {
   text-align: center;
 
   .is-active & {
-    background: #ecf5ff;
-    color: #409eff;
+    background: #edf3fe;
+    color: #236de9;
   }
 }
 
@@ -753,7 +753,7 @@ onMounted(() => {
   height: 48px;
   padding: 0 14px;
   margin-bottom: 12px;
-  background: #ecf5ff;
+  background: #edf3fe;
   border: 1px solid #b3d8ff;
   border-radius: 4px;
   font-size: 13px;
@@ -761,7 +761,7 @@ onMounted(() => {
 }
 
 .oa-batch-bar__count b {
-  color: #409eff;
+  color: #236de9;
   font-weight: 600;
 }
 
@@ -845,7 +845,7 @@ onMounted(() => {
   margin-bottom: 14px;
   border-radius: 4px;
   background: #f4f8ff;
-  border: 1px solid #d9ecff;
+  border: 1px solid #dbe7fc;
   font-size: 12px;
   line-height: 1.7;
   color: #606266;

@@ -15,7 +15,8 @@ const useSettingsStore = defineStore(
   {
     state: () => ({
       title: '',
-      theme: storageSetting.theme || '#409EFF',
+      // 珍珠玻璃主题主色；兼容旧版本 localStorage 里保存的若依默认蓝
+      theme: (!storageSetting.theme || storageSetting.theme.toUpperCase() === '#409EFF') ? '#236de9' : storageSetting.theme,
       sideTheme: storageSetting.sideTheme || sideTheme,
       showSettings: showSettings,
       navType: storageSetting.navType === undefined ? navType : storageSetting.navType,

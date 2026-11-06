@@ -66,18 +66,25 @@ public class TokenService
         String token = getToken(request);
         if (StringUtils.isNotEmpty(token))
         {
+            String userKey = null;
             try
             {
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                String userKey = getTokenKey(uuid);
+                userKey = getTokenKey(uuid);
                 LoginUser user = redisCache.getCacheObject(userKey);
                 return user;
             }
             catch (Exception e)
             {
                 log.error("获取用户信息异常'{}'", e.getMessage());
+                // 缓存里是其它系统写入的同名 token（或类结构不兼容）时，
+                // 删掉这条脏数据，避免每次请求都重复报错
+                if (StringUtils.isNotEmpty(userKey))
+                {
+                    redisCache.deleteObject(userKey);
+                }
             }
         }
         return null;

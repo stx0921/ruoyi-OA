@@ -940,7 +940,7 @@ defineExpose({ open, loadDetail })
     width: 3px;
     height: 13px;
     border-radius: 2px;
-    background: #409eff;
+    background: #236de9;
   }
 
   small {
@@ -1100,8 +1100,8 @@ defineExpose({ open, loadDetail })
     width: 32px;
     height: 32px;
     border-radius: 4px;
-    background: #ecf5ff;
-    color: #409eff;
+    background: #edf3fe;
+    color: #236de9;
     flex: 0 0 32px;
   }
 
@@ -1164,13 +1164,13 @@ defineExpose({ open, loadDetail })
 
   &.is-highlight {
     &::before {
-      border-color: #409eff;
-      background: #409eff;
-      box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.18);
+      border-color: #236de9;
+      background: #236de9;
+      box-shadow: 0 0 0 4px rgba(35, 109, 233, 0.18);
     }
 
     .tl-title {
-      color: #409eff;
+      color: #236de9;
     }
   }
 

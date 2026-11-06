@@ -14,6 +14,12 @@
 
     <template v-else>
       <div class="oa-card">
+        <!-- 部门维护入口：组织架构独立维护，不再依赖系统管理 -->
+        <div class="oa-card-head">
+          <h3>内设部门</h3>
+          <el-button type="primary" icon="Plus" v-hasPermi="['oa:dept:add']" @click="openCreate">新增部门</el-button>
+        </div>
+
         <!-- 筛选：部门名称 / 状态 -->
         <el-form :model="filterForm" :inline="true" class="oa-filter-bar" @submit.prevent>
           <el-form-item label="部门名称">
@@ -81,31 +87,36 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column label="操作" width="160" align="center" fixed="right">
+          <el-table-column label="操作" width="260" align="center" fixed="right">
             <template #default="{ row }">
-              <el-button link type="primary" @click="openEdit(row)" v-hasPermi="['oa:dept:edit']">编辑</el-button>
+              <el-button link type="primary" @click="openDeptForm(row)" v-hasPermi="['oa:dept:edit']">编辑</el-button>
+              <el-button link type="primary" @click="openLeader(row)" v-hasPermi="['oa:dept:edit']">负责人</el-button>
               <el-button link type="primary" @click="viewMembers(row)">查看成员</el-button>
+              <el-button link type="danger" @click="handleDelete(row)" v-hasPermi="['oa:dept:remove']">删除</el-button>
             </template>
           </el-table-column>
 
           <template #empty>
             <div class="oa-dept-empty">
-              <p class="oa-dept-empty__title">暂无部门</p>
-              <p class="oa-dept-empty__desc">请先在 系统管理 → 部门管理 中创建部门</p>
+              <p class="oa-dept-empty__title">暂无内设部门</p>
+              <p class="oa-dept-empty__desc">点击上方「新增部门」创建组织部、宣传部等内设部门</p>
             </div>
           </template>
         </el-table>
       </div>
     </template>
 
-    <!-- 负责人编辑抽屉 -->
+    <!-- 部门负责人编辑抽屉 -->
     <dept-leader-drawer v-model="drawerVisible" :dept="currentDept" @saved="getList" />
+    <!-- 部门新增 / 编辑弹窗 -->
+    <dept-form-dialog v-model="formVisible" :dept="formDept" @saved="getList" />
   </div>
 </template>
 
 <script setup name="OaDept">
-import { listDept } from '@/api/oa/dept'
+import { delDept, listDept } from '@/api/oa/dept'
 import DeptLeaderDrawer from './DeptLeaderDrawer.vue'
+import DeptFormDialog from './DeptFormDialog.vue'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -119,6 +130,9 @@ const appliedFilter = ref({ deptName: '', status: '' })
 
 const drawerVisible = ref(false)
 const currentDept = ref({})
+
+const formVisible = ref(false)
+const formDept = ref(null)
 
 const canView = computed(() => proxy.$auth.hasPermi('oa:dept:list'))
 
@@ -170,9 +184,34 @@ function resetQuery() {
   appliedFilter.value = { deptName: '', status: '' }
 }
 
-function openEdit(row) {
+/** 打开「新增部门」 */
+function openCreate() {
+  formDept.value = null
+  formVisible.value = true
+}
+
+/** 打开「编辑部门」（名称 / 排序 / 状态） */
+function openDeptForm(row) {
+  formDept.value = { ...row }
+  formVisible.value = true
+}
+
+/** 打开部门负责人维护抽屉 */
+function openLeader(row) {
   currentDept.value = row
   drawerVisible.value = true
+}
+
+/** 删除部门（后端会校验下级部门 / 在籍成员 / 系统用户） */
+function handleDelete(row) {
+  proxy.$modal
+    .confirm('确认删除部门「' + (row.deptName || '') + '」？删除后不可恢复')
+    .then(() => delDept(row.deptId))
+    .then(() => {
+      proxy.$modal.msgSuccess('删除成功')
+      getList()
+    })
+    .catch(() => {})
 }
 
 function viewMembers(row) {

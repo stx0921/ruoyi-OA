@@ -1,10 +1,11 @@
 <template>
-  <span class="oa-pill" :class="'oa-pill--' + meta.tone">{{ meta.label }}</span>
+  <span class="oa-pill" :class="pillToneClass(meta.tone)">{{ meta.label }}</span>
 </template>
 
 <script setup name="OaStatusTag">
 import { computed } from 'vue'
 import { LEAVE_STATUS_MAP } from '@/utils/oa'
+import { pillToneClass } from '@/utils/status'
 
 const props = defineProps({
   // 请假单状态值：0 草稿 1 审批中 2 已通过 3 已驳回 4 已撤销

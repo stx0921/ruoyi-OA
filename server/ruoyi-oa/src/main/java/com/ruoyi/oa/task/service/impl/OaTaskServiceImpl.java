@@ -24,6 +24,7 @@ import com.ruoyi.oa.apply.domain.OaFile;
 import com.ruoyi.oa.apply.service.IOaFileService;
 import com.ruoyi.oa.notify.service.IOaNotifyService;
 import com.ruoyi.oa.support.OaCurrentUser;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 import com.ruoyi.oa.support.OaFileUrlHelper;
 import com.ruoyi.oa.task.domain.OaTask;
 import com.ruoyi.oa.task.dto.TaskAuditDTO;
@@ -111,6 +112,21 @@ public class OaTaskServiceImpl implements IOaTaskService
     }
 
     @Autowired
+    private OaDictLabelProvider dictLabels;
+
+    /**
+     * 一次装配内复用的标签映射：字典优先、写死兜底
+     */
+    private Map<String, Map<String, String>> loadTaskDictMaps()
+    {
+        Map<String, Map<String, String>> maps = new HashMap<>();
+        maps.put("oa_task_status", dictLabels.labels("oa_task_status", STATUS_LABELS));
+        maps.put("oa_task_priority", dictLabels.labels("oa_task_priority", PRIORITY_LABELS));
+        maps.put("oa_task_source", dictLabels.labels("oa_task_source", SOURCE_LABELS));
+        return maps;
+    }
+
+    @Autowired
     private OaTaskMapper taskMapper;
 
     @Autowired
@@ -184,9 +200,10 @@ public class OaTaskServiceImpl implements IOaTaskService
 
         TaskBoardVO board = new TaskBoardVO();
         Map<String, TaskColumnVO> columnMap = new LinkedHashMap<String, TaskColumnVO>();
+        Map<String, String> boardStatusLabels = dictLabels.labels("oa_task_status", STATUS_LABELS);
         for (String[] def : BOARD_COLUMNS)
         {
-            TaskColumnVO column = new TaskColumnVO(def[0], def[1]);
+            TaskColumnVO column = new TaskColumnVO(def[0], boardStatusLabels.getOrDefault(def[0], def[1]));
             board.getColumns().add(column);
             columnMap.put(def[0], column);
         }
@@ -1026,9 +1043,10 @@ public class OaTaskServiceImpl implements IOaTaskService
         {
             return;
         }
+        Map<String, Map<String, String>> dictMaps = loadTaskDictMaps();
         for (TaskListVO vo : list)
         {
-            fillListFlags(vo, ctx);
+            fillListFlags(vo, ctx, dictMaps);
         }
     }
 
@@ -1037,13 +1055,19 @@ public class OaTaskServiceImpl implements IOaTaskService
      */
     private void fillListFlags(TaskListVO vo, OaTaskPermissionChecker.Ctx ctx)
     {
+        fillListFlags(vo, ctx, loadTaskDictMaps());
+    }
+
+    private void fillListFlags(TaskListVO vo, OaTaskPermissionChecker.Ctx ctx,
+            Map<String, Map<String, String>> dictMaps)
+    {
         if (vo == null)
         {
             return;
         }
-        vo.setStatusLabel(label(STATUS_LABELS, vo.getStatus()));
-        vo.setPriorityLabel(label(PRIORITY_LABELS, vo.getPriority()));
-        vo.setSourceLabel(label(SOURCE_LABELS, vo.getSource()));
+        vo.setStatusLabel(label(dictMaps.get("oa_task_status"), vo.getStatus()));
+        vo.setPriorityLabel(label(dictMaps.get("oa_task_priority"), vo.getPriority()));
+        vo.setSourceLabel(label(dictMaps.get("oa_task_source"), vo.getSource()));
         if (vo.getRejectCount() == null)
         {
             vo.setRejectCount(0);
@@ -1421,6 +1445,10 @@ public class OaTaskServiceImpl implements IOaTaskService
 
     private String label(Map<String, String> labels, String key)
     {
+        if (labels == null || key == null)
+        {
+            return "";
+        }
         String label = labels.get(key);
         return label == null ? "" : label;
     }

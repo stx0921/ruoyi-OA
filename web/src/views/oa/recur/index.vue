@@ -10,7 +10,7 @@
       <el-form ref="queryRef" :model="queryParams" :inline="true" class="oa-filter-bar">
         <el-form-item label="状态">
           <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-            <el-option v-for="item in RECUR_STATUS_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="关键字">
@@ -169,14 +169,19 @@ import { ElMessageBox } from 'element-plus'
 import OaTaskStatusTag from '@/components/oa/OaTaskStatusTag.vue'
 import RecurFormDrawer from './RecurFormDrawer.vue'
 import { listRecur, deleteRecur, updateRecurStatus } from '@/api/oa/recur'
-import { RECUR_STATUS_MAP, formatDate, formatWeekDays } from '@/utils/oaTask'
+import { RECUR_STATUS_MAP, formatDate, formatWeekDays, resolveOptions } from '@/utils/oaTask'
+import { useDict } from '@/utils/dict'
 
 const { proxy } = getCurrentInstance()
 
+/** 兜底选项（字典 oa_recur_status 优先） */
 const RECUR_STATUS_OPTIONS = ['0', '1', '2'].map(value => ({
   value,
   label: RECUR_STATUS_MAP[value].label
 }))
+
+const { oa_recur_status } = useDict('oa_recur_status')
+const statusOptions = computed(() => resolveOptions(oa_recur_status.value, RECUR_STATUS_OPTIONS))
 
 const loading = ref(false)
 const error = ref(false)
@@ -353,10 +358,10 @@ onMounted(() => {
   .proj-tag {
     display: inline-block;
     padding: 1px 6px;
-    border: 1px solid #d9ecff;
+    border: 1px solid #dbe7fc;
     border-radius: 3px;
-    background: #ecf5ff;
-    color: #337ecc;
+    background: #edf3fe;
+    color: #1d61d5;
     font-size: 11px;
     white-space: nowrap;
   }

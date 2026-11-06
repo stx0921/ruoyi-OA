@@ -9,7 +9,11 @@
  */
 import { parseTime } from '@/utils/ruoyi'
 
-/** 请假单状态，对应 OaConstants：0草稿 1审批中 2已通过 3已驳回 4已撤销 */
+/**
+ * 请假单状态，对应 OaConstants：0草稿 1审批中 2已通过 3已驳回 4已撤销
+ * tone 对应的色值已统一收敛到 utils/status.js + .oa-pill--* 令牌（暗色自适应），
+ * 本文件不再出现任何 hex，子状态色值只保留语义 tone。
+ */
 export const LEAVE_STATUS_MAP = {
   0: { label: '草稿', tone: 'gray' },
   1: { label: '审批中', tone: 'orange' },

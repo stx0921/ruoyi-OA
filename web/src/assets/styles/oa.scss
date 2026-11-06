@@ -7,27 +7,30 @@
 
 /* ---------- 页面标题 ---------- */
 .oa-page-title {
+  /* 渐变下划线由 ui.scss 的 ::after 绝对定位绘制，这里提供定位上下文与下划线空间 */
+  position: relative;
   display: flex;
   align-items: baseline;
   gap: 10px;
+  padding-bottom: 12px;
   margin: 0 0 16px;
   font-size: 18px;
   font-weight: 600;
-  color: #303133;
+  color: var(--ink);
 
   small {
     font-size: 12px;
     font-weight: 400;
-    color: #909399;
+    color: var(--ink-soft);
   }
 }
 
 /* ---------- 卡片 ---------- */
 .oa-card {
-  background: #fff;
+  background: var(--surface);
   border-radius: 8px;
   padding: 16px 18px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.06);
+  box-shadow: var(--e1);
 }
 
 .oa-card + .oa-card {
@@ -51,7 +54,7 @@
     margin: 0;
     font-size: 15px;
     font-weight: 600;
-    color: #303133;
+    color: var(--ink);
   }
 }
 
@@ -75,7 +78,11 @@
   }
 }
 
-/* ---------- 药丸标签 ---------- */
+/* ---------- 药丸标签 ----------
+ * 注意：色调类必须写成 .oa-pill.oa-pill--xxx 复合选择器。
+ * ui.scss 后加载且同特异性的 .oa-pill 会重设 background（玻璃渐变），
+ * 单类 .oa-pill--xxx 会被它覆盖，导致状态色底丢失。
+ */
 .oa-pill {
   display: inline-flex;
   align-items: center;
@@ -87,45 +94,45 @@
   line-height: 1;
   white-space: nowrap;
 
-  &--blue {
-    background: #ecf5ff;
-    color: #409eff;
+  &.oa-pill--blue {
+    background: var(--blue-soft);
+    color: var(--blue);
   }
 
-  &--green {
-    background: #f0f9eb;
-    color: #67c23a;
+  &.oa-pill--green {
+    background: var(--lime-soft);
+    color: var(--lime-text);
   }
 
-  &--orange {
-    background: #fdf6ec;
-    color: #e6a23c;
+  &.oa-pill--orange {
+    background: var(--warn-soft);
+    color: var(--warn-text);
   }
 
-  &--red {
-    background: #fef0f0;
-    color: #f56c6c;
+  &.oa-pill--red {
+    background: var(--red-soft);
+    color: var(--red-text);
   }
 
-  &--gray {
-    background: #f4f4f5;
-    color: #909399;
+  &.oa-pill--gray {
+    background: var(--neutral-soft);
+    color: var(--neutral-text);
   }
 }
 
 /* ---------- 文本 ---------- */
 .oa-muted {
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 12px;
 }
 
 .oa-strong {
   font-weight: 600;
-  color: #303133;
+  color: var(--ink);
 }
 
 .oa-link {
-  color: #409eff;
+  color: var(--blue);
   cursor: pointer;
 
   &:hover {
@@ -137,7 +144,7 @@
   padding: 32px 0;
   text-align: center;
   font-size: 13px;
-  color: #909399;
+  color: var(--ink-soft);
 }
 
 /* ---------- 查询条 / 工具条 ---------- */
@@ -147,7 +154,7 @@
   align-items: flex-end;
   gap: 12px 18px;
   padding-bottom: 14px;
-  border-bottom: 1px solid #f0f2f5;
+  border-bottom: 1px solid var(--line);
   margin-bottom: 14px;
 }
 
@@ -176,7 +183,7 @@
 
   th,
   td {
-    border: 1px solid #ebeef5;
+    border: 1px solid var(--line);
     padding: 9px 12px;
     text-align: left;
     vertical-align: top;
@@ -184,14 +191,14 @@
 
   th {
     width: 110px;
-    background: #fafafa;
+    background: var(--hover-bg);
     font-weight: 500;
-    color: #606266;
+    color: var(--ink-muted);
     white-space: nowrap;
   }
 
   td {
-    color: #303133;
+    color: var(--ink);
   }
 }
 
@@ -201,7 +208,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 2px;
-  border-bottom: 1px solid #f5f7fa;
+  border-bottom: 1px solid var(--line);
 
   &:last-child {
     border-bottom: none;
@@ -212,7 +219,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #409eff;
+  background: var(--blue);
   flex: 0 0 8px;
 }
 
@@ -223,7 +230,7 @@
 
 .oa-list-row__title {
   font-size: 13px;
-  color: #303133;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -232,5 +239,5 @@
 .oa-list-row__sub {
   margin-top: 4px;
   font-size: 12px;
-  color: #909399;
+  color: var(--ink-soft);
 }

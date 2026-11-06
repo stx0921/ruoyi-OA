@@ -121,6 +121,6 @@ function copyByExecCommand(text) {
 }
 
 .oa-sensitive__copy:hover {
-  color: #409eff;
+  color: #236de9;
 }
 </style>

@@ -21,7 +21,11 @@ export { oaDate, oaDateTime, oaTimestamp } from '@/utils/oa'
 /* 1. 字典映射                                                                */
 /* -------------------------------------------------------------------------- */
 
-/** 成员状态（oa_member_status）：0 在籍 / 1 已退会 / 2 已毕业 */
+/**
+ * 成员状态（oa_member_status）：0 在籍 / 1 已退会 / 2 已毕业
+ * 状态标签的色值统一由 utils/status.js + .oa-pill--* 令牌提供（暗色自适应），
+ * 这里只保留语义 tone，不再出现 hex。
+ */
 export const MEMBER_STATUS_MAP = {
   0: { label: '在籍', tone: 'green' },
   1: { label: '已退会', tone: 'red' },

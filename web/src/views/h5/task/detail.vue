@@ -998,7 +998,7 @@ function onUnread(value) {
     width: 18px;
     height: 18px;
     margin: 0;
-    accent-color: #409eff;
+    accent-color: #236de9;
   }
 
   &__main {
@@ -1063,8 +1063,8 @@ function onUnread(value) {
     width: 30px;
     height: 30px;
     border-radius: 6px;
-    background: #ecf5ff;
-    color: #409eff;
+    background: #edf3fe;
+    color: #236de9;
     font-size: 11.5px;
     font-weight: 600;
 
@@ -1123,7 +1123,7 @@ function onUnread(value) {
     i {
       display: block;
       height: 100%;
-      background: #409eff;
+      background: #236de9;
       transition: width 0.2s;
     }
   }
@@ -1156,11 +1156,11 @@ function onUnread(value) {
   }
 
   &:active {
-    border-color: #409eff;
-    color: #409eff;
+    border-color: #236de9;
+    color: #236de9;
 
     svg {
-      color: #409eff;
+      color: #236de9;
     }
   }
 }
@@ -1206,7 +1206,7 @@ function onUnread(value) {
     height: 9px;
     margin-top: 4px;
     border-radius: 50%;
-    background: #409eff;
+    background: #236de9;
 
     &.is-green {
       background: #67c23a;

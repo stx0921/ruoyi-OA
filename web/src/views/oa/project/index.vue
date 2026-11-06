@@ -19,7 +19,7 @@
         </el-form-item>
         <el-form-item label="状态">
           <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-            <el-option v-for="item in PROJECT_STATUS_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -223,15 +223,20 @@ import { ElMessageBox } from 'element-plus'
 import OaTaskStatusTag from '@/components/oa/OaTaskStatusTag.vue'
 import ProjectFormDrawer from './ProjectFormDrawer.vue'
 import { deleteProject, finishProject, getProject, listProject } from '@/api/oa/project'
-import { avatarColor, formatDate, nameInitial } from '@/utils/oaTask'
+import { avatarColor, formatDate, nameInitial, resolveOptions } from '@/utils/oaTask'
+import { useDict } from '@/utils/dict'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
 
+/** 兜底选项（字典 oa_project_status 优先） */
 const PROJECT_STATUS_OPTIONS = [
   { value: '0', label: '进行中' },
   { value: '1', label: '已结束' }
 ]
+
+const { oa_project_status } = useDict('oa_project_status')
+const statusOptions = computed(() => resolveOptions(oa_project_status.value, PROJECT_STATUS_OPTIONS))
 
 const loading = ref(false)
 const error = ref(false)
@@ -485,8 +490,8 @@ function handleFormDeleted() {
     }
 
     &.is-highlight {
-      border-color: #409eff;
-      box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.25);
+      border-color: #236de9;
+      box-shadow: 0 0 0 3px rgba(35, 109, 233, 0.25);
     }
   }
 
@@ -541,7 +546,7 @@ function handleFormDeleted() {
       display: block;
       height: 100%;
       border-radius: 3px;
-      background: linear-gradient(90deg, #79bbff, #409eff);
+      background: linear-gradient(90deg, #5b8ff0, #236de9);
     }
   }
 
@@ -630,7 +635,7 @@ function handleFormDeleted() {
       width: 3px;
       height: 13px;
       border-radius: 2px;
-      background: #409eff;
+      background: #236de9;
     }
 
     small {
@@ -700,8 +705,8 @@ function handleFormDeleted() {
     .owner-tag {
       padding: 0 4px;
       border-radius: 2px;
-      background: #ecf5ff;
-      color: #337ecc;
+      background: #edf3fe;
+      color: #1d61d5;
       font-size: 11px;
     }
   }

@@ -110,9 +110,9 @@ function onDrop() {
   transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
 
   &.is-drag-over {
-    background: #ecf5ff;
-    border: 2px dashed #409eff;
-    box-shadow: inset 0 0 0 2px rgba(64, 158, 255, 0.18);
+    background: #edf3fe;
+    border: 2px dashed #236de9;
+    box-shadow: inset 0 0 0 2px rgba(35, 109, 233, 0.18);
     padding: 9px;
   }
 

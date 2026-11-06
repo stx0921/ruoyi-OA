@@ -501,7 +501,7 @@ function saveState() {
 .home-head {
   flex: 0 0 auto;
   padding: 10px 16px 10px;
-  background: linear-gradient(135deg, #409eff, #79bbff 70%, #9fcaff);
+  background: linear-gradient(135deg, #236de9, #5b8ff0 70%, #8fb3f5);
   color: #fff;
 }
 
@@ -609,11 +609,11 @@ function saveState() {
   }
 
   &.is-active {
-    color: #409eff;
+    color: #236de9;
     font-weight: 600;
 
     &::after {
-      background: #409eff;
+      background: #236de9;
     }
   }
 }
@@ -740,7 +740,7 @@ function saveState() {
 
     &.is-submit {
       border-color: transparent;
-      background: linear-gradient(90deg, #409eff, #66b1ff);
+      background: linear-gradient(90deg, #236de9, #5b8ff0);
       color: #fff;
     }
 
@@ -793,7 +793,7 @@ function saveState() {
   cursor: pointer;
 
   &.is-active {
-    color: #409eff;
+    color: #236de9;
   }
 }
 </style>

@@ -83,7 +83,7 @@
             <el-form-item label="优先级" prop="priority">
               <el-select v-model="form.priority" style="width: 100%">
                 <el-option
-                  v-for="item in PRIORITY_OPTIONS"
+                  v-for="item in priorityOptions"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -220,12 +220,14 @@
 import { addTask, addSelfTask, updateTask, uploadTaskFile } from '@/api/oa/task'
 import { listProject } from '@/api/oa/project'
 import useUserStore from '@/store/modules/user'
-import { PRIORITY_OPTIONS, toDate, toDateTimeString, searchMemberOptions, memberBriefOptions, TASK_TAG_FALLBACK } from '@/utils/oaTask'
+import { PRIORITY_OPTIONS, toDate, toDateTimeString, searchMemberOptions, memberBriefOptions, TASK_TAG_FALLBACK, resolveOptions } from '@/utils/oaTask'
 
 const { proxy } = getCurrentInstance()
 const emit = defineEmits(['success'])
 const userStore = useUserStore()
-const { oa_task_tag } = useDict('oa_task_tag')
+const { oa_task_tag, oa_task_priority } = useDict('oa_task_tag', 'oa_task_priority')
+
+const priorityOptions = computed(() => resolveOptions(oa_task_priority.value, PRIORITY_OPTIONS))
 
 const visible = ref(false)
 const saving = ref(false)
@@ -346,6 +348,11 @@ async function open(options = {}) {
 }
 
 async function loadProjects() {
+  // 无项目权限时不请求，避免 403
+  if (!proxy.$auth.hasPermi('oa:project:list')) {
+    projectOptions.value = []
+    return
+  }
   try {
     const response = await listProject({ pageNum: 1, pageSize: 200, status: '0' })
     projectOptions.value = (response.rows || []).map(project => ({

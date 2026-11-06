@@ -14,7 +14,7 @@
       <div class="oa-timeline__body">
         <div class="oa-timeline__title">
           <span>{{ item.taskName || '审批节点' }}</span>
-          <span class="oa-pill" :class="item.finished ? 'oa-pill--blue' : 'oa-pill--orange'">
+          <span class="oa-pill" :class="item.finished ? 'oa-pill--green' : 'oa-pill--orange'">
             {{ item.finished ? '已完成' : '处理中' }}
           </span>
         </div>
@@ -86,7 +86,7 @@ const ordered = computed(() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #c0c4cc;
+  background: var(--ink-faint);
   flex: 0 0 10px;
 }
 
@@ -95,16 +95,16 @@ const ordered = computed(() => {
   width: 2px;
   min-height: 26px;
   margin: 4px 0 0;
-  background: #ebeef5;
+  background: var(--line-strong);
 }
 
 .oa-timeline__item.is-done .oa-timeline__dot {
-  background: #67c23a;
+  background: var(--lime);
 }
 
 .oa-timeline__item.is-current .oa-timeline__dot {
-  background: #e6a23c;
-  box-shadow: 0 0 0 4px rgba(230, 162, 60, 0.15);
+  background: var(--warn);
+  box-shadow: 0 0 0 4px var(--warn-soft);
 }
 
 .oa-timeline__body {
@@ -118,13 +118,13 @@ const ordered = computed(() => {
   align-items: center;
   gap: 8px;
   font-weight: 600;
-  color: #303133;
+  color: var(--ink);
 }
 
 .oa-timeline__meta {
   margin-top: 4px;
   font-size: 12px;
-  color: #909399;
+  color: var(--ink-soft);
   line-height: 1.7;
 }
 
@@ -135,8 +135,8 @@ const ordered = computed(() => {
   margin-top: 8px;
   padding: 8px 10px;
   border-radius: 4px;
-  background: #f8f9fb;
-  color: #606266;
+  background: var(--hover-bg);
+  color: var(--ink-muted);
   line-height: 1.6;
   word-break: break-all;
 }

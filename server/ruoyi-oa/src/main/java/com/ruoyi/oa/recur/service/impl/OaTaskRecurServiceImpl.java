@@ -32,6 +32,7 @@ import com.ruoyi.oa.recur.support.RecurDateCalculator;
 import com.ruoyi.oa.recur.vo.RecurListVO;
 import com.ruoyi.oa.recur.vo.RecurSaveResultVO;
 import com.ruoyi.oa.support.OaCurrentUser;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 import com.ruoyi.oa.task.domain.OaTask;
 import com.ruoyi.oa.task.mapper.OaTaskLogMapper;
 import com.ruoyi.oa.task.mapper.OaTaskMapper;
@@ -85,6 +86,9 @@ public class OaTaskRecurServiceImpl implements IOaTaskRecurService
     private OaCurrentUser currentUser;
 
     @Autowired
+    private OaDictLabelProvider dictLabels;
+
+    @Autowired
     private IOaNotifyService notifyService;
 
     @Override
@@ -94,10 +98,12 @@ public class OaTaskRecurServiceImpl implements IOaTaskRecurService
         RecurQuery condition = query == null ? new RecurQuery() : query;
         List<OaTaskRecur> list = recurMapper.selectRecurList(condition);
         List<RecurListVO> result = new ArrayList<RecurListVO>(list.size());
+        Map<String, String> statusLabels = dictLabels.labels("oa_recur_status", STATUS_LABELS);
+        Map<String, String> priorityLabels = dictLabels.labels("oa_task_priority", PRIORITY_LABELS);
         for (OaTaskRecur recur : list)
         {
             RecurListVO vo = new RecurListVO();
-            fillListVO(vo, recur);
+            fillListVO(vo, recur, statusLabels, priorityLabels);
             result.add(vo);
         }
         // 保留 PageHelper 分页信息（转换成 VO 后 getDataTable 仍能取到 total）
@@ -469,7 +475,7 @@ public class OaTaskRecurServiceImpl implements IOaTaskRecurService
         {
             return "1";
         }
-        if (!PRIORITY_LABELS.containsKey(priority))
+        if (!dictLabels.labels("oa_task_priority", PRIORITY_LABELS).containsKey(priority))
         {
             throw new ServiceException("请选择优先级", 400);
         }
@@ -599,7 +605,8 @@ public class OaTaskRecurServiceImpl implements IOaTaskRecurService
     /**
      * 列表字段装配
      */
-    private void fillListVO(RecurListVO vo, OaTaskRecur recur)
+    private void fillListVO(RecurListVO vo, OaTaskRecur recur, Map<String, String> statusLabels,
+            Map<String, String> priorityLabels)
     {
         vo.setRecurId(recur.getRecurId());
         vo.setTitle(recur.getTitle());
@@ -612,11 +619,11 @@ public class OaTaskRecurServiceImpl implements IOaTaskRecurService
         vo.setAssigneeId(recur.getAssigneeId());
         vo.setAssigneeName(recur.getAssigneeName());
         vo.setPriority(recur.getPriority());
-        vo.setPriorityLabel(PRIORITY_LABELS.get(recur.getPriority()));
+        vo.setPriorityLabel(priorityLabels == null ? "" : priorityLabels.getOrDefault(recur.getPriority(), ""));
         vo.setTags(parseTags(recur.getTags()));
         vo.setStartDate(recur.getStartDate());
         vo.setStatus(recur.getStatus());
-        vo.setStatusLabel(STATUS_LABELS.get(recur.getStatus()));
+        vo.setStatusLabel(statusLabels == null ? "" : statusLabels.getOrDefault(recur.getStatus(), ""));
         vo.setNextDate(recur.getNextDate());
         vo.setCreatorId(recur.getCreatorId());
         vo.setCreatorName(recur.getCreatorName());

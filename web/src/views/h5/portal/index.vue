@@ -668,7 +668,7 @@ function gradeLabel(grade) {
     padding: 0;
     border: none;
     background: none;
-    color: #409eff;
+    color: #236de9;
     font-size: 12.5px;
     font-weight: 400;
     cursor: pointer;

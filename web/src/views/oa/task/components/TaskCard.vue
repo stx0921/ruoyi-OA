@@ -404,7 +404,7 @@ function handleMoreCommand(command) {
 
     &:hover {
       background: #f5f7fa;
-      color: #409eff;
+      color: #236de9;
     }
   }
 }
@@ -413,10 +413,10 @@ function handleMoreCommand(command) {
 .proj-tag {
   display: inline-block;
   padding: 1px 6px;
-  border: 1px solid #d9ecff;
+  border: 1px solid #dbe7fc;
   border-radius: 3px;
-  background: #ecf5ff;
-  color: #337ecc;
+  background: #edf3fe;
+  color: #1d61d5;
   font-size: 11px;
   white-space: nowrap;
 }

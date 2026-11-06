@@ -23,7 +23,7 @@ import com.ruoyi.oa.apply.dto.WithdrawDTO;
 import com.ruoyi.oa.apply.service.IOaFileService;
 import com.ruoyi.oa.apply.service.IOaMemberApplyService;
 import com.ruoyi.oa.apply.support.OaCaptchaService;
-import com.ruoyi.oa.member.mapper.OaDeptMapper;
+import com.ruoyi.oa.member.service.IOaDeptService;
 
 /**
  * H5 学生端公开接口 Controller（类级 {@code @Anonymous} 免登录）
@@ -46,7 +46,7 @@ public class OaApplyPublicController extends BaseController
     private IOaFileService fileService;
 
     @Autowired
-    private OaDeptMapper oaDeptMapper;
+    private IOaDeptService deptService;
 
     /**
      * P1 获取图形验证码（5 分钟有效）
@@ -74,7 +74,7 @@ public class OaApplyPublicController extends BaseController
     @GetMapping("/depts")
     public AjaxResult depts()
     {
-        return success(oaDeptMapper.selectOrgDeptOptions());
+        return success(deptService.selectAllDeptOptions());
     }
 
     /**

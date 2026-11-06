@@ -4,7 +4,7 @@
       <el-icon :size="20"><component :is="icon" /></el-icon>
     </div>
     <div class="oa-stat__body">
-      <div class="oa-stat__num">
+      <div class="oa-stat__num tnum">
         {{ displayValue }}<small v-if="suffix">{{ suffix }}</small>
       </div>
       <div class="oa-stat__label">{{ label }}</div>
@@ -39,9 +39,9 @@ const displayValue = computed(() => {
   align-items: center;
   gap: 14px;
   padding: 18px 20px;
-  background: #fff;
+  background: var(--surface);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.06);
+  box-shadow: var(--e1);
 }
 
 .oa-stat__ico {
@@ -55,23 +55,23 @@ const displayValue = computed(() => {
 }
 
 .oa-stat__ico.is-blue {
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--blue-soft);
+  color: var(--blue);
 }
 
 .oa-stat__ico.is-green {
-  background: #f0f9eb;
-  color: #67c23a;
+  background: var(--lime-soft);
+  color: var(--lime-text);
 }
 
 .oa-stat__ico.is-orange {
-  background: #fdf6ec;
-  color: #e6a23c;
+  background: var(--warn-soft);
+  color: var(--warn-text);
 }
 
 .oa-stat__ico.is-red {
-  background: #fef0f0;
-  color: #f56c6c;
+  background: var(--red-soft);
+  color: var(--red-text);
 }
 
 .oa-stat__body {
@@ -82,20 +82,20 @@ const displayValue = computed(() => {
   font-size: 24px;
   font-weight: 600;
   line-height: 1.2;
-  color: #303133;
+  color: var(--ink);
 }
 
 .oa-stat__num small {
   margin-left: 3px;
   font-size: 13px;
   font-weight: 400;
-  color: #909399;
+  color: var(--ink-muted);
 }
 
 .oa-stat__label {
   margin-top: 4px;
   font-size: 12px;
-  color: #909399;
+  color: var(--ink-muted);
   white-space: nowrap;
 }
 </style>

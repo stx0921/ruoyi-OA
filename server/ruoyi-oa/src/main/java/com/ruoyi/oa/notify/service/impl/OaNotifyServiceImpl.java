@@ -15,6 +15,7 @@ import com.ruoyi.oa.notify.dto.NotifyQuery;
 import com.ruoyi.oa.notify.mapper.OaNotifyMapper;
 import com.ruoyi.oa.notify.service.IOaNotifyService;
 import com.ruoyi.oa.notify.vo.NotifyVO;
+import com.ruoyi.oa.support.OaDictLabelProvider;
 
 /**
  * 站内信 Service 实现
@@ -43,6 +44,9 @@ public class OaNotifyServiceImpl implements IOaNotifyService
         TYPE_LABELS.put("4", "验收结果");
         TYPE_LABELS.put("5", "系统通知");
     }
+
+    @Autowired
+    private OaDictLabelProvider dictLabels;
 
     @Autowired
     private OaNotifyMapper notifyMapper;
@@ -148,12 +152,13 @@ public class OaNotifyServiceImpl implements IOaNotifyService
             return result;
         }
         List<OaNotify> list = notifyMapper.selectNotifyList(query);
+        Map<String, String> typeLabels = dictLabels.labels("oa_notify_type", TYPE_LABELS);
         for (OaNotify notify : list)
         {
             NotifyVO vo = new NotifyVO();
             vo.setNotifyId(notify.getNotifyId());
             vo.setType(notify.getType());
-            vo.setTypeLabel(TYPE_LABELS.get(notify.getType()));
+            vo.setTypeLabel(typeLabels == null ? "" : typeLabels.getOrDefault(notify.getType(), ""));
             vo.setTitle(notify.getTitle());
             vo.setContent(notify.getContent());
             vo.setBizType(notify.getBizType());

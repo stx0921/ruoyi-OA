@@ -25,8 +25,8 @@
 
       <!-- 触发器 -->
       <template #reference>
-        <div class="right-menu-item hover-effect notice-trigger" @mouseenter="onNoticeEnter" @mouseleave="onNoticeLeave">
-          <svg-icon icon-class="bell" />
+        <div class="right-menu-item hover-effect notice-trigger" title="通知公告" @mouseenter="onNoticeEnter" @mouseleave="onNoticeLeave">
+          <svg-icon icon-class="message" />
           <span v-if="unreadCount > 0" class="notice-badge">{{ unreadCount }}</span>
         </div>
       </template>

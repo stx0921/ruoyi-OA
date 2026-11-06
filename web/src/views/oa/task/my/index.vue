@@ -385,8 +385,8 @@ onMounted(() => {
     }
 
     &.is-active {
-      border-color: #409eff;
-      box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
+      border-color: #236de9;
+      box-shadow: 0 0 0 2px rgba(35, 109, 233, 0.12);
     }
   }
 
@@ -400,8 +400,8 @@ onMounted(() => {
     flex: 0 0 48px;
 
     &.is-blue {
-      background: #ecf5ff;
-      color: #409eff;
+      background: #edf3fe;
+      color: #236de9;
     }
 
     &.is-green {
@@ -455,12 +455,12 @@ onMounted(() => {
     user-select: none;
 
     &:hover {
-      color: #409eff;
+      color: #236de9;
     }
 
     &.active {
-      color: #409eff;
-      border-bottom-color: #409eff;
+      color: #236de9;
+      border-bottom-color: #236de9;
       font-weight: 500;
     }
 
@@ -474,8 +474,8 @@ onMounted(() => {
     }
 
     &.active .num {
-      background: #ecf5ff;
-      color: #409eff;
+      background: #edf3fe;
+      color: #236de9;
     }
   }
 

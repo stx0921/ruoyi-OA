@@ -16,21 +16,31 @@
         <result property="deptName" column="dept_name"/>
     </resultMap>
 
-    <select id="selectOrgRootDeptId" resultType="java.lang.Long">
+    <select id="selectRootDeptIdByName" resultType="java.lang.Long">
         select dept_id from sys_dept
-        where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
+        where parent_id = 0 and dept_name = #{deptName} and del_flag = '0'
         order by dept_id
+        limit 1
+    </select>
+
+    <select id="selectRootDeptIdWithActiveChild" resultType="java.lang.Long">
+        select d.dept_id
+        from sys_dept d
+        where d.parent_id = 0
+          and d.del_flag = '0'
+          and d.status = '0'
+          and exists (select 1 from sys_dept c where c.parent_id = d.dept_id and c.del_flag = '0')
+        order by d.dept_id desc
         limit 1
     </select>
 
     <select id="selectOrgDeptList" resultMap="DeptVoResult">
         select d.dept_id, d.dept_name, d.parent_id, d.order_num, d.status,
-               (select count(*) from oa_member m where m.dept_id = d.dept_id and m.status = '0' and m.del_flag = '0') as member_count
+               (select count(*) from oa_member m
+                 where m.dept_id = d.dept_id and m.status = '0' and m.del_flag = '0') as member_count
         from sys_dept d
         where d.del_flag = '0'
-          and d.parent_id = (select dept_id from sys_dept
-                             where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
-                             order by dept_id limit 1)
+          and d.parent_id = #{rootId}
         order by d.order_num, d.dept_id
     </select>
 
@@ -38,10 +48,12 @@
         select d.dept_id, d.dept_name
         from sys_dept d
         where d.del_flag = '0' and d.status = '0'
-          and d.parent_id = (select dept_id from sys_dept
-                             where parent_id = 0 and dept_name = '校学生会' and del_flag = '0'
-                             order by dept_id limit 1)
+          and d.parent_id = #{rootId}
         order by d.order_num, d.dept_id
+    </select>
+
+    <select id="countActiveMemberByDeptId" resultType="java.lang.Integer">
+        select count(*) from oa_member where dept_id = #{deptId} and del_flag = '0'
     </select>
 
     <update id="updateDeptLeader">

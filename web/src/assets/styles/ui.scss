@@ -1,0 +1,934 @@
+/**
+ * 珍珠玻璃（Pearl Glass）主题适配层
+ *
+ * 参考开源项目 wbr664393425-lgtm/scaffold-master 的 DESIGN.md 与 tokens.css：
+ * - 灰白场景面 + 近实色阅读面 + 克制的玻璃浮层 + 细边线
+ * - 蓝 = 选择/主操作，青柠 = 正常状态，红 = 警示
+ * - 8/12/16/20/24 五级圆角；e1/e2/e3 三级材质阴影
+ *
+ * 说明：本文件在 main.js 最后引入，覆盖 Element Plus / 若依默认样式；
+ * 只引用令牌，不在页面里手写颜色。后续新页面直接复用令牌与 .m-* 材质类。
+ */
+
+/* ==========================================================================
+   1. 令牌
+   ========================================================================== */
+:root {
+  font-family: "SF Pro Display", "SF Pro Text", "PingFang SC", -apple-system, BlinkMacSystemFont, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+
+  /* 字色五档 */
+  --ink: #101418;
+  --ink-muted: #596368;
+  --ink-soft: #7e888c;
+  --ink-faint: #99a2a5;
+  --leaf-text: #58a021;
+
+  /* 语义色 */
+  --blue: #236de9;
+  --blue-hover: #1d61d5;
+  --blue-soft: rgba(35, 109, 233, 0.1);
+  --lime: #82dd2d;
+  --lime-soft: rgba(130, 221, 45, 0.14);
+  --red: #ff5a50;
+  --red-text: #e0443b;
+  --red-soft: rgba(255, 90, 80, 0.11);
+  --focus: rgba(35, 109, 233, 0.8);
+
+  /* 状态语义色阶：补齐 warn / neutral 两档文字色与底色，.oa-pill--* 与 utils/status.js 共用 */
+  --warn: #e6a23c;
+  --warn-text: #b7791f;
+  --warn-soft: rgba(230, 162, 60, 0.12);
+  --neutral: #909399;
+  --neutral-text: #7e888c;
+  --neutral-soft: rgba(144, 147, 153, 0.12);
+  --lime-text: #58a021;
+
+  /* 头像底色调色板（按 userId 取模，仅影响观感；utils/oaTask.js 引用，暗色共用） */
+  --avatar-1: #236de9;
+  --avatar-2: #67c23a;
+  --avatar-3: #e6a23c;
+  --avatar-4: #f56c6c;
+  --avatar-5: #8e9bff;
+  --avatar-6: #36cfc9;
+  --avatar-7: #b37feb;
+
+  /* 圆角 */
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+
+  /* 描边 */
+  --shade: 46, 58, 62;
+  --line: rgba(var(--shade), 0.085);
+  --line-strong: rgba(var(--shade), 0.11);
+  --glass-line: rgba(255, 255, 255, 0.88);
+  --glass-line-soft: rgba(255, 255, 255, 0.7);
+
+  /* 材质阴影 */
+  --e1: 0 1px 2px rgba(var(--shade), 0.05), 0 5px 14px rgba(var(--shade), 0.04);
+  --e2: 0 1px 3px rgba(var(--shade), 0.06), 0 12px 30px rgba(var(--shade), 0.055);
+  --e3: 0 2px 6px rgba(var(--shade), 0.07), 0 22px 50px rgba(var(--shade), 0.08);
+  --e-accent: 0 1px 2px rgba(20, 66, 148, 0.28), 0 8px 18px rgba(35, 109, 233, 0.24);
+  --e-accent-hover: 0 1px 2px rgba(20, 66, 148, 0.32), 0 12px 24px rgba(35, 109, 233, 0.3);
+  --e-danger: 0 1px 2px rgba(150, 40, 34, 0.26), 0 8px 18px rgba(255, 90, 80, 0.24);
+  --edge: inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  --edge-strong: inset 0 1px 0 rgba(255, 255, 255, 0.98);
+
+  /* 场景面 / 四种玻璃 */
+  --stage: #dfe3e2;
+  --frame: #17191d;
+  --canvas: #f6f8f7;
+  --rail-bg: rgba(250, 251, 250, 0.92);
+  --pill-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.93), rgba(246, 251, 249, 0.62));
+  --pill-inset: inset 0 -1px 0 rgba(105, 122, 128, 0.08);
+  --float-bg: rgba(246, 248, 247, 0.86);
+  --float-inset: inset 0 0 0 1px rgba(120, 132, 135, 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --surface: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(249, 252, 251, 0.93));
+  --surface-solid: #fbfcfc;
+  --groove-bg: rgba(225, 231, 229, 0.5);
+  --groove-inset: inset 0 1px 0 rgba(255, 255, 255, 0.46);
+  --input-bg: rgba(255, 255, 255, 0.78);
+  --hover-bg: rgba(var(--shade), 0.045);
+  --press-bg: rgba(var(--shade), 0.075);
+  --overlay: rgba(16, 20, 24, 0.26);
+  --dark-surface: #131619;
+
+  /* 分类色：只区分类别，不表示状态 */
+  --cat-1-bg: #f6e7c4; --cat-1-ink: #7a5a16;
+  --cat-2-bg: #d7e7fb; --cat-2-ink: #275a96;
+  --cat-3-bg: #e4dcf7; --cat-3-ink: #5b4597;
+  --cat-4-bg: #f7dce1; --cat-4-ink: #94384c;
+  --cat-5-bg: #d8f0dc; --cat-5-ink: #2d7140;
+
+  /* 环境光 */
+  --ambient-a: rgba(130, 221, 45, 0.07);
+  --ambient-b: rgba(35, 109, 233, 0.055);
+
+  /* 等宽数字与仪器化排版 */
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --fs-display-xl: 56px;
+  --fs-display-l: 40px;
+  --fs-display-m: 28px;
+  --track-eyebrow: 0.14em;
+
+  /* 深色铭牌 */
+  --plate-bg: rgba(21, 24, 26, 0.9);
+  --plate-line: rgba(255, 255, 255, 0.1);
+  --plate-ink: #f2f5f4;
+  --plate-soft: rgba(255, 255, 255, 0.56);
+
+  /* 布局尺寸（若依外壳沿用 200/50，令牌供新页面参考） */
+  --rail-w: 232px;
+  --topbar-h: 64px;
+  --control-h: 36px;
+  --control-h-sm: 30px;
+  --row-h: 48px;
+  --cell-px: 16px;
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Element Plus 变量映射：让组件库直接继承珍珠玻璃语义 */
+  --el-color-primary: var(--blue);
+  --el-color-primary-light-3: #5b8ff0;
+  --el-color-primary-light-5: #8fb3f5;
+  --el-color-primary-light-7: #c2d6fa;
+  --el-color-primary-light-8: #dbe7fc;
+  --el-color-primary-light-9: #edf3fe;
+  --el-color-primary-dark-2: var(--blue-hover);
+  --el-color-success: #58a021;
+  --el-color-danger: var(--red-text);
+  --el-color-error: var(--red-text);
+  --el-color-warning: #b7791f;
+  --el-border-radius-base: var(--r-sm);
+  --el-border-radius-small: var(--r-xs);
+  --el-border-radius-round: 999px;
+  --el-border-color: var(--line-strong);
+  --el-border-color-light: var(--line);
+  --el-fill-color-light: #f2f5f4;
+  --el-fill-color-lighter: #f7f9f8;
+  --el-bg-color: var(--surface-solid);
+  --el-bg-color-overlay: var(--surface-solid);
+  --el-box-shadow-light: var(--e2);
+
+  /* 若依布局变量 */
+  --navbar-bg: var(--rail-bg);
+  --tags-bg: var(--rail-bg);
+  --tags-item-border: var(--line-strong);
+}
+
+html.dark {
+  --ink: #eef2f1;
+  --ink-muted: #b0babd;
+  --ink-soft: #8d979a;
+  --ink-faint: #6c7679;
+  --leaf-text: #9be35a;
+
+  --blue: #4c8dff;
+  --blue-hover: #3d7ff2;
+  --blue-soft: rgba(76, 141, 255, 0.16);
+  --lime-soft: rgba(130, 221, 45, 0.16);
+  --red-text: #ff7a71;
+  --red-soft: rgba(255, 90, 80, 0.16);
+  --focus: rgba(76, 141, 255, 0.85);
+
+  --shade: 0, 0, 0;
+  --line: rgba(255, 255, 255, 0.07);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --glass-line: rgba(255, 255, 255, 0.1);
+  --glass-line-soft: rgba(255, 255, 255, 0.07);
+
+  --e1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 5px 14px rgba(0, 0, 0, 0.2);
+  --e2: 0 1px 3px rgba(0, 0, 0, 0.32), 0 12px 30px rgba(0, 0, 0, 0.28);
+  --e3: 0 2px 6px rgba(0, 0, 0, 0.36), 0 22px 50px rgba(0, 0, 0, 0.42);
+  --e-accent: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 18px rgba(76, 141, 255, 0.26);
+  --e-accent-hover: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 24px rgba(76, 141, 255, 0.34);
+  --e-danger: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 18px rgba(255, 90, 80, 0.26);
+  --edge: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --edge-strong: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+
+  --stage: #090b0c;
+  --frame: #000;
+  --canvas: #121517;
+  --rail-bg: rgba(22, 26, 28, 0.94);
+  --pill-bg: linear-gradient(145deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.05));
+  --pill-inset: inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  --float-bg: rgba(30, 34, 37, 0.9);
+  --float-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --surface: linear-gradient(145deg, rgba(29, 33, 36, 0.98), rgba(25, 29, 31, 0.96));
+  --surface-solid: #1b1f21;
+  --groove-bg: rgba(0, 0, 0, 0.22);
+  --input-bg: rgba(255, 255, 255, 0.04);
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --press-bg: rgba(255, 255, 255, 0.08);
+  --overlay: rgba(0, 0, 0, 0.5);
+
+  /* 状态语义色阶（暗色）：内联 :style 传的是令牌名，这里换值即可整体切换 */
+  --warn-text: #e0b15c;
+  --warn-soft: rgba(230, 162, 60, 0.18);
+  --neutral-text: #b0babd;
+  --neutral-soft: rgba(255, 255, 255, 0.07);
+  --lime-text: #9be35a;
+
+  /* Element Plus 语义色暗色版本：:root 里的浅色值直接沿用会过暗/过亮 */
+  --el-color-primary: var(--blue);
+  --el-color-primary-light-3: #3767ba;
+  --el-color-primary-light-5: #244278;
+  --el-color-primary-light-7: #1a3057;
+  --el-color-primary-light-8: #152747;
+  --el-color-primary-light-9: #0e1b30;
+  --el-color-primary-dark-2: #6fa4ff;
+  --el-color-success: #7fc24a;
+  --el-color-danger: #ff7a71;
+  --el-color-error: #ff7a71;
+  --el-color-warning: #e0b15c;
+
+  --el-fill-color-light: #1e2225;
+  --el-fill-color-lighter: #23282b;
+  --el-bg-color: var(--surface-solid);
+  --el-bg-color-overlay: #1e2225;
+}
+
+/* ==========================================================================
+   2. 基础排版与场景面
+   ========================================================================== */
+body {
+  min-width: 320px;
+  color: var(--ink);
+  background: var(--canvas);
+  font-family: "SF Pro Display", "SF Pro Text", "PingFang SC", -apple-system, BlinkMacSystemFont, "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--blue-soft);
+}
+
+/* 数字等宽，表格与读数不跳位 */
+.tnum,
+.el-table td,
+.el-descriptions__content,
+.el-pagination {
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.muted { color: var(--ink-muted); }
+.soft { color: var(--ink-soft); }
+.faint { color: var(--ink-faint); }
+.ellipsis { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* 分区标签：前置青柠光点 */
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+
+  &::before {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--lime);
+    box-shadow: 0 0 0 5px var(--lime-soft);
+    content: "";
+    flex: none;
+  }
+}
+
+/* ==========================================================================
+   3. 材质（与参考项目同名，方便新页面直接复用）
+   ========================================================================== */
+.m-rail {
+  border-right: 1px solid var(--line-strong);
+  background: var(--rail-bg);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+}
+
+.m-pill {
+  border: 1px solid var(--glass-line);
+  background: var(--pill-bg);
+  box-shadow: var(--e2), var(--edge-strong), var(--pill-inset);
+}
+
+.m-float {
+  border: 1px solid var(--glass-line);
+  background: var(--float-bg);
+  box-shadow: var(--e3), var(--float-inset);
+  backdrop-filter: blur(28px) saturate(1.08);
+  -webkit-backdrop-filter: blur(28px) saturate(1.08);
+}
+
+.m-surface {
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+}
+
+.m-groove {
+  border: 1px solid var(--glass-line-soft);
+  background: var(--groove-bg);
+  box-shadow: var(--groove-inset);
+}
+
+/* 深色规格铭牌（展示型读数；两种主题都是深色面） */
+.spec-plate {
+  border: 1px solid var(--plate-line);
+  border-radius: var(--r-md);
+  background: var(--plate-bg);
+  color: var(--plate-ink);
+  box-shadow: var(--e2);
+  backdrop-filter: blur(16px);
+
+  .plate-soft { color: var(--plate-soft); }
+  .plate-mono { font-family: var(--font-mono); letter-spacing: 0.04em; }
+}
+
+/* ==========================================================================
+   4. 外壳：画布 + 导航轨 + 顶栏
+   ========================================================================== */
+.app-wrapper {
+  background: var(--canvas);
+}
+
+.app-main {
+  background:
+    radial-gradient(55% 45% at 92% 0%, var(--ambient-a), transparent 70%),
+    radial-gradient(45% 40% at 20% 100%, var(--ambient-b), transparent 70%),
+    var(--canvas);
+}
+
+.app-container {
+  padding: 24px 28px 40px;
+}
+
+.app-container > .el-card + .el-card,
+.app-container > .el-row + .el-row {
+  margin-top: 16px;
+}
+
+/* 导航轨：浅色珍珠玻璃（覆盖若依深色主题的内联颜色） */
+body .sidebar-container.sidebar-theme-wrapper {
+  border-right: 1px solid var(--line-strong);
+  background: var(--rail-bg) !important;
+  box-shadow: none;
+
+  .el-menu {
+    background: transparent !important;
+    border-right: none;
+  }
+
+  .el-menu-item,
+  .el-sub-menu__title {
+    height: 40px !important;
+    line-height: 40px !important;
+    margin: 2px 10px;
+    border-radius: var(--r-sm);
+    color: var(--ink-muted) !important;
+    font-size: 13px;
+    font-weight: 550;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+    .svg-icon {
+      color: var(--ink-soft);
+    }
+  }
+
+  .el-menu-item:hover,
+  .el-sub-menu__title:hover {
+    color: var(--ink) !important;
+    background: var(--hover-bg) !important;
+  }
+
+  .el-menu-item.is-active {
+    color: var(--blue) !important;
+    background: var(--pill-bg) !important;
+    border: 1px solid var(--glass-line);
+    box-shadow: var(--e2), var(--edge-strong) !important;
+    font-weight: 650;
+
+    &::before {
+      display: none;
+    }
+
+    .svg-icon {
+      color: var(--blue);
+    }
+  }
+
+  .el-sub-menu .el-menu-item {
+    margin: 2px 10px 2px 16px;
+    border-radius: var(--r-xs);
+  }
+
+  /* 子菜单项：去掉若依深色主题遗留的深色块，统一为透明导航轨 */
+  .el-sub-menu .el-menu-item,
+  .nest-menu .el-sub-menu > .el-sub-menu__title {
+    border: 1px solid transparent;
+    background: transparent !important;
+    color: var(--ink-muted) !important;
+    box-shadow: none !important;
+
+    &:hover {
+      color: var(--ink) !important;
+      background: var(--hover-bg) !important;
+    }
+
+    &.is-active {
+      color: var(--blue) !important;
+      background: var(--pill-bg) !important;
+      border-color: var(--glass-line);
+      box-shadow: var(--e2), var(--edge-strong) !important;
+      font-weight: 650;
+    }
+  }
+}
+
+/* Logo 区域：与导航轨同面 */
+body .sidebar-container.sidebar-theme-wrapper .sidebar-logo-container {
+  background: transparent !important;
+  border-bottom: 1px solid var(--line);
+}
+
+body .sidebar-container.sidebar-theme-wrapper .sidebar-title {
+  color: var(--ink) !important;
+  font-weight: 720;
+  letter-spacing: -0.02em;
+}
+
+/* 顶栏：凝结玻璃 */
+body .app-wrapper .navbar {
+  border-bottom: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  box-shadow: 0 1px 0 var(--line-strong);
+}
+
+.right-menu-item.hover-effect:hover,
+.hamburger-container:hover {
+  border-radius: var(--r-xs);
+  background: var(--hover-bg) !important;
+}
+
+body .app-wrapper .tags-view-container {
+  border-bottom: 1px solid var(--line);
+  background: var(--rail-bg) !important;
+  backdrop-filter: blur(14px);
+}
+
+body .app-wrapper .tags-view-container .tags-view-item {
+  border-radius: var(--r-xs) !important;
+}
+
+/* ==========================================================================
+   5. 阅读面：卡片
+   ========================================================================== */
+.el-card {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+
+  &.is-hover-shadow:hover,
+  &.is-always-shadow:hover {
+    box-shadow: var(--edge), var(--e2);
+  }
+}
+
+.el-card__header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.el-card__body {
+  padding: 20px;
+}
+
+/* ==========================================================================
+   6. 表格：48px 行高 + 细边线
+   ========================================================================== */
+.el-table {
+  --el-table-border-color: var(--line);
+  --el-table-header-bg-color: rgba(246, 248, 247, 0.86);
+  --el-table-row-hover-bg-color: var(--hover-bg);
+  --el-table-text-color: var(--ink-muted);
+  --el-table-header-text-color: var(--ink-soft);
+  border-radius: var(--r-sm);
+
+  th.el-table__cell {
+    height: 44px;
+    background: rgba(246, 248, 247, 0.86) !important;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+  }
+
+  td.el-table__cell {
+    height: var(--row-h);
+    padding: 10px 0;
+  }
+
+  .el-table__inner-wrapper::before {
+    display: none;
+  }
+
+  .el-table__empty-text {
+    color: var(--ink-faint);
+  }
+
+  .el-table__fixed-right::before,
+  .el-table__fixed::before {
+    display: none;
+  }
+}
+
+html.dark .el-table {
+  --el-table-header-bg-color: #1e2225;
+  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.04);
+
+  th.el-table__cell {
+    background: #1e2225 !important;
+    color: var(--ink-soft);
+  }
+}
+
+/* ==========================================================================
+   7. 表单控件
+   ========================================================================== */
+.el-input__wrapper,
+.el-select__wrapper,
+.el-textarea__inner,
+.el-date-editor.el-input__wrapper,
+.el-range-editor.el-input__wrapper {
+  border-radius: var(--r-sm);
+  background: var(--input-bg);
+  box-shadow: 0 0 0 1px var(--line-strong) inset;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.el-input__wrapper,
+.el-select__wrapper {
+  min-height: 34px;
+}
+
+.el-input__wrapper:hover,
+.el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(var(--shade), 0.18) inset;
+}
+
+.el-input__wrapper.is-focus,
+.el-select__wrapper.is-focused,
+.el-textarea__inner:focus {
+  background: var(--surface-solid);
+  box-shadow: 0 0 0 1px var(--blue) inset, 0 0 0 3px var(--blue-soft);
+}
+
+.el-form-item__label {
+  color: var(--ink-muted);
+  font-weight: 550;
+}
+
+.el-form-item {
+  margin-bottom: 18px;
+}
+
+.el-checkbox__inner {
+  border-radius: 4px;
+}
+
+.el-radio-button__inner,
+.el-radio-button:first-child .el-radio-button__inner,
+.el-radio-button:last-child .el-radio-button__inner {
+  border-radius: var(--r-xs);
+}
+
+/* ==========================================================================
+   8. 按钮：蓝 = 主操作，红 = 危险，其余玻璃
+   ========================================================================== */
+.el-button {
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+/* 实心按钮统一显式给白字 + 主色兜底：
+ * ① 主题色被用户在「布局设置」改成浅色时，白字会糊在浅底上；
+ * ② 万一 --blue 令牌失效（背景变透明），白字就彻底看不见。
+ * 这两道保险保证任何情况下按钮文字都可读。 */
+.el-button--primary:not(.is-plain):not(.is-link):not(.is-text) {
+  border-color: transparent;
+  background: var(--blue, #236de9);
+  color: var(--el-color-white, #fff);
+  box-shadow: var(--e-accent);
+
+  &:hover,
+  &:focus {
+    background: var(--blue-hover, #1d61d5);
+    color: var(--el-color-white, #fff);
+    transform: translateY(-1px);
+    box-shadow: var(--e-accent-hover);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.el-button--danger:not(.is-plain):not(.is-link):not(.is-text) {
+  border-color: transparent;
+  background: var(--red-text);
+  color: var(--el-color-white, #fff);
+  box-shadow: var(--e-danger);
+
+  &:hover,
+  &:focus {
+    background: #f14c42;
+    color: var(--el-color-white, #fff);
+  }
+}
+
+/* 朴素主按钮：文字用主色，主色过亮时同样会糊在白底上；
+ * normalizePrimary 已在 utils/theme.js 兜底压暗，这里再显式声明一次字色来源 */
+.el-button--primary.is-plain {
+  color: var(--blue, #236de9);
+  border-color: var(--el-color-primary-light-5, #8fb3f5);
+  background: var(--blue-soft, rgba(35, 109, 233, 0.08));
+}
+
+/* 无类型按钮（玻璃底）。
+ * 关键坑：Element Plus 会给「所有」按钮都挂上 el-button--default，
+ * 如果这里不排除带类型的按钮，这条白色玻璃底会盖掉 primary / danger /
+ * success 的实心底色，最终呈现「白字压白底，按钮文字完全看不见」。
+ * 所以必须把所有类型修饰类都排除掉。 */
+.el-button--default:not(.el-button--primary):not(.el-button--danger):not(.el-button--success):not(.el-button--warning):not(.el-button--info):not(.is-plain):not(.is-link):not(.is-text) {
+  border: 1px solid var(--line-strong);
+  background: var(--input-bg);
+  box-shadow: var(--edge);
+}
+
+.el-button.is-link {
+  font-weight: 600;
+}
+
+.el-button.is-round {
+  border-radius: 999px;
+}
+
+/* ==========================================================================
+   9. 浮层：对话框 / 抽屉 / 消息框 / 下拉
+   ========================================================================== */
+.el-dialog {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e3);
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  margin: 0;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.el-dialog__title {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.el-dialog__body {
+  padding: 22px;
+  color: var(--ink-muted);
+}
+
+.el-dialog__footer {
+  padding: 14px 22px 18px;
+  border-top: 1px solid var(--line);
+}
+
+.el-drawer {
+  background: var(--surface);
+}
+
+.el-drawer__header {
+  margin-bottom: 0;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.el-drawer__body {
+  padding: 20px 22px;
+}
+
+.el-overlay {
+  background-color: var(--overlay);
+  backdrop-filter: blur(2px);
+}
+
+.el-message-box {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e3);
+  padding-bottom: 16px;
+}
+
+.el-message-box__header {
+  padding: 18px 20px 8px;
+}
+
+.el-message-box__content {
+  padding: 8px 20px 12px;
+}
+
+.el-message {
+  border-radius: var(--r-sm);
+  box-shadow: var(--e2);
+}
+
+.el-notification {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--float-bg);
+  box-shadow: var(--e3), var(--float-inset);
+  backdrop-filter: blur(18px);
+}
+
+.el-popper.is-light,
+.el-dropdown-menu {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--r-md);
+  background: var(--float-bg);
+  box-shadow: var(--e3), var(--float-inset);
+  backdrop-filter: blur(24px) saturate(1.08);
+}
+
+.el-dropdown-menu__item {
+  margin: 2px 6px;
+  padding: 7px 12px;
+  border-radius: var(--r-xs);
+}
+
+.el-select-dropdown__item {
+  margin: 2px 6px;
+  border-radius: var(--r-xs);
+}
+
+/* ==========================================================================
+   10. 标签 / 分页 / 标签页 / 描述
+   ========================================================================== */
+.el-tag {
+  border-radius: var(--r-xs);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.el-tag.el-tag--light {
+  border-color: var(--line);
+}
+
+.el-pagination {
+  justify-content: flex-end;
+  padding: 14px 0 2px;
+
+  .el-pager li,
+  .btn-prev,
+  .btn-next {
+    border-radius: var(--r-xs);
+  }
+}
+
+.el-tabs__item {
+  color: var(--ink-muted);
+  font-weight: 550;
+}
+
+.el-tabs__item.is-active {
+  color: var(--blue);
+  font-weight: 650;
+}
+
+.el-tabs__nav-wrap::after {
+  height: 1px;
+  background-color: var(--line);
+}
+
+.el-tabs__active-bar {
+  height: 3px;
+  border-radius: 3px;
+  background-color: var(--blue);
+}
+
+.el-descriptions__label {
+  color: var(--ink-soft);
+}
+
+.el-descriptions__content {
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   11. OA 业务页公共类：仪器化排版
+   ========================================================================== */
+.oa-page-title {
+  position: relative;
+  margin: 0 0 20px;
+  /* 给绝对定位的渐变条留出空间：它不再作为 flex 子项参与排版 */
+  padding-bottom: 12px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 720;
+  letter-spacing: -0.02em;
+
+  &::after {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 44px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--blue), var(--lime));
+    content: "";
+    pointer-events: none;
+  }
+}
+
+.oa-card {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  padding: 18px 20px;
+  box-shadow: var(--edge), var(--e1);
+  transition: box-shadow 0.25s ease;
+
+  &:hover {
+    box-shadow: var(--edge), var(--e2);
+  }
+}
+
+html.dark .oa-card {
+  background: var(--surface);
+}
+
+.oa-card-head {
+  color: var(--ink);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.oa-filter-bar {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  padding: 16px 18px 2px;
+  box-shadow: var(--edge), var(--e1);
+}
+
+html.dark .oa-filter-bar {
+  background: var(--surface);
+}
+
+.oa-toolbar {
+  border-radius: var(--r-lg);
+}
+
+.oa-pill {
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  background: var(--pill-bg);
+  box-shadow: var(--edge-strong), var(--pill-inset);
+  font-weight: 600;
+}
+
+.oa-muted {
+  color: var(--ink-soft);
+}
+
+/* ==========================================================================
+   12. 滚动条
+   ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--shade), 0.18) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: rgba(var(--shade), 0.18);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--shade), 0.3);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

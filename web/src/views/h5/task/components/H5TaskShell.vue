@@ -34,7 +34,7 @@ defineOptions({ name: 'H5TaskShell' })
 /* ==========================================================================
    任务端 H5 手机壳 + 公共原子类
    - 只放 ht- 前缀类名，参照 views/h5/layout/index.vue 的 390px 手机壳方案
-   - ≤430px 真机铺满整屏（100dvh），底部安全区用 env(safe-area-inset-bottom)
+   - 小屏 / 触屏 / 横屏手机优先铺满整屏（100dvh），底部安全区用 env(safe-area-inset-bottom)
    ========================================================================== */
 
 .ht-stage {
@@ -44,7 +44,7 @@ defineOptions({ name: 'H5TaskShell' })
   min-height: 100vh;
   min-height: 100dvh;
   padding: 26px 16px;
-  background: #e9edf2;
+  background: var(--stage);
 }
 
 .ht-shell {
@@ -53,12 +53,13 @@ defineOptions({ name: 'H5TaskShell' })
   flex-direction: column;
   width: 390px;
   height: 812px;
-  max-height: calc(100vh - 52px);
-  max-height: calc(100dvh - 52px);
+  /* 上下 padding 30px × 2 = 60px，与 .ht-stage 实际 padding 一致，避免矮屏多出 8px 整页滚动 */
+  max-height: calc(100vh - 60px);
+  max-height: calc(100dvh - 60px);
   overflow: hidden;
   border-radius: 40px;
-  background: #fff;
-  box-shadow: 0 18px 50px rgba(20, 30, 50, 0.28), 0 0 0 10px #1f2d3d;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgba(20, 30, 50, 0.28), 0 0 0 10px var(--frame);
 }
 
 /* ---------- 模拟状态栏 ---------- */
@@ -69,8 +70,8 @@ defineOptions({ name: 'H5TaskShell' })
   justify-content: space-between;
   height: 38px;
   padding: 0 24px;
-  background: #fff;
-  color: #111;
+  background: var(--surface);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
 }
@@ -91,7 +92,7 @@ defineOptions({ name: 'H5TaskShell' })
     display: block;
     width: 3px;
     border-radius: 1px;
-    background: #111;
+    background: var(--ink);
 
     &:nth-child(1) { height: 4px; }
     &:nth-child(2) { height: 6px; }
@@ -105,7 +106,7 @@ defineOptions({ name: 'H5TaskShell' })
   width: 22px;
   height: 11px;
   margin-left: 3px;
-  border: 1px solid #111;
+  border: 1px solid var(--ink);
   border-radius: 2px;
 
   &::after {
@@ -116,14 +117,14 @@ defineOptions({ name: 'H5TaskShell' })
     width: 2px;
     height: 5px;
     border-radius: 0 1px 1px 0;
-    background: #111;
+    background: var(--ink);
   }
 
   i {
     position: absolute;
     inset: 1px 6px 1px 1px;
     border-radius: 1px;
-    background: #111;
+    background: var(--ink);
   }
 }
 
@@ -135,7 +136,7 @@ defineOptions({ name: 'H5TaskShell' })
   min-height: 0;
   height: 100%;
   overflow: hidden;
-  background: #f5f7fa;
+  background: var(--canvas);
 }
 
 .ht-scroll {
@@ -143,7 +144,7 @@ defineOptions({ name: 'H5TaskShell' })
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #f5f7fa;
+  background: var(--canvas);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 
@@ -161,8 +162,8 @@ defineOptions({ name: 'H5TaskShell' })
   gap: 6px;
   height: 44px;
   padding: 0 8px 0 4px;
-  border-bottom: 1px solid #ebeef5;
-  background: #fff;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .ht-nav__back {
@@ -175,7 +176,7 @@ defineOptions({ name: 'H5TaskShell' })
   padding: 0;
   border: none;
   background: none;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -185,7 +186,7 @@ defineOptions({ name: 'H5TaskShell' })
   flex: 1;
   min-width: 0;
   overflow: hidden;
-  color: #303133;
+  color: var(--ink);
   font-size: 16px;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -206,7 +207,7 @@ defineOptions({ name: 'H5TaskShell' })
   border: none;
   border-radius: 50%;
   background: none;
-  color: #606266;
+  color: var(--ink-muted);
   cursor: pointer;
 
   svg {
@@ -248,7 +249,7 @@ defineOptions({ name: 'H5TaskShell' })
   margin: 10px 12px;
   padding: 14px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -260,7 +261,7 @@ defineOptions({ name: 'H5TaskShell' })
   padding: 0;
   border: none;
   background: none;
-  color: #303133;
+  color: var(--ink);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -271,11 +272,11 @@ defineOptions({ name: 'H5TaskShell' })
     width: 3px;
     height: 13px;
     border-radius: 2px;
-    background: #409eff;
+    background: var(--blue);
   }
 
   &__tip {
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 11px;
     font-weight: 400;
   }
@@ -289,7 +290,7 @@ defineOptions({ name: 'H5TaskShell' })
     padding: 0;
     border: none;
     background: none;
-    color: #409eff;
+    color: var(--blue);
     font-family: inherit;
     font-size: 12px;
     font-weight: 400;
@@ -329,10 +330,10 @@ defineOptions({ name: 'H5TaskShell' })
   max-width: 100%;
   overflow: hidden;
   padding: 1px 6px;
-  border: 1px solid #d9ecff;
+  border: 1px solid #dbe7fc;
   border-radius: 3px;
-  background: #ecf5ff;
-  color: #337ecc;
+  background: var(--blue-soft);
+  color: var(--blue);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -358,9 +359,9 @@ defineOptions({ name: 'H5TaskShell' })
   }
 
   &--gray {
-    border-color: #d3d4d6;
-    background: #f4f4f5;
-    color: #909399;
+    border-color: var(--line-strong);
+    background: var(--groove-bg);
+    color: var(--ink-soft);
   }
 
   &--strike {
@@ -409,8 +410,8 @@ defineOptions({ name: 'H5TaskShell' })
   padding: 0 16px;
   border: none;
   border-radius: 22px;
-  background: #f4f4f5;
-  color: #606266;
+  background: var(--groove-bg);
+  color: var(--ink-muted);
   font-family: inherit;
   font-size: 15px;
   letter-spacing: 0.5px;
@@ -426,8 +427,8 @@ defineOptions({ name: 'H5TaskShell' })
   }
 
   &--primary {
-    background: linear-gradient(90deg, #409eff, #66b1ff);
-    box-shadow: 0 6px 16px rgba(64, 158, 255, 0.32);
+    background: linear-gradient(90deg, var(--blue), #5b8ff0);
+    box-shadow: 0 6px 16px rgba(35, 109, 233, 0.32);
     color: #fff;
 
     &:disabled {
@@ -436,15 +437,15 @@ defineOptions({ name: 'H5TaskShell' })
   }
 
   &--ghost {
-    border: 1px solid #409eff;
-    background: #fff;
-    color: #409eff;
+    border: 1px solid var(--blue);
+    background: var(--surface);
+    color: var(--blue);
   }
 
   &--ghost-2 {
-    border: 1px solid #dcdfe6;
-    background: #fff;
-    color: #606266;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-muted);
   }
 
   &--danger {
@@ -454,7 +455,7 @@ defineOptions({ name: 'H5TaskShell' })
 
   &--danger-ghost {
     border: 1px solid #f56c6c;
-    background: #fff;
+    background: var(--surface);
     color: #f56c6c;
   }
 
@@ -474,13 +475,13 @@ defineOptions({ name: 'H5TaskShell' })
   align-items: center;
   gap: 10px;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid #ebeef5;
-  background: #fff;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
 
   &__readonly {
     flex: 1;
     padding: 4px 0;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 13px;
     line-height: 1.6;
     text-align: center;
@@ -498,7 +499,7 @@ defineOptions({ name: 'H5TaskShell' })
 }
 
 .ht-hint {
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11.5px;
   line-height: 1.7;
 }
@@ -517,7 +518,7 @@ defineOptions({ name: 'H5TaskShell' })
 /* ---------- 空态 / 骨架 ---------- */
 .ht-empty {
   padding: 56px 24px 40px;
-  color: #909399;
+  color: var(--ink-soft);
   text-align: center;
 
   &__ico {
@@ -528,7 +529,7 @@ defineOptions({ name: 'H5TaskShell' })
     height: 60px;
     margin: 0 auto 14px;
     border-radius: 50%;
-    background: #f0f2f5;
+    background: var(--canvas);
     color: #c0c4cc;
     font-size: 26px;
     font-weight: 600;
@@ -536,13 +537,13 @@ defineOptions({ name: 'H5TaskShell' })
 
   &__title {
     margin-bottom: 8px;
-    color: #303133;
+    color: var(--ink);
     font-size: 14px;
   }
 
   &__sub {
     margin-bottom: 18px;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 12px;
     line-height: 1.7;
   }
@@ -563,14 +564,14 @@ defineOptions({ name: 'H5TaskShell' })
   margin: 10px 12px;
   padding: 14px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .ht-skel-line {
   height: 12px;
   margin-bottom: 10px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #f0f2f5 25%, #f8fafc 37%, #f0f2f5 63%);
+  background: linear-gradient(90deg, var(--hover-bg) 25%, var(--line-strong) 37%, var(--hover-bg) 63%);
   background-size: 400% 100%;
   animation: ht-skel 1.3s ease infinite;
 
@@ -612,7 +613,7 @@ defineOptions({ name: 'H5TaskShell' })
   width: 100%;
   max-height: 70%;
   border-radius: 16px 16px 0 0;
-  background: #fff;
+  background: var(--surface);
   animation: ht-sheet-up 0.2s ease-out;
 
   &--tall {
@@ -635,12 +636,12 @@ defineOptions({ name: 'H5TaskShell' })
   align-items: center;
   gap: 8px;
   padding: 16px 16px 10px;
-  border-bottom: 1px solid #f2f4f7;
+  border-bottom: 1px solid var(--line);
 
   &__title {
     flex: 1;
     min-width: 0;
-    color: #303133;
+    color: var(--ink);
     font-size: 16px;
     font-weight: 600;
   }
@@ -657,7 +658,7 @@ defineOptions({ name: 'H5TaskShell' })
     padding: 0 2px;
     border: none;
     background: none;
-    color: #409eff;
+    color: var(--blue);
     font-family: inherit;
     font-size: 12.5px;
     cursor: pointer;
@@ -678,8 +679,8 @@ defineOptions({ name: 'H5TaskShell' })
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: #f4f4f5;
-    color: #909399;
+    background: var(--groove-bg);
+    color: var(--ink-soft);
     font-size: 16px;
     line-height: 1;
     cursor: pointer;
@@ -705,7 +706,7 @@ defineOptions({ name: 'H5TaskShell' })
   flex: 0 0 auto;
   gap: 10px;
   padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
-  border-top: 1px solid #f2f4f7;
+  border-top: 1px solid var(--line);
 }
 
 /* ---------- 表单 ---------- */
@@ -722,12 +723,12 @@ defineOptions({ name: 'H5TaskShell' })
   align-items: center;
   gap: 2px;
   margin-bottom: 6px;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 13px;
 
   small {
     margin-left: auto;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 11px;
     font-weight: 400;
   }
@@ -738,10 +739,10 @@ defineOptions({ name: 'H5TaskShell' })
   width: 100%;
   min-height: 96px;
   padding: 10px 12px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
-  background: #fff;
-  color: #303133;
+  background: var(--surface);
+  color: var(--ink);
   font-family: inherit;
   font-size: 16px;
   line-height: 1.6;
@@ -753,7 +754,7 @@ defineOptions({ name: 'H5TaskShell' })
   }
 
   &:focus {
-    border-color: #409eff;
+    border-color: var(--blue);
   }
 }
 
@@ -766,18 +767,18 @@ defineOptions({ name: 'H5TaskShell' })
 
 .ht-chip {
   padding: 5px 10px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 14px;
-  background: #fff;
-  color: #606266;
+  background: var(--surface);
+  color: var(--ink-muted);
   font-family: inherit;
   font-size: 12px;
   line-height: 1.5;
   cursor: pointer;
 
   &:active {
-    border-color: #409eff;
-    color: #409eff;
+    border-color: var(--blue);
+    color: var(--blue);
   }
 }
 
@@ -789,7 +790,7 @@ defineOptions({ name: 'H5TaskShell' })
   width: 100%;
   padding: 11px 0;
   border: none;
-  border-bottom: 1px solid #f2f4f7;
+  border-bottom: 1px solid var(--line);
   background: none;
   font-family: inherit;
   text-align: left;
@@ -808,15 +809,15 @@ defineOptions({ name: 'H5TaskShell' })
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--blue-soft);
+  color: var(--blue);
   font-size: 12px;
   font-weight: 600;
 
   &.is-type-2 { background: #f0f9eb; color: #67c23a; }
   &.is-type-3 { background: #fdf6ec; color: #e6a23c; }
   &.is-type-4 { background: #fef0f0; color: #f56c6c; }
-  &.is-type-5 { background: #f4f4f5; color: #909399; }
+  &.is-type-5 { background: var(--groove-bg); color: var(--ink-soft); }
 }
 
 .ht-notify-item__main {
@@ -827,7 +828,7 @@ defineOptions({ name: 'H5TaskShell' })
 .ht-notify-item__title {
   display: block;
   overflow: hidden;
-  color: #303133;
+  color: var(--ink);
   font-size: 13px;
   line-height: 1.5;
   text-overflow: ellipsis;
@@ -838,7 +839,7 @@ defineOptions({ name: 'H5TaskShell' })
   display: block;
   margin-top: 2px;
   overflow: hidden;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11.5px;
   line-height: 1.5;
   text-overflow: ellipsis;
@@ -859,7 +860,7 @@ defineOptions({ name: 'H5TaskShell' })
   height: 8px;
   margin-top: 6px;
   border-radius: 50%;
-  background: #409eff;
+  background: var(--blue);
 }
 
 .ht-notify-item.is-unread .ht-notify-item__title {
@@ -889,12 +890,12 @@ defineOptions({ name: 'H5TaskShell' })
   }
 }
 
-/* ---------- 小屏：真机全屏 ---------- */
-@media (max-width: 430px) {
+/* ---------- 真机优先：小屏 / 触屏 / 横屏手机铺满整屏 ---------- */
+@media (max-width: 480px), (pointer: coarse), (orientation: landscape) and (max-height: 520px) {
   .ht-stage {
     display: block;
     padding: 0;
-    background: #f5f7fa;
+    background: var(--canvas);
   }
 
   .ht-shell {
@@ -919,6 +920,81 @@ defineOptions({ name: 'H5TaskShell' })
 
   .ht-nav__back {
     height: 44px;
+  }
+}
+
+/* ==========================================================================
+   UI 优化覆盖（2026-11）：与 H5 人员端保持同一套珍珠玻璃视觉
+   ========================================================================== */
+.ht-stage {
+  background:
+    radial-gradient(55% 45% at 92% 0%, var(--ambient-a), transparent 70%),
+    radial-gradient(45% 40% at 20% 100%, var(--ambient-b), transparent 70%),
+    var(--stage);
+  padding: 30px 18px;
+}
+
+.ht-shell {
+  border-radius: 38px;
+  background: var(--canvas);
+  box-shadow:
+    0 24px 70px rgba(17, 23, 27, 0.24),
+    0 3px 12px rgba(17, 23, 27, 0.16),
+    0 0 0 8px var(--frame);
+}
+
+.ht-page {
+  background:
+    radial-gradient(70% 45% at 90% 0%, var(--ambient-a), transparent 70%),
+    var(--canvas);
+}
+
+.ht-nav {
+  border-bottom: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  box-shadow: 0 1px 0 var(--line-strong);
+}
+
+.ht-card {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+}
+
+.ht-btn {
+  border-radius: var(--r-sm);
+}
+
+.ht-btn--primary {
+  background: var(--blue);
+  box-shadow: var(--e-accent);
+}
+
+.ht-sheet-panel {
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--surface);
+  box-shadow: 0 -18px 50px rgba(17, 23, 27, 0.18);
+}
+
+.ht-action-bar {
+  border-top: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+@media (max-width: 480px), (pointer: coarse), (orientation: landscape) and (max-height: 520px) {
+  .ht-stage {
+    padding: 0;
+    background: var(--canvas);
+  }
+
+  .ht-shell {
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 </style>

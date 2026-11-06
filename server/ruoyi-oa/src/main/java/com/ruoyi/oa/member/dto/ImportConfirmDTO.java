@@ -2,6 +2,8 @@ package com.ruoyi.oa.member.dto;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * 导入确认 DTO
  *
@@ -14,7 +16,13 @@ public class ImportConfirmDTO implements Serializable
     /** 批次ID */
     private Long batchId;
 
-    /** 重复处理策略：true=更新已有档案，false=跳过重复行 */
+    /**
+     * 重复处理策略：true=更新已有档案，false=跳过重复行。
+     *
+     * <p>兼容前端单选框与文档中 {@code updateSupport=1/0} 的写法：
+     * Jackson 默认不接受字符串 "1"/"0"，见 {@link LenientBooleanDeserializer}。
+     */
+    @JsonDeserialize(using = LenientBooleanDeserializer.class)
     private Boolean updateSupport;
 
     public Long getBatchId()

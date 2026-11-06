@@ -111,7 +111,7 @@ defineExpose({
   line-height: 28px;
 }
 .read-stat strong {
-  color: #409eff;
+  color: #236de9;
   font-size: 15px;
   margin: 0 2px;
 }

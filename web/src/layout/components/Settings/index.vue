@@ -21,31 +21,6 @@
         </div>
       </el-tooltip>
     </div>
-    <div class="setting-drawer-title">
-      <h3 class="drawer-title">主题风格设置</h3>
-    </div>
-    <div class="setting-drawer-block-checbox">
-      <div class="setting-drawer-block-checbox-item" @click="handleTheme('theme-dark')">
-        <img src="@/assets/images/dark.svg" alt="dark" />
-        <div v-if="sideTheme === 'theme-dark'" class="setting-drawer-block-checbox-selectIcon" style="display: block;">
-          <i aria-label="图标: check" class="anticon anticon-check">
-            <svg viewBox="64 64 896 896" data-icon="check" width="1em" height="1em" :fill="theme" aria-hidden="true" focusable="false" class>
-              <path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 0 0-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z" />
-            </svg>
-          </i>
-        </div>
-      </div>
-      <div class="setting-drawer-block-checbox-item" @click="handleTheme('theme-light')">
-        <img src="@/assets/images/light.svg" alt="light" />
-        <div v-if="sideTheme === 'theme-light'" class="setting-drawer-block-checbox-selectIcon" style="display: block;">
-          <i aria-label="图标: check" class="anticon anticon-check">
-            <svg viewBox="64 64 896 896" data-icon="check" width="1em" height="1em" :fill="theme" aria-hidden="true" focusable="false" class>
-              <path d="M912 190h-69.9c-9.8 0-19.1 4.5-25.1 12.2L404.7 724.5 207 474a32 32 0 0 0-25.1-12.2H112c-6.7 0-10.4 7.7-6.3 12.9l273.9 347c12.8 16.2 37.4 16.2 50.3 0l488.4-618.9c4.1-5.1.4-12.8-6.3-12.8z" />
-            </svg>
-          </i>
-        </div>
-      </div>
-    </div>
     <div class="drawer-item">
       <span>主题颜色</span>
       <span class="comp-style">
@@ -136,10 +111,9 @@ const permissionStore = usePermissionStore()
 const showSettings = ref(false)
 const navType = ref(settingsStore.navType)
 const theme = ref(settingsStore.theme)
-const sideTheme = ref(settingsStore.sideTheme)
 const tagsViewPersist = ref(settingsStore.tagsViewPersist)
 const storeSettings = computed(() => settingsStore)
-const predefineColors = ref(["#409EFF", "#ff4500", "#ff8c00", "#ffd700", "#90ee90", "#00ced1", "#1e90ff", "#c71585"])
+const predefineColors = ref(["#236de9", "#ff4500", "#ff8c00", "#ffd700", "#90ee90", "#00ced1", "#1e90ff", "#c71585"])
 
 /** 是否需要dynamicTitle */
 function dynamicTitleChange() {
@@ -156,33 +130,28 @@ function themeChange(val) {
   handleThemeStyle(val)
 }
 
-function handleTheme(val) {
-  settingsStore.sideTheme = val
-  sideTheme.value = val
-}
-
 function handleNavType(val) {
   settingsStore.navType = val
   navType.value = val
 }
 
-/** 菜单导航设置 */
-watch(() => navType, val => {
-  if (val.value == 1) {
+/** 菜单导航设置：navType 是 ref，回调参数就是新值（原写法 val.value 恒为 undefined） */
+watch(navType, val => {
+  if (val == 1) {
     appStore.sidebar.opened = true
     appStore.toggleSideBarHide(false)
   }
-  if (val.value == 2) {
+  if (val == 2) {
     appStore.sidebar.opened = true
   }
-  if (val.value == 3) {
+  if (val == 3) {
     appStore.sidebar.opened = false
     appStore.toggleSideBarHide(true)
   }
-  if ([1, 3].includes(val.value)) {
-      permissionStore.setSidebarRouters(permissionStore.defaultRoutes)
+  if ([1, 3].includes(val)) {
+    permissionStore.setSidebarRouters(permissionStore.defaultRoutes)
   }
-  }, { immediate: true, deep: true }
+}, { immediate: true }
 )
 
 function saveSetting() {
@@ -204,14 +173,14 @@ function saveSetting() {
     "theme": storeSettings.value.theme
   }
   localStorage.setItem("layout-setting", JSON.stringify(layoutSetting))
-  setTimeout(proxy.$modal.closeLoading(), 1000)
+  setTimeout(() => proxy.$modal.closeLoading(), 1000)
 }
 
 function resetSetting() {
   proxy.$cache.local.remove('tags-view-visited')
   proxy.$modal.loading("正在清除设置缓存并刷新，请稍候...")
   localStorage.removeItem("layout-setting")
-  setTimeout("window.location.reload()", 1000)
+  setTimeout(() => window.location.reload(), 1000)
 }
 
 function openSetting() {
@@ -235,39 +204,6 @@ defineExpose({
   }
 }
 
-.setting-drawer-block-checbox {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 10px;
-  margin-bottom: 20px;
-
-  .setting-drawer-block-checbox-item {
-    position: relative;
-    margin-right: 16px;
-    border-radius: 2px;
-    cursor: pointer;
-
-    img {
-      width: 48px;
-      height: 48px;
-    }
-
-    .setting-drawer-block-checbox-selectIcon {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      padding-top: 15px;
-      padding-left: 24px;
-      color: #1890ff;
-      font-weight: 700;
-      font-size: 14px;
-    }
-  }
-}
-
 .drawer-item {
   color: var(--el-text-color-regular, rgba(0, 0, 0, 0.65));
   padding: 12px 0;
@@ -288,7 +224,7 @@ defineExpose({
   margin-bottom: 20px;
 
   .activeItem {
-    border: 2px solid var(--el-color-primary) !important;
+    border: 2px solid var(--blue) !important;
   }
 
   .item {
@@ -297,47 +233,48 @@ defineExpose({
     cursor: pointer;
     width: 56px;
     height: 48px;
-    border-radius: 4px;
-    background: #f0f2f5;
+    border-radius: var(--r-xs);
+    background: var(--groove-bg);
     border: 2px solid transparent;
+    overflow: hidden;
   }
 
   .left {
     b:first-child {
       display: block;
-      height: 30%;
-      background: #fff;
+      height: 100%;
+      background: var(--surface-solid);
     }
     b:last-child {
       width: 30%;
-      background: #1b2a47;
+      background: var(--ink-faint);
       position: absolute;
       height: 100%;
       top: 0;
-      border-radius: 4px 0 0 4px;
+      border-radius: var(--r-xs) 0 0 var(--r-xs);
     }
   }
   .mix {
     b:first-child {
-      border-radius: 4px 4px 0 0;
+      border-radius: var(--r-xs) var(--r-xs) 0 0;
       display: block;
       height: 30%;
-      background: #1b2a47;
+      background: var(--ink-faint);
     }
     b:last-child {
       width: 30%;
-      background: #1b2a47;
+      background: var(--ink-faint);
       position: absolute;
       height: 70%;
-      border-radius: 0 0 0 4px;
+      border-radius: 0 0 0 var(--r-xs);
     }
   }
   .top {
     b:first-child {
       display: block;
       height: 30%;
-      background: #1b2a47;
-      border-radius: 4px 4px 0 0;
+      background: var(--ink-faint);
+      border-radius: var(--r-xs) var(--r-xs) 0 0;
     }
   }
 }

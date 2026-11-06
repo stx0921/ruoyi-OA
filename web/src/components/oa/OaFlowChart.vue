@@ -137,17 +137,17 @@ function nodeCaption(node) {
 }
 
 .oa-flow__node.is-current {
-  border-color: #409eff;
-  background: #ecf5ff;
-  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.12);
+  border-color: #236de9;
+  background: #edf3fe;
+  box-shadow: 0 0 0 3px rgba(35, 109, 233, 0.12);
 }
 
 .oa-flow__node.is-current .oa-flow__name {
-  color: #337ecc;
+  color: #1d61d5;
 }
 
 .oa-flow__node.is-current .oa-flow__role {
-  color: #409eff;
+  color: #236de9;
 }
 
 .oa-flow__node.is-wait {
@@ -220,7 +220,7 @@ function nodeCaption(node) {
 }
 
 .oa-flow__legend i.is-current {
-  background: #409eff;
+  background: #236de9;
 }
 
 .oa-flow__legend i.is-wait {

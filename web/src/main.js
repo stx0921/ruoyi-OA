@@ -9,6 +9,7 @@ import locale from 'element-plus/es/locale/lang/zh-cn'
 
 import '@/assets/styles/index.scss' // global css
 import '@/assets/styles/oa.scss' // OA 业务页公共样式
+import '@/assets/styles/ui.scss' // 全局 UI 优化（最后引入，覆盖默认控件样式）
 
 import App from './App'
 import store from './store'

@@ -48,7 +48,7 @@ const getLogoTextColor = computed(() => {
   if (settingsStore.navType == 3) {
     return variables.menuLightText
   }
-  return sideTheme.value === 'theme-dark' ? '#fff' : variables.menuLightText
+  return sideTheme.value === 'theme-dark' ? 'var(--ink)' : variables.menuLightText
 })
 </script>
 
@@ -75,23 +75,26 @@ const getLogoTextColor = computed(() => {
     width: 100%;
 
     & .sidebar-logo {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       vertical-align: middle;
-      margin-right: 12px;
-      border-radius: 8px;
+      margin-right: 10px;
+      border-radius: var(--r-xs);
       object-fit: cover;
-      background: #fff;
+      /* 不铺白底：logo 图自身带白边，硬加白底会形成一块方形色块 */
+      background: transparent;
+      box-shadow: var(--e1);
     }
 
     & .sidebar-title {
       display: inline-block;
       margin: 0;
       color: v-bind(getLogoTextColor);
-      font-weight: 600;
+      font-weight: 720;
       line-height: 50px;
-      font-size: 14px;
-      font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      font-family: inherit;
       vertical-align: middle;
     }
   }

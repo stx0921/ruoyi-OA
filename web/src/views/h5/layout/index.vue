@@ -33,7 +33,7 @@ defineOptions({ name: 'H5Layout' })
 <style lang="scss">
 /* ==========================================================================
    H5 学生端 / 干事端外壳与公共样式
-   - 390 × 844 手机壳，桌面预览居中，≤430px 时铺满整屏（100dvh 兜底）
+   - 390 × 844 手机壳，桌面预览居中；小屏 / 触屏 / 横屏手机优先铺满整屏（100dvh 兜底）
    - 只放 h5- 前缀类名，不影响 PC 端页面
    ========================================================================== */
 
@@ -44,7 +44,7 @@ defineOptions({ name: 'H5Layout' })
   min-height: 100vh;
   min-height: 100dvh;
   padding: 26px 16px;
-  background: #e9edf2;
+  background: var(--stage);
 }
 
 .h5-shell {
@@ -53,12 +53,13 @@ defineOptions({ name: 'H5Layout' })
   flex-direction: column;
   width: 390px;
   height: 812px;
-  max-height: calc(100vh - 52px);
-  max-height: calc(100dvh - 52px);
+  /* 上下 padding 30px × 2 = 60px，与 .h5-stage 实际 padding 一致，避免矮屏多出 8px 整页滚动 */
+  max-height: calc(100vh - 60px);
+  max-height: calc(100dvh - 60px);
   overflow: hidden;
-  background: #fff;
+  background: var(--surface);
   border-radius: 40px;
-  box-shadow: 0 18px 50px rgba(20, 30, 50, 0.28), 0 0 0 10px #1f2d3d;
+  box-shadow: 0 18px 50px rgba(20, 30, 50, 0.28), 0 0 0 10px var(--frame);
 }
 
 /* ---------- 模拟状态栏 ---------- */
@@ -69,8 +70,8 @@ defineOptions({ name: 'H5Layout' })
   justify-content: space-between;
   height: 38px;
   padding: 0 24px;
-  background: #fff;
-  color: #111;
+  background: var(--surface);
+  color: var(--ink);
   font-size: 12px;
   font-weight: 600;
 }
@@ -91,7 +92,7 @@ defineOptions({ name: 'H5Layout' })
     display: block;
     width: 3px;
     border-radius: 1px;
-    background: #111;
+    background: var(--ink);
 
     &:nth-child(1) { height: 4px; }
     &:nth-child(2) { height: 6px; }
@@ -105,7 +106,7 @@ defineOptions({ name: 'H5Layout' })
   width: 22px;
   height: 11px;
   margin-left: 3px;
-  border: 1px solid #111;
+  border: 1px solid var(--ink);
   border-radius: 2px;
 
   &::after {
@@ -116,14 +117,14 @@ defineOptions({ name: 'H5Layout' })
     width: 2px;
     height: 5px;
     border-radius: 0 1px 1px 0;
-    background: #111;
+    background: var(--ink);
   }
 
   i {
     position: absolute;
     inset: 1px 6px 1px 1px;
     border-radius: 1px;
-    background: #111;
+    background: var(--ink);
   }
 }
 
@@ -141,7 +142,7 @@ defineOptions({ name: 'H5Layout' })
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: #f5f7fa;
+  background: var(--canvas);
 }
 
 /* ---------- 顶部导航 ---------- */
@@ -153,8 +154,8 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   height: 44px;
   padding: 0 14px;
-  border-bottom: 1px solid #ebeef5;
-  background: #fff;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .h5-nav__back {
@@ -166,7 +167,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
@@ -179,7 +180,7 @@ defineOptions({ name: 'H5Layout' })
   max-width: 60%;
   overflow: hidden;
   transform: translate(-50%, -50%);
-  color: #303133;
+  color: var(--ink);
   font-size: 16px;
   font-weight: 600;
   text-overflow: ellipsis;
@@ -191,13 +192,13 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #409eff;
+  color: var(--blue);
   font-size: 13px;
   cursor: pointer;
 }
 
 .h5-nav__side--muted {
-  color: #909399;
+  color: var(--ink-soft);
 }
 
 /* ---------- 滚动区 ---------- */
@@ -206,7 +207,7 @@ defineOptions({ name: 'H5Layout' })
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #f5f7fa;
+  background: var(--canvas);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 
@@ -221,7 +222,7 @@ defineOptions({ name: 'H5Layout' })
   position: relative;
   padding: 20px 18px 18px;
   overflow: hidden;
-  background: linear-gradient(135deg, #409eff, #79bbff 70%, #9fcaff);
+  background: linear-gradient(135deg, var(--blue), #5b8ff0 70%, #8fb3f5);
   color: #fff;
 
   &::after {
@@ -254,7 +255,7 @@ defineOptions({ name: 'H5Layout' })
   height: 38px;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.92);
-  color: #337ecc;
+  color: var(--blue);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.15;
@@ -289,7 +290,7 @@ defineOptions({ name: 'H5Layout' })
   margin: 10px 12px;
   padding: 14px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .h5-card--flat {
@@ -302,7 +303,7 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   gap: 8px;
   margin: 2px 0 12px;
-  color: #303133;
+  color: var(--ink);
   font-size: 14px;
   font-weight: 600;
 
@@ -311,13 +312,13 @@ defineOptions({ name: 'H5Layout' })
     width: 3px;
     height: 13px;
     border-radius: 2px;
-    background: #409eff;
+    background: var(--blue);
   }
 }
 
 .h5-sec-title__tip {
   margin-left: auto;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11px;
   font-weight: 400;
 }
@@ -336,12 +337,12 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   gap: 2px;
   margin-bottom: 6px;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 13px;
 
   small {
     margin-left: auto;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 11px;
     font-weight: 400;
   }
@@ -356,10 +357,10 @@ defineOptions({ name: 'H5Layout' })
 .h5-select {
   box-sizing: border-box;
   width: 100%;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #fff;
-  color: #303133;
+  background: var(--surface);
+  color: var(--ink);
   font-family: inherit;
   font-size: 16px;
   outline: none;
@@ -370,7 +371,7 @@ defineOptions({ name: 'H5Layout' })
   }
 
   &:focus {
-    border-color: #409eff;
+    border-color: var(--blue);
   }
 
   &.is-error {
@@ -379,8 +380,8 @@ defineOptions({ name: 'H5Layout' })
 
   &.is-readonly,
   &[readonly] {
-    background: #f5f7fa;
-    color: #606266;
+    background: var(--canvas);
+    color: var(--ink-muted);
   }
 }
 
@@ -422,7 +423,7 @@ defineOptions({ name: 'H5Layout' })
 
 .h5-hint {
   margin-top: 6px;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11.5px;
   line-height: 1.6;
 }
@@ -433,9 +434,9 @@ defineOptions({ name: 'H5Layout' })
   flex: 0 0 112px;
   width: 112px;
   height: 44px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #f5f7fa;
+  background: var(--canvas);
   cursor: pointer;
   object-fit: cover;
 }
@@ -444,7 +445,7 @@ defineOptions({ name: 'H5Layout' })
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 12px;
 }
 
@@ -463,7 +464,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 15px;
   cursor: pointer;
 
@@ -472,16 +473,16 @@ defineOptions({ name: 'H5Layout' })
     display: block;
     width: 17px;
     height: 17px;
-    border: 1px solid #dcdfe6;
+    border: 1px solid var(--line-strong);
     border-radius: 50%;
-    background: #fff;
+    background: var(--surface);
   }
 
   &.is-on {
-    color: #303133;
+    color: var(--ink);
 
     i {
-      border-color: #409eff;
+      border-color: var(--blue);
     }
 
     i::after {
@@ -489,7 +490,7 @@ defineOptions({ name: 'H5Layout' })
       position: absolute;
       inset: 3px;
       border-radius: 50%;
-      background: #409eff;
+      background: var(--blue);
     }
   }
 }
@@ -507,10 +508,10 @@ defineOptions({ name: 'H5Layout' })
   gap: 6px;
   min-height: 42px;
   padding: 0 10px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 6px;
-  background: #fff;
-  color: #606266;
+  background: var(--surface);
+  color: var(--ink-muted);
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -522,7 +523,7 @@ defineOptions({ name: 'H5Layout' })
     justify-content: center;
     width: 16px;
     height: 16px;
-    border: 1px solid #dcdfe6;
+    border: 1px solid var(--line-strong);
     border-radius: 3px;
     color: transparent;
     font-size: 11px;
@@ -530,13 +531,13 @@ defineOptions({ name: 'H5Layout' })
   }
 
   &.is-on {
-    border-color: #409eff;
-    background: #ecf5ff;
-    color: #337ecc;
+    border-color: var(--blue);
+    background: var(--blue-soft);
+    color: var(--blue);
 
     .h5-dept__check {
-      border-color: #409eff;
-      background: #409eff;
+      border-color: var(--blue);
+      background: var(--blue);
       color: #fff;
     }
   }
@@ -558,10 +559,10 @@ defineOptions({ name: 'H5Layout' })
   gap: 4px;
   min-height: 100px;
   padding: 8px;
-  border: 1px dashed #c6d3e2;
+  border: 1px dashed var(--line-strong);
   border-radius: 8px;
-  background: #fafbfd;
-  color: #909399;
+  background: var(--input-bg);
+  color: var(--ink-soft);
   font-size: 12px;
   text-align: center;
   cursor: pointer;
@@ -588,7 +589,7 @@ defineOptions({ name: 'H5Layout' })
   &__file {
     max-width: 100%;
     overflow: hidden;
-    color: #606266;
+    color: var(--ink-muted);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -599,12 +600,12 @@ defineOptions({ name: 'H5Layout' })
     bottom: 0;
     left: 0;
     height: 3px;
-    background: #ebeef5;
+    background: var(--line);
   }
 
   &__bar-inner {
     height: 100%;
-    background: #409eff;
+    background: var(--blue);
     transition: width 0.2s;
   }
 
@@ -637,7 +638,7 @@ defineOptions({ name: 'H5Layout' })
   align-items: flex-start;
   gap: 8px;
   padding: 2px 4px 0;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 12.5px;
   line-height: 1.7;
   cursor: pointer;
@@ -647,7 +648,7 @@ defineOptions({ name: 'H5Layout' })
     width: 16px;
     height: 16px;
     margin: 3px 0 0;
-    accent-color: #409eff;
+    accent-color: var(--blue);
   }
 }
 
@@ -655,7 +656,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #409eff;
+  color: var(--blue);
   font-size: inherit;
   cursor: pointer;
 }
@@ -667,7 +668,7 @@ defineOptions({ name: 'H5Layout' })
   margin: 10px 12px 0;
   padding: 12px 10px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .h5-step {
@@ -686,7 +687,7 @@ defineOptions({ name: 'H5Layout' })
     justify-content: center;
     width: 20px;
     height: 20px;
-    border: 1px solid #dcdfe6;
+    border: 1px solid var(--line-strong);
     border-radius: 50%;
     font-size: 11px;
     line-height: 1;
@@ -702,25 +703,25 @@ defineOptions({ name: 'H5Layout' })
     flex: 1;
     height: 1px;
     margin: 0 4px;
-    background: #ebeef5;
+    background: var(--line);
   }
 
   &.is-active {
-    color: #409eff;
+    color: var(--blue);
     font-weight: 600;
 
     .h5-step__dot {
-      border-color: #409eff;
-      color: #409eff;
+      border-color: var(--blue);
+      color: var(--blue);
     }
   }
 
   &.is-done {
-    color: #606266;
+    color: var(--ink-muted);
 
     .h5-step__dot {
-      border-color: #409eff;
-      background: #409eff;
+      border-color: var(--blue);
+      background: var(--blue);
       color: #fff;
     }
   }
@@ -733,7 +734,7 @@ defineOptions({ name: 'H5Layout' })
     align-items: flex-start;
     gap: 10px;
     padding: 9px 0;
-    border-bottom: 1px dashed #f0f2f5;
+    border-bottom: 1px dashed var(--line);
     font-size: 13px;
     line-height: 1.6;
 
@@ -743,13 +744,13 @@ defineOptions({ name: 'H5Layout' })
 
     > span {
       flex: 0 0 84px;
-      color: #909399;
+      color: var(--ink-soft);
     }
 
     > b {
       flex: 1;
       min-width: 0;
-      color: #303133;
+      color: var(--ink);
       font-weight: 400;
       word-break: break-all;
     }
@@ -759,7 +760,7 @@ defineOptions({ name: 'H5Layout' })
       padding: 0;
       border: none;
       background: none;
-      color: #409eff;
+      color: var(--blue);
       font-size: 12px;
       cursor: pointer;
     }
@@ -773,8 +774,8 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   gap: 8px;
   padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid #ebeef5;
-  background: #fff;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
 }
 
 .h5-submit {
@@ -787,8 +788,8 @@ defineOptions({ name: 'H5Layout' })
   padding: 0 16px;
   border: none;
   border-radius: 22px;
-  background: linear-gradient(90deg, #409eff, #66b1ff);
-  box-shadow: 0 6px 16px rgba(64, 158, 255, 0.32);
+  background: linear-gradient(90deg, var(--blue), #5b8ff0);
+  box-shadow: 0 6px 16px rgba(35, 109, 233, 0.32);
   color: #fff;
   font-family: inherit;
   font-size: 16px;
@@ -806,10 +807,10 @@ defineOptions({ name: 'H5Layout' })
   }
 
   &.is-plain {
-    border: 1px solid #409eff;
-    background: #fff;
+    border: 1px solid var(--blue);
+    background: var(--surface);
     box-shadow: none;
-    color: #409eff;
+    color: var(--blue);
   }
 
   &.is-sm {
@@ -825,7 +826,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0 14px;
   border: none;
   background: none;
-  color: #606266;
+  color: var(--ink-muted);
   font-family: inherit;
   font-size: 14px;
   cursor: pointer;
@@ -833,7 +834,7 @@ defineOptions({ name: 'H5Layout' })
 
 .h5-tip-line {
   margin-top: 10px;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11.5px;
   line-height: 1.6;
   text-align: center;
@@ -870,15 +871,15 @@ defineOptions({ name: 'H5Layout' })
   }
 
   &--gray {
-    border-color: #d3d4d6;
-    background: #f4f4f5;
-    color: #909399;
+    border-color: var(--line-strong);
+    background: var(--groove-bg);
+    color: var(--ink-soft);
   }
 
   &--blue {
     border-color: #b3d8ff;
-    background: #ecf5ff;
-    color: #409eff;
+    background: var(--blue-soft);
+    color: var(--blue);
   }
 }
 
@@ -887,7 +888,7 @@ defineOptions({ name: 'H5Layout' })
   margin: 10px 12px;
   padding: 14px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -899,21 +900,21 @@ defineOptions({ name: 'H5Layout' })
   margin-bottom: 8px;
 
   &__dept {
-    color: #303133;
+    color: var(--ink);
     font-size: 15px;
     font-weight: 600;
   }
 
   &__no {
     margin-top: 4px;
-    color: #909399;
+    color: var(--ink-soft);
     font-family: Consolas, Menlo, monospace;
     font-size: 11.5px;
   }
 }
 
 .h5-app-meta {
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 12px;
   line-height: 1.8;
 }
@@ -936,7 +937,7 @@ defineOptions({ name: 'H5Layout' })
   border-left: 2px solid #f56c6c;
   border-radius: 4px;
   background: #fef0f0;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 12.5px;
   line-height: 1.7;
 
@@ -946,16 +947,16 @@ defineOptions({ name: 'H5Layout' })
 
   &--gray {
     border-left-color: #c0c4cc;
-    background: #f4f4f5;
+    background: var(--groove-bg);
 
     b {
-      color: #909399;
+      color: var(--ink-soft);
     }
   }
 
   &__meta {
     margin-top: 4px;
-    color: #909399;
+    color: var(--ink-soft);
     font-size: 11.5px;
   }
 }
@@ -966,7 +967,7 @@ defineOptions({ name: 'H5Layout' })
   border-left: 2px solid #67c23a;
   border-radius: 4px;
   background: #f0f9eb;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 12.5px;
   line-height: 1.7;
 
@@ -983,17 +984,17 @@ defineOptions({ name: 'H5Layout' })
   min-width: 84px;
   height: 34px;
   padding: 0 14px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--line-strong);
   border-radius: 17px;
-  background: #fff;
-  color: #606266;
+  background: var(--surface);
+  color: var(--ink-muted);
   font-family: inherit;
   font-size: 13px;
   cursor: pointer;
 
   &--primary {
-    border-color: #409eff;
-    color: #409eff;
+    border-color: var(--blue);
+    color: var(--blue);
   }
 
   &--danger {
@@ -1013,7 +1014,7 @@ defineOptions({ name: 'H5Layout' })
   top: 0;
   z-index: 3;
   padding: 10px 12px;
-  background: #f5f7fa;
+  background: var(--canvas);
 }
 
 .h5-search__box {
@@ -1023,7 +1024,7 @@ defineOptions({ name: 'H5Layout' })
   height: 40px;
   padding: 0 12px;
   border-radius: 20px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .h5-search__input {
@@ -1033,7 +1034,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #303133;
+  color: var(--ink);
   font-family: inherit;
   font-size: 16px;
   outline: none;
@@ -1048,8 +1049,8 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
-  border-bottom: 1px solid #f2f4f7;
-  background: #fff;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
   cursor: pointer;
 
   &:last-child {
@@ -1065,7 +1066,7 @@ defineOptions({ name: 'H5Layout' })
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #79bbff, #409eff);
+  background: linear-gradient(135deg, #5b8ff0, var(--blue));
   color: #fff;
   font-size: 14px;
 
@@ -1074,7 +1075,7 @@ defineOptions({ name: 'H5Layout' })
     width: 56px;
     height: 56px;
     background: rgba(255, 255, 255, 0.92);
-    color: #337ecc;
+    color: var(--blue);
     font-size: 20px;
     font-weight: 600;
   }
@@ -1087,13 +1088,13 @@ defineOptions({ name: 'H5Layout' })
 
 .h5-contact-name {
   margin-bottom: 2px;
-  color: #303133;
+  color: var(--ink);
   font-size: 14px;
 }
 
 .h5-contact-pos {
   margin-left: 6px;
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 11.5px;
 }
 
@@ -1102,14 +1103,14 @@ defineOptions({ name: 'H5Layout' })
   margin-left: 6px;
   padding: 0 5px;
   border-radius: 3px;
-  background: #ecf5ff;
-  color: #409eff;
+  background: var(--blue-soft);
+  color: var(--blue);
   font-size: 10.5px;
   line-height: 16px;
 }
 
 .h5-contact-sub {
-  color: #909399;
+  color: var(--ink-soft);
   font-size: 12.5px;
   line-height: 1.6;
 }
@@ -1123,15 +1124,15 @@ defineOptions({ name: 'H5Layout' })
 .h5-contact-detail {
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px dashed #f0f2f5;
-  color: #606266;
+  border-top: 1px dashed var(--line);
+  color: var(--ink-muted);
   font-size: 12px;
   line-height: 1.9;
 
   span {
     display: inline-block;
     width: 40px;
-    color: #909399;
+    color: var(--ink-soft);
   }
 }
 
@@ -1153,7 +1154,7 @@ defineOptions({ name: 'H5Layout' })
   align-items: center;
   gap: 14px;
   padding: 20px 18px 18px;
-  background: linear-gradient(135deg, #409eff, #79bbff);
+  background: linear-gradient(135deg, var(--blue), #5b8ff0);
   color: #fff;
 
   &__name {
@@ -1177,19 +1178,19 @@ defineOptions({ name: 'H5Layout' })
   &__item {
     padding: 8px 10px;
     border-radius: 6px;
-    background: #f5f7fa;
+    background: var(--canvas);
     font-size: 13px;
     line-height: 1.5;
 
     span {
       display: block;
       margin-bottom: 2px;
-      color: #909399;
+      color: var(--ink-soft);
       font-size: 11px;
     }
 
     b {
-      color: #303133;
+      color: var(--ink);
       font-weight: 400;
       word-break: break-all;
     }
@@ -1211,9 +1212,9 @@ defineOptions({ name: 'H5Layout' })
   width: 76px;
   height: 96px;
   overflow: hidden;
-  border: 1px dashed #c6d3e2;
+  border: 1px dashed var(--line-strong);
   border-radius: 8px;
-  background: #fafbfd;
+  background: var(--input-bg);
   color: #a8bdd6;
   font-size: 22px;
   cursor: pointer;
@@ -1228,7 +1229,7 @@ defineOptions({ name: 'H5Layout' })
 .h5-photo__meta {
   flex: 1;
   min-width: 0;
-  color: #606266;
+  color: var(--ink-muted);
   font-size: 13px;
   line-height: 1.7;
 }
@@ -1237,8 +1238,8 @@ defineOptions({ name: 'H5Layout' })
 .h5-tabbar {
   display: flex;
   flex: 0 0 auto;
-  border-top: 1px solid #ebeef5;
-  background: #fff;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -1253,7 +1254,7 @@ defineOptions({ name: 'H5Layout' })
   padding: 0;
   border: none;
   background: none;
-  color: #909399;
+  color: var(--ink-soft);
   font-family: inherit;
   font-size: 11px;
   cursor: pointer;
@@ -1267,7 +1268,7 @@ defineOptions({ name: 'H5Layout' })
   }
 
   &.is-active {
-    color: #409eff;
+    color: var(--blue);
   }
 }
 
@@ -1285,11 +1286,11 @@ defineOptions({ name: 'H5Layout' })
   width: 100%;
   padding: 20px 18px calc(18px + env(safe-area-inset-bottom));
   border-radius: 16px 16px 0 0;
-  background: #fff;
+  background: var(--surface);
 
   &__title {
     margin-bottom: 14px;
-    color: #303133;
+    color: var(--ink);
     font-size: 16px;
     font-weight: 600;
     text-align: center;
@@ -1301,7 +1302,7 @@ defineOptions({ name: 'H5Layout' })
     justify-content: space-between;
     gap: 12px;
     padding: 11px 0;
-    border-bottom: 1px solid #f2f4f7;
+    border-bottom: 1px solid var(--line);
     font-size: 13px;
 
     &:last-of-type {
@@ -1310,12 +1311,12 @@ defineOptions({ name: 'H5Layout' })
 
     span {
       flex: 0 0 76px;
-      color: #909399;
+      color: var(--ink-soft);
     }
 
     b {
       flex: 1;
-      color: #303133;
+      color: var(--ink);
       font-weight: 600;
       text-align: right;
       word-break: break-all;
@@ -1330,12 +1331,12 @@ defineOptions({ name: 'H5Layout' })
 /* ---------- 空态 / 加载骨架 / 错误 ---------- */
 .h5-empty {
   padding: 52px 20px 40px;
-  color: #909399;
+  color: var(--ink-soft);
   text-align: center;
 
   &__title {
     margin-bottom: 8px;
-    color: #303133;
+    color: var(--ink);
     font-size: 14px;
   }
 
@@ -1355,14 +1356,14 @@ defineOptions({ name: 'H5Layout' })
   margin: 10px 12px;
   padding: 14px;
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface);
 }
 
 .h5-skel-line {
   height: 12px;
   margin-bottom: 10px;
   border-radius: 4px;
-  background: linear-gradient(90deg, #f0f2f5 25%, #f8fafc 37%, #f0f2f5 63%);
+  background: linear-gradient(90deg, var(--hover-bg) 25%, var(--line-strong) 37%, var(--hover-bg) 63%);
   background-size: 400% 100%;
   animation: h5-skel 1.3s ease infinite;
 
@@ -1424,12 +1425,12 @@ defineOptions({ name: 'H5Layout' })
   border-radius: 12px;
 }
 
-/* ---------- 小屏：真机全屏 ---------- */
-@media (max-width: 430px) {
+/* ---------- 真机优先：小屏 / 触屏 / 横屏手机铺满整屏 ---------- */
+@media (max-width: 480px), (pointer: coarse), (orientation: landscape) and (max-height: 520px) {
   .h5-stage {
     display: block;
     padding: 0;
-    background: #f5f7fa;
+    background: var(--canvas);
   }
 
   .h5-shell {
@@ -1462,6 +1463,141 @@ defineOptions({ name: 'H5Layout' })
     height: 44px;
     line-height: 44px;
     transform: translateX(-50%);
+  }
+}
+
+/* ==========================================================================
+   UI 优化覆盖（2026-11）：珍珠玻璃（Pearl Glass）视觉
+   ========================================================================== */
+.h5-stage {
+  background:
+    radial-gradient(55% 45% at 92% 0%, var(--ambient-a), transparent 70%),
+    radial-gradient(45% 40% at 20% 100%, var(--ambient-b), transparent 70%),
+    var(--stage);
+  padding: 30px 18px;
+}
+
+.h5-shell {
+  border-radius: 38px;
+  background: var(--canvas);
+  box-shadow:
+    0 24px 70px rgba(17, 23, 27, 0.24),
+    0 3px 12px rgba(17, 23, 27, 0.16),
+    0 0 0 8px var(--frame);
+}
+
+.h5-view {
+  background:
+    radial-gradient(70% 45% at 90% 0%, var(--ambient-a), transparent 70%),
+    var(--canvas);
+}
+
+.h5-nav {
+  border-bottom: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(22px) saturate(1.1);
+  -webkit-backdrop-filter: blur(22px) saturate(1.1);
+  box-shadow: 0 1px 0 var(--line-strong);
+}
+
+.h5-card {
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+}
+
+.h5-input,
+.h5-textarea,
+.h5-select {
+  border-color: var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--input-bg);
+}
+
+.h5-hero {
+  padding: 30px 22px 28px;
+  border-radius: 0 0 var(--r-xl) var(--r-xl);
+  background: linear-gradient(155deg, var(--blue) 0%, #4c8dff 55%, #6ea6ff 100%);
+  text-align: center;
+}
+
+.h5-hero__org {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.h5-hero__logo {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  font-size: 13px;
+  line-height: 1.2;
+  box-shadow: 0 10px 24px rgba(9, 30, 80, 0.22);
+}
+
+.h5-hero__meta {
+  font-size: 11.5px;
+  line-height: 1.7;
+  text-align: center;
+  opacity: 0.92;
+}
+
+.h5-hero h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.h5-hero p {
+  max-width: 320px;
+  margin: 0 auto;
+  font-size: 12.5px;
+  line-height: 1.8;
+}
+
+/* 步骤条上移，压在头图上形成层次 */
+.h5-steps {
+  position: relative;
+  z-index: 2;
+  margin: -18px 14px 0;
+  padding: 14px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+}
+
+.h5-card {
+  margin: 12px 14px;
+}
+
+.h5-submit-bar {
+  border-top: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.h5-submit {
+  border-radius: 999px;
+  background: var(--blue);
+  box-shadow: var(--e-accent);
+}
+
+@media (max-width: 480px), (pointer: coarse), (orientation: landscape) and (max-height: 520px) {
+  .h5-stage {
+    padding: 0;
+    background: var(--canvas);
+  }
+
+  .h5-shell {
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 </style>

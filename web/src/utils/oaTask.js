@@ -10,6 +10,21 @@
  */
 import { parseTime } from '@/utils/ruoyi'
 import { listMember } from '@/api/oa/member'
+import { toneColor, toneMeta } from '@/utils/status'
+
+/**
+ * 选项列表：字典优先、前端常量兜底
+ * 说明：字典在「系统管理 → 字典管理」改过后，下拉/筛选里的文案同步变化
+ *
+ * @param {Array} dicts useDict 返回的字典数组
+ * @param {Array} fallbackOptions 兜底选项 [{ value, label }]
+ */
+export function resolveOptions(dicts, fallbackOptions) {
+  if (Array.isArray(dicts) && dicts.length) {
+    return dicts.map(item => ({ value: String(item.value), label: item.label }))
+  }
+  return Array.isArray(fallbackOptions) ? fallbackOptions : []
+}
 
 /* -------------------------------------------------------------------------- */
 /* 一、状态 / 优先级 / 来源 / 周期 / 项目 / 站内信映射（02 §5.1、SQL 字典）      */
@@ -26,14 +41,15 @@ export const TASK_STATUS = {
 
 /**
  * 任务状态展示映射
- * tone 对应全局 .oa-pill--xxx；color/bg/border 严格按 02 §5.1
+ * tone 对应全局 .oa-pill--xxx；color/bg/border 取自 utils/status.js 的令牌，
+ * 字段名与结构保持不变（页面用内联 :style 直接读取），只把 hex 换成 var(--token)。
  */
 export const TASK_STATUS_MAP = {
-  '0': { label: '待办', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#D3D4D6' },
-  '1': { label: '进行中', tone: 'blue', color: '#409EFF', bg: '#ECF5FF', border: '#B3D8FF' },
-  '2': { label: '待验收', tone: 'orange', color: '#E6A23C', bg: '#FDF6EC', border: '#F5DAB1' },
-  '3': { label: '已完成', tone: 'green', color: '#67C23A', bg: '#F0F9EB', border: '#C2E7B0' },
-  '4': { label: '已取消', tone: 'gray', color: '#909399', bg: '#FAFAFA', border: '#E4E7ED', strike: true }
+  '0': { label: '待办', tone: 'gray', ...toneMeta('gray') },
+  '1': { label: '进行中', tone: 'blue', ...toneMeta('blue') },
+  '2': { label: '待验收', tone: 'orange', ...toneMeta('orange') },
+  '3': { label: '已完成', tone: 'green', ...toneMeta('green') },
+  '4': { label: '已取消', tone: 'gray', ...toneMeta('gray'), strike: true }
 }
 
 /** 任务状态下拉（筛选 / 表单） */
@@ -44,9 +60,9 @@ export const TASK_STATUS_OPTIONS = ['0', '1', '2', '3', '4'].map(value => ({
 
 /** 优先级映射：0 高 / 1 中 / 2 低（字典 oa_task_priority） */
 export const PRIORITY_MAP = {
-  '0': { label: '高', tone: 'red', color: '#F56C6C', bg: '#FEF0F0', border: '#FBC4C4', bar: '#F56C6C' },
-  '1': { label: '中', tone: 'orange', color: '#E6A23C', bg: '#FDF6EC', border: '#F5DAB1', bar: '#E6A23C' },
-  '2': { label: '低', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#D3D4D6', bar: '#C0C4CC' }
+  '0': { label: '高', tone: 'red', ...toneMeta('red'), bar: toneColor('red') },
+  '1': { label: '中', tone: 'orange', ...toneMeta('orange'), bar: toneColor('orange') },
+  '2': { label: '低', tone: 'gray', ...toneMeta('gray'), bar: toneColor('gray') }
 }
 
 /** 优先级下拉 */
@@ -67,15 +83,15 @@ export const SOURCE_MAP = {
 
 /** 周期规则状态：0 启用 / 1 暂停 / 2 已结束 */
 export const RECUR_STATUS_MAP = {
-  '0': { label: '启用', tone: 'green', color: '#67C23A', bg: '#F0F9EB', border: '#C2E7B0' },
-  '1': { label: '暂停', tone: 'orange', color: '#E6A23C', bg: '#FDF6EC', border: '#F5DAB1' },
-  '2': { label: '已结束', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#D3D4D6' }
+  '0': { label: '启用', tone: 'green', ...toneMeta('green') },
+  '1': { label: '暂停', tone: 'orange', ...toneMeta('orange') },
+  '2': { label: '已结束', tone: 'gray', ...toneMeta('gray') }
 }
 
 /** 项目状态：0 进行中 / 1 已结束（归档） */
 export const PROJECT_STATUS_MAP = {
-  '0': { label: '进行中', tone: 'blue', color: '#409EFF', bg: '#ECF5FF', border: '#B3D8FF' },
-  '1': { label: '已结束', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#D3D4D6' }
+  '0': { label: '进行中', tone: 'blue', ...toneMeta('blue') },
+  '1': { label: '已结束', tone: 'gray', ...toneMeta('gray') }
 }
 
 /** 站内信类型：1 被派任务 / 2 周期提醒 / 3 截止提醒 / 4 验收结果 / 5 系统通知 */
@@ -107,12 +123,12 @@ export const WEEK_DAY_OPTIONS = WEEK_DAY_LABELS.map((label, index) => ({
   short: label
 }))
 
-/** 看板列定义（顺序 = 展示顺序） */
+/** 看板列定义（顺序 = 展示顺序；color 引用 status.js 令牌，暗色可切换） */
 export const BOARD_COLUMNS = [
-  { status: '0', label: '待办', color: '#909399' },
-  { status: '1', label: '进行中', color: '#409EFF' },
-  { status: '2', label: '待验收', color: '#E6A23C' },
-  { status: '3', label: '已完成', color: '#67C23A' }
+  { status: '0', label: '待办', color: toneColor('gray') },
+  { status: '1', label: '进行中', color: toneColor('blue') },
+  { status: '2', label: '待验收', color: toneColor('orange') },
+  { status: '3', label: '已完成', color: toneColor('green') }
 ]
 
 /** 看板列状态 → 落位成功 toast 文案 */
@@ -127,7 +143,7 @@ export const BOARD_STATUS_LABEL = BOARD_COLUMNS.reduce((map, item) => {
 
 /** 任务状态 meta */
 export function statusMeta(status) {
-  return TASK_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#E4E7ED' }
+  return TASK_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', ...toneMeta('gray') }
 }
 
 /** 任务状态文案 */
@@ -137,7 +153,7 @@ export function statusLabel(status) {
 
 /** 优先级 meta */
 export function priorityMeta(priority) {
-  return PRIORITY_MAP[String(priority)] || { label: '—', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#D3D4D6', bar: '#C0C4CC' }
+  return PRIORITY_MAP[String(priority)] || { label: '—', tone: 'gray', ...toneMeta('gray'), bar: toneColor('gray') }
 }
 
 /** 优先级文案 */
@@ -162,12 +178,12 @@ export function sourceTone(source) {
 
 /** 周期规则状态 meta */
 export function recurStatusMeta(status) {
-  return RECUR_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#E4E7ED' }
+  return RECUR_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', ...toneMeta('gray') }
 }
 
 /** 项目状态 meta */
 export function projectStatusMeta(status) {
-  return PROJECT_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', color: '#909399', bg: '#F4F4F5', border: '#E4E7ED' }
+  return PROJECT_STATUS_MAP[String(status)] || { label: '—', tone: 'gray', ...toneMeta('gray') }
 }
 
 /** 站内信类型 meta */
@@ -347,8 +363,16 @@ export function nameInitial(name) {
   return text ? text.slice(0, 1) : '?'
 }
 
-/** 头像背景色（按 userId 稳定取色） */
-const AVATAR_COLORS = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#8E9BFF', '#36CFC9', '#B37FEB']
+/** 头像背景色（按 userId 稳定取色；引用 ui.scss 的 --avatar-* 令牌，暗色下同样可读） */
+const AVATAR_COLORS = [
+  'var(--avatar-1)',
+  'var(--avatar-2)',
+  'var(--avatar-3)',
+  'var(--avatar-4)',
+  'var(--avatar-5)',
+  'var(--avatar-6)',
+  'var(--avatar-7)'
+]
 export function avatarColor(userId) {
   const num = Number(userId) || 1
   return AVATAR_COLORS[Math.abs(num) % AVATAR_COLORS.length]

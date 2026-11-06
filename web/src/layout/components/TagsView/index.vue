@@ -14,7 +14,6 @@
         :class="{ 'active': isActive(tag), 'has-icon': tagsIcon }"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
         class="tags-view-item"
-        :style="tagActiveStyle(tag)"
         @click.middle="!isAffix(tag) ? closeSelectedTag(tag) : ''"
         @contextmenu.prevent="openMenu(tag, $event)"
       >
@@ -93,7 +92,6 @@ const settingsStore = useSettingsStore()
 
 const visitedViews = computed(() => useTagsViewStore().visitedViews)
 const routes = computed(() => usePermissionStore().routes)
-const theme = computed(() => useSettingsStore().theme)
 const tagsIcon = computed(() => useSettingsStore().tagsIcon)
 const tagsViewPersist = computed(() => useSettingsStore().tagsViewPersist)
 const tagsViewStyle = computed(() => useSettingsStore().tagsViewStyle)
@@ -139,14 +137,6 @@ function handleKeyDown(event) {
 
 function isActive(r) {
   return r.path === route.path
-}
-
-function tagActiveStyle(tag) {
-  if (!isActive(tag) || tagsViewStyle.value !== 'card') return {}
-  return {
-    'background-color': theme.value,
-    'border-color': theme.value
-  }
 }
 
 function isAffix(tag) {
@@ -375,18 +365,18 @@ $tags-bar-height: 34px;
 .tags-view-container {
   height: $tags-bar-height;
   width: 100%;
-  background: var(--tags-bg, #fff);
-  border-bottom: 1px solid var(--tags-item-border, #d8dce5);
+  background: var(--rail-bg);
+  border-bottom: 1px solid var(--line);
   display: flex;
   align-items: center;
   overflow: hidden;
 
   $btn-width: 28px;
-  $btn-color: #71717a;
-  $btn-hover-bg: #f0f2f5;
-  $btn-hover-color: #303133;
-  $btn-disabled-color: #c0c4cc;
-  $divider: 1px solid var(--tags-item-border, #d8dce5);
+  $btn-color: var(--ink-muted);
+  $btn-hover-bg: var(--hover-bg);
+  $btn-hover-color: var(--ink);
+  $btn-disabled-color: var(--ink-faint);
+  $divider: 1px solid var(--line);
 
   .tags-nav-btn {
     flex-shrink: 0;
@@ -427,41 +417,41 @@ $tags-bar-height: 34px;
       cursor: pointer;
       height: 26px;
       line-height: 26px;
-      border: 1px solid var(--tags-item-border, #d8dce5);
-      color: var(--tags-item-text, #495060);
-      background: var(--tags-item-bg, #fff);
+      border: 1px solid transparent;
+      color: var(--ink-muted);
+      background: transparent;
       padding: 0 8px;
       font-size: 12px;
       margin-left: 5px;
-      border-radius: 3px;
+      border-radius: var(--r-xs);
       text-decoration: none;
       vertical-align: middle;
-      padding-top: 2px !important;
 
       &:first-of-type { margin-left: 6px; }
       &:last-of-type  { margin-right: 15px; }
     }
   }
 
-  &:not(.tags-view-container--chrome) .tags-view-wrapper .tags-view-item.active {
-    background-color: #42b983;
-    color: #fff;
-    border-color: #42b983;
+  &:not(.tags-view-container--chrome) .tags-view-wrapper .tags-view-item {
+    border-color: transparent;
+    background: transparent;
+    color: var(--ink-muted);
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
 
-    &::before {
-      content: '';
-      background: #fff;
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      position: relative;
-      margin-right: 5px;
+    &:hover {
+      background: var(--hover-bg);
+      color: var(--ink);
+      border-color: transparent;
     }
   }
 
-  &:not(.tags-view-container--chrome) .tags-view-wrapper .tags-view-item.active.has-icon::before {
-    content: none !important;
+  /* 激活页签与侧栏激活项同一套材质：玻璃药丸 + 蓝字，不再用纯色块 */
+  &:not(.tags-view-container--chrome) .tags-view-wrapper .tags-view-item.active {
+    border-color: var(--glass-line) !important;
+    background: var(--pill-bg) !important;
+    color: var(--blue) !important;
+    font-weight: 650;
+    box-shadow: var(--e1), var(--edge-strong);
   }
 
   .tags-action-dropdown {
@@ -495,25 +485,29 @@ $tags-bar-height: 34px;
 
   .contextmenu {
     margin: 0;
-    background: var(--el-bg-color-overlay, #fff);
+    padding: 5px 0;
+    background: var(--float-bg);
     z-index: 3000;
     position: fixed;
     list-style-type: none;
-    padding: 5px 0;
-    border-radius: 4px;
+    border-radius: var(--r-sm);
     font-size: 12px;
     font-weight: 400;
-    color: var(--tags-item-text, #333);
-    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
-    border: 1px solid var(--el-border-color-light, #e4e7ed);
+    color: var(--ink-muted);
+    box-shadow: var(--e3);
+    border: 1px solid var(--glass-line);
+    backdrop-filter: blur(24px) saturate(1.08);
+    -webkit-backdrop-filter: blur(24px) saturate(1.08);
 
     li {
-      margin: 0;
-      padding: 7px 16px;
+      margin: 2px 6px;
+      padding: 7px 12px;
+      border-radius: var(--r-xs);
       cursor: pointer;
 
       &:hover {
-        background: var(--tags-item-hover, #eee);
+        background: var(--hover-bg);
+        color: var(--ink);
       }
     }
   }
@@ -660,10 +654,10 @@ $tags-bar-height: 34px;
       }
       
       &:hover {
-        background-color: var(--tags-close-hover, #b4bccc);
+        background-color: var(--press-bg);
         
         .el-icon-close {
-          color: #fff;
+          color: var(--surface-solid);
         }
       }
     }

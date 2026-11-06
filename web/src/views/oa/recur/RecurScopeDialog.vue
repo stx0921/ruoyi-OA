@@ -94,19 +94,19 @@ defineExpose({ open })
   transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 
   &.on {
-    border-color: #409eff;
-    background: #ecf5ff;
-    box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
+    border-color: #236de9;
+    background: #edf3fe;
+    box-shadow: 0 0 0 2px rgba(35, 109, 233, 0.12);
 
     .rnd {
-      border-color: #409eff;
+      border-color: #236de9;
 
       &::after {
         content: '';
         position: absolute;
         inset: 3px;
         border-radius: 50%;
-        background: #409eff;
+        background: #236de9;
       }
     }
   }

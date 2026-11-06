@@ -28,8 +28,11 @@ public class MemberAccountService
     @Autowired
     private OaCurrentUser currentUser;
 
+    @Autowired
+    private RoleSyncService roleSyncService;
+
     /**
-     * 幂等开通账号：user_name=学号、初始密码=手机号后 6 位、绑定 oa_staff
+     * 幂等开通账号：user_name=学号、初始密码=手机号后 6 位，并按职务同步业务角色
      */
     public SysUser ensureAccount(OaMember member)
     {
@@ -47,6 +50,7 @@ public class MemberAccountService
                 {
                     userMapper.updateUserStatus(exists.getUserId(), "0");
                 }
+                syncRoleByPosition(exists.getUserId(), member.getPosition());
                 return exists;
             }
         }
@@ -61,6 +65,7 @@ public class MemberAccountService
             {
                 userMapper.updateUserStatus(byName.getUserId(), "0");
             }
+            syncRoleByPosition(byName.getUserId(), member.getPosition());
             return byName;
         }
         SysUser user = new SysUser();
@@ -77,12 +82,22 @@ public class MemberAccountService
         user.setCreateBy(currentUser.username());
         user.setRemark("人员录入自动开通，member_id=" + member.getMemberId());
         userMapper.insertUser(user);
-        Long staffRoleId = accountMapper.selectRoleIdByKey(OaMemberConstants.ROLE_STAFF);
-        if (staffRoleId != null)
-        {
-            accountMapper.insertUserRole(user.getUserId(), staffRoleId);
-        }
+        // 关键：按职务绑角色（原来固定绑 oa_staff，导致"部长"通过导入/入会审批开号后仍是干事权限）
+        syncRoleByPosition(user.getUserId(), member.getPosition());
         return user;
+    }
+
+    /**
+     * 按职务同步业务角色（1/2 会长副会长 → oa_president；3/4 部长副部长 → oa_minister；5 干事 → oa_staff）
+     * position 为空时不动，避免把已有角色误降级
+     */
+    private void syncRoleByPosition(Long userId, String position)
+    {
+        if (userId == null || StringUtils.isEmpty(position))
+        {
+            return;
+        }
+        roleSyncService.sync(userId, position);
     }
 
     /**

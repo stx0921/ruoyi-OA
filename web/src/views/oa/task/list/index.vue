@@ -29,12 +29,12 @@
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="queryParams.status" placeholder="全部" clearable style="width: 120px">
-            <el-option v-for="item in TASK_STATUS_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="优先级" prop="priority">
           <el-select v-model="queryParams.priority" placeholder="全部" clearable style="width: 120px">
-            <el-option v-for="item in PRIORITY_OPTIONS" :key="item.value" :label="item.label" :value="item.value" />
+            <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="标签" prop="tag">
@@ -295,6 +295,7 @@ import {
   overdueText,
   priorityLabel,
   priorityMeta,
+  resolveOptions,
   rowActions,
   searchMemberOptions
 } from '@/utils/oaTask'
@@ -302,7 +303,10 @@ import { parseTime } from '@/utils/ruoyi'
 
 const { proxy } = getCurrentInstance()
 const route = useRoute()
-const { oa_task_tag } = useDict('oa_task_tag')
+const { oa_task_tag, oa_task_status, oa_task_priority } = useDict('oa_task_tag', 'oa_task_status', 'oa_task_priority')
+
+const statusOptions = computed(() => resolveOptions(oa_task_status.value, TASK_STATUS_OPTIONS))
+const priorityOptions = computed(() => resolveOptions(oa_task_priority.value, PRIORITY_OPTIONS))
 
 const loading = ref(false)
 const error = ref(false)
@@ -407,8 +411,12 @@ function handlePageChange() {
   getList()
 }
 
-/** 加载项目下拉（无项目权限时静默降级） */
+/** 加载项目下拉；无项目权限时直接跳过，避免 403 提示 */
 function loadProjects() {
+  if (!proxy.$auth.hasPermi('oa:project:list')) {
+    projectOptions.value = []
+    return
+  }
   listProject({ pageNum: 1, pageSize: 200 })
     .then(response => {
       projectOptions.value = (response.rows || []).map(project => ({ projectId: project.projectId, name: project.name }))
@@ -730,7 +738,7 @@ onMounted(() => {
     height: 48px;
     padding: 0 14px;
     margin-bottom: 12px;
-    background: #ecf5ff;
+    background: #edf3fe;
     border-radius: 4px;
 
     .sel-tag {
@@ -738,7 +746,7 @@ onMounted(() => {
       border: 1px solid #b3d8ff;
       border-radius: 3px;
       background: #fff;
-      color: #337ecc;
+      color: #1d61d5;
       font-size: 12px;
     }
   }
@@ -759,17 +767,17 @@ onMounted(() => {
     cursor: pointer;
 
     &:hover {
-      color: #409eff;
+      color: #236de9;
     }
   }
 
   .proj-tag {
     display: inline-block;
     padding: 1px 6px;
-    border: 1px solid #d9ecff;
+    border: 1px solid #dbe7fc;
     border-radius: 3px;
-    background: #ecf5ff;
-    color: #337ecc;
+    background: #edf3fe;
+    color: #1d61d5;
     font-size: 11px;
     white-space: nowrap;
   }

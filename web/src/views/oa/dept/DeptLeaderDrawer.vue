@@ -351,7 +351,7 @@ function handleSave() {
   margin-bottom: 18px;
   border-radius: 4px;
   background: #f4f8ff;
-  border: 1px solid #d9ecff;
+  border: 1px solid #dbe7fc;
   font-size: 12px;
   line-height: 1.7;
   color: #606266;

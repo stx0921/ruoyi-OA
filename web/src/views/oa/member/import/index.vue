@@ -787,13 +787,13 @@ const filteredErrorRows = computed(() => {
 }
 
 .import-step.is-done .import-step__circle {
-  background: #409eff;
-  border-color: #409eff;
+  background: #236de9;
+  border-color: #236de9;
   color: #fff;
 }
 
 .import-step.is-done .import-step__bar {
-  background: #409eff;
+  background: #236de9;
 }
 
 .import-step.is-done .import-step__text {
@@ -801,13 +801,13 @@ const filteredErrorRows = computed(() => {
 }
 
 .import-step.is-current .import-step__circle {
-  border-color: #409eff;
-  color: #409eff;
-  box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.15);
+  border-color: #236de9;
+  color: #236de9;
+  box-shadow: 0 0 0 4px rgba(35, 109, 233, 0.15);
 }
 
 .import-step.is-current .import-step__text {
-  color: #409eff;
+  color: #236de9;
   font-weight: 600;
 }
 
@@ -823,9 +823,9 @@ const filteredErrorRows = computed(() => {
   color: #606266;
 
   &--blue {
-    background: #ecf5ff;
+    background: #edf3fe;
     border-color: #b3d8ff;
-    color: #409eff;
+    color: #236de9;
   }
 
   &--red {
@@ -893,7 +893,7 @@ const filteredErrorRows = computed(() => {
   transition: border-color 0.2s, background 0.2s;
 
   &:hover {
-    border-color: #409eff;
+    border-color: #236de9;
     background: #f5faff;
   }
 }
@@ -909,7 +909,7 @@ const filteredErrorRows = computed(() => {
 }
 
 .import-dropzone__link {
-  color: #409eff;
+  color: #236de9;
 }
 
 .import-dropzone__sub {
@@ -960,7 +960,7 @@ const filteredErrorRows = computed(() => {
 .import-progress__text {
   margin-bottom: 8px;
   font-size: 13px;
-  color: #409eff;
+  color: #236de9;
 }
 
 /* ---------- 校验结果数字块 ---------- */
@@ -1021,11 +1021,11 @@ const filteredErrorRows = computed(() => {
 
 .import-result-card.is-info,
 .import-result-card.is-total {
-  background: #ecf5ff;
+  background: #edf3fe;
   border-color: #b3d8ff;
 
   .import-result-card__num {
-    color: #409eff;
+    color: #236de9;
   }
 }
 

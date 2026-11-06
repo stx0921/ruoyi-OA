@@ -17,6 +17,15 @@
 <script setup>
 import { scrollTo } from '@/utils/scroll-to'
 
+/** 页面滚动容器：固定 Header 时是 .app-main 内部滚动，否则退回 window */
+function scrollToTop() {
+  const main = document.querySelector('.app-main')
+  if (main && main.scrollHeight > main.clientHeight) {
+    main.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+  scrollTo(0, 0)
+}
 const props = defineProps({
   total: {
     required: true,
@@ -83,21 +92,21 @@ function handleSizeChange(val) {
   }
   emit('pagination', { page: currentPage.value, limit: val })
   if (props.autoScroll) {
-    scrollTo(0, 800)
+    scrollToTop()
   }
 }
 
 function handleCurrentChange(val) {
   emit('pagination', { page: val, limit: pageSize.value })
   if (props.autoScroll) {
-    scrollTo(0, 800)
+    scrollToTop()
   }
 }
 </script>
 
 <style scoped>
 .pagination-container {
-  background: #fff;
+  background: transparent;
 }
 .pagination-container.hidden {
   display: none;

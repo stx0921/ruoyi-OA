@@ -559,7 +559,7 @@ onBeforeUnmount(() => {
 }
 
 .oa-tl__item.is-blue .oa-tl__dot {
-  background: #409eff;
+  background: #236de9;
 }
 
 .oa-tl__body {
