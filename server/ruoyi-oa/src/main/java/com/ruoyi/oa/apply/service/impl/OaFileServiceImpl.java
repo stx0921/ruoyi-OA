@@ -46,6 +46,12 @@ public class OaFileServiceImpl implements IOaFileService
     /** 业务类型：任务附件 */
     public static final String BIZ_TASK = "task";
 
+    /** 业务类型：工单临时附件（提交前） */
+    public static final String BIZ_FEEDBACK_TEMP = "feedback_temp";
+
+    /** 业务类型：工单正式附件（提交后绑定） */
+    public static final String BIZ_FEEDBACK = "feedback";
+
     /** 照片允许扩展名 */
     private static final String[] PHOTO_EXTENSION = { "jpg", "jpeg", "png" };
 
@@ -54,6 +60,15 @@ public class OaFileServiceImpl implements IOaFileService
 
     /** 任务附件允许扩展名 */
     private static final String[] TASK_EXTENSION = { "jpg", "jpeg", "png", "pdf", "docx", "xlsx" };
+
+    /** 工单图片允许扩展名 */
+    private static final String[] FEEDBACK_IMAGE_EXTENSION = { "jpg", "jpeg", "png", "gif", "webp" };
+
+    /** 工单 Word 允许扩展名 */
+    private static final String[] FEEDBACK_DOC_EXTENSION = { "doc", "docx" };
+
+    /** 工单附件全部允许扩展名 */
+    private static final String[] FEEDBACK_EXTENSION = { "jpg", "jpeg", "png", "gif", "webp", "doc", "docx" };
 
     /** 照片最大 2MB */
     private static final long PHOTO_MAX_SIZE = 2 * 1024 * 1024L;
@@ -64,12 +79,18 @@ public class OaFileServiceImpl implements IOaFileService
     /** 任务附件最大 10MB */
     private static final long TASK_MAX_SIZE = 10 * 1024 * 1024L;
 
+    /** 工单图片最大 5MB */
+    private static final long FEEDBACK_IMAGE_MAX_SIZE = 5 * 1024 * 1024L;
+
+    /** 工单 Word 最大 20MB */
+    private static final long FEEDBACK_DOC_MAX_SIZE = 20 * 1024 * 1024L;
+
     /** H5/PC 上传目录（相对 ruoyi.profile） */
     private static final String OA_UPLOAD_DIR = "/oa/upload";
 
     /** 常见文件扩展名（用于解析存储名） */
     private static final Collection<String> ALLOWED_BIZ_TYPES = Arrays.asList(BIZ_MEMBER_PHOTO, BIZ_MEMBER_CARD,
-            BIZ_TASK);
+            BIZ_TASK, BIZ_FEEDBACK_TEMP, BIZ_FEEDBACK);
 
     @Autowired
     private OaFileMapper fileMapper;
@@ -83,7 +104,8 @@ public class OaFileServiceImpl implements IOaFileService
         assertUploadAllowed(file, bizType);
         String baseDir = RuoYiConfig.getProfile() + OA_UPLOAD_DIR;
         String[] allowed = BIZ_MEMBER_CARD.equals(bizType) ? CARD_EXTENSION
-                : (BIZ_TASK.equals(bizType) ? TASK_EXTENSION : PHOTO_EXTENSION);
+                : (BIZ_TASK.equals(bizType) ? TASK_EXTENSION
+                        : (isFeedbackBiz(bizType) ? FEEDBACK_EXTENSION : PHOTO_EXTENSION));
         String filePath;
         try
         {
@@ -207,6 +229,12 @@ public class OaFileServiceImpl implements IOaFileService
     @Override
     public void download(Long fileId, HttpServletResponse response)
     {
+        writeFile(fileId, true, response);
+    }
+
+    @Override
+    public void writeFile(Long fileId, boolean attachment, HttpServletResponse response)
+    {
         OaFile file = selectFileById(fileId);
         if (file == null)
         {
@@ -222,13 +250,47 @@ public class OaFileServiceImpl implements IOaFileService
         {
             String downloadName = StringUtils.isNotEmpty(file.getOriginalName()) ? file.getOriginalName()
                     : file.getFileName();
-            FileUtils.setAttachmentResponseHeader(response, downloadName);
+            if (attachment)
+            {
+                FileUtils.setAttachmentResponseHeader(response, downloadName);
+            }
+            else
+            {
+                response.setContentType(contentType(downloadName));
+                response.setHeader("Content-Disposition", "inline");
+            }
             FileUtils.writeBytes(absPath, response.getOutputStream());
         }
         catch (Exception e)
         {
-            log.error("附件下载失败 fileId={}", fileId, e);
+            log.error("附件输出失败 fileId={}", fileId, e);
             throw new ServiceException("附件下载失败，请稍后再试", 500);
+        }
+    }
+
+    /**
+     * 推断内联预览 Content-Type（图片、Word）
+     */
+    private String contentType(String fileName)
+    {
+        String extension = getExtension(fileName);
+        switch (extension)
+        {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "webp":
+                return "image/webp";
+            case "doc":
+                return "application/msword";
+            case "docx":
+                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            default:
+                return "application/octet-stream";
         }
     }
 
@@ -262,6 +324,20 @@ public class OaFileServiceImpl implements IOaFileService
             throw new ServiceException("不支持的业务类型：" + bizType, 400);
         }
         String extension = getExtension(file.getOriginalFilename());
+        if (isFeedbackBiz(bizType))
+        {
+            if (!Arrays.asList(FEEDBACK_EXTENSION).contains(extension))
+            {
+                throw new ServiceException("工单附件仅支持 jpg/jpeg/png/gif/webp 或 doc/docx", 400);
+            }
+            boolean doc = Arrays.asList(FEEDBACK_DOC_EXTENSION).contains(extension);
+            long maxSize = doc ? FEEDBACK_DOC_MAX_SIZE : FEEDBACK_IMAGE_MAX_SIZE;
+            if (file.getSize() > maxSize)
+            {
+                throw new ServiceException(doc ? "Word 附件不能超过 20MB" : "图片不能超过 5MB", 400);
+            }
+            return;
+        }
         if (BIZ_TASK.equals(bizType))
         {
             if (!Arrays.asList(TASK_EXTENSION).contains(extension))
@@ -293,6 +369,11 @@ public class OaFileServiceImpl implements IOaFileService
             }
             throw new ServiceException("学生证仅支持 jpg / png / pdf，且不超过 5MB", 400);
         }
+    }
+
+    private boolean isFeedbackBiz(String bizType)
+    {
+        return BIZ_FEEDBACK.equals(bizType) || BIZ_FEEDBACK_TEMP.equals(bizType);
     }
 
     private String getExtension(String fileName)

@@ -100,7 +100,8 @@ export const NOTIFY_TYPE_MAP = {
   '2': { label: '周期提醒', tone: 'orange', icon: 'Refresh' },
   '3': { label: '截止提醒', tone: 'orange', icon: 'AlarmClock' },
   '4': { label: '验收结果', tone: 'green', icon: 'CircleCheck' },
-  '5': { label: '系统通知', tone: 'gray', icon: 'Bell' }
+  '5': { label: '系统通知', tone: 'gray', icon: 'Bell' },
+  'feedback_reply': { label: '工单回复', tone: 'green', icon: 'ChatDotRound' }
 }
 
 /** 标签字典兜底（oa_task_tag，字典接口未就绪时仍可展示） */

@@ -142,6 +142,8 @@ function handleClick(item) {
   visible.value = false
   if (item.bizType === 'task' && item.bizId) {
     router.push({ path: '/task/list', query: { taskId: item.bizId } })
+  } else if (item.bizType === 'feedback') {
+    router.push({ path: '/feedback/list' })
   }
 }
 

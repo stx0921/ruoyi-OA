@@ -40,6 +40,11 @@ public class OaFileController extends BaseController
     public AjaxResult upload(@RequestParam("file") MultipartFile file,
             @RequestParam(value = "bizType", required = false, defaultValue = "member_photo") String bizType)
     {
+        // 工单附件只允许走 /oa/feedback/upload（做魔数/大小/业务归属校验），避免绕过
+        if (bizType != null && bizType.startsWith("feedback"))
+        {
+            throw new com.ruoyi.common.exception.ServiceException("工单附件请使用 /oa/feedback/upload 上传", 400);
+        }
         OaFile oaFile = fileService.upload(file, bizType, getUserId());
         FileUploadVO vo = new FileUploadVO();
         vo.setFileId(oaFile.getFileId());

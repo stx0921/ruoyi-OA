@@ -57,6 +57,11 @@ public interface IOaFileService
     void download(Long fileId, HttpServletResponse response);
 
     /**
+     * 鉴权输出附件（attachment=true 强制下载；false 内联预览，用于工单图片）
+     */
+    void writeFile(Long fileId, boolean attachment, HttpServletResponse response);
+
+    /**
      * 绑定附件到业务（任务保存/提交/验收时回填 biz_type=task、biz_id=taskId）
      *
      * @param fileId  附件 ID

@@ -3,7 +3,9 @@ package com.ruoyi.framework.security.filter;
 import java.io.IOException;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,7 +33,39 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException
     {
-        LoginUser loginUser = tokenService.getLoginUser(request);
+        HttpServletRequest authRequest = request;
+        // 工单附件由 <img>/<a> 直接访问，浏览器的图片/链接请求无法携带 Authorization 头：
+        // 仅对该 GET 预览接口回退读取前端登录 Cookie（RuoYiOA-Token），不扩大到其它接口。
+        if ("GET".equalsIgnoreCase(request.getMethod())
+                && request.getRequestURI().contains("/oa/feedback/attachment/")
+                && StringUtils.isEmpty(request.getHeader("Authorization")))
+        {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null)
+            {
+                for (Cookie cookie : cookies)
+                {
+                    if ("RuoYiOA-Token".equals(cookie.getName()) && StringUtils.isNotEmpty(cookie.getValue()))
+                    {
+                        final String token = cookie.getValue();
+                        authRequest = new HttpServletRequestWrapper(request)
+                        {
+                            @Override
+                            public String getHeader(String name)
+                            {
+                                if ("Authorization".equalsIgnoreCase(name))
+                                {
+                                    return "Bearer " + token;
+                                }
+                                return super.getHeader(name);
+                            }
+                        };
+                        break;
+                    }
+                }
+            }
+        }
+        LoginUser loginUser = tokenService.getLoginUser(authRequest);
         if (StringUtils.isNotNull(loginUser) && StringUtils.isNull(SecurityUtils.getAuthentication()))
         {
             tokenService.verifyToken(loginUser);

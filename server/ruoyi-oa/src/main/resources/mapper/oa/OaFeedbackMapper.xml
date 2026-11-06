@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.feedback.mapper.OaFeedbackMapper">
+
+    <resultMap type="com.ruoyi.oa.feedback.domain.OaFeedback" id="OaFeedbackResult">
+        <result property="feedbackId"       column="feedback_id"/>
+        <result property="ticketNo"         column="ticket_no"/>
+        <result property="type"             column="type"/>
+        <result property="title"            column="title"/>
+        <result property="moduleId"         column="module_id"/>
+        <result property="moduleName"       column="module_name"/>
+        <result property="pageId"           column="page_id"/>
+        <result property="pageName"         column="page_name"/>
+        <result property="content"          column="content"/>
+        <result property="steps"            column="steps"/>
+        <result property="expectResult"     column="expect_result"/>
+        <result property="isAnonymous"      column="is_anonymous"/>
+        <result property="status"           column="status"/>
+        <result property="submitterId"      column="submitter_id"/>
+        <result property="submitterName"    column="submitter_name"/>
+        <result property="submitTime"       column="submit_time"/>
+        <result property="replyContent"     column="reply_content"/>
+        <result property="replyBy"          column="reply_by"/>
+        <result property="replyByName"      column="reply_by_name"/>
+        <result property="replyTime"        column="reply_time"/>
+        <result property="delFlag"          column="del_flag"/>
+        <result property="createTime"       column="create_time"/>
+        <result property="updateTime"       column="update_time"/>
+        <result property="attachmentCount"  column="attachment_count"/>
+    </resultMap>
+
+    <sql id="selectFeedbackColumns">
+        f.feedback_id, f.ticket_no, f.type, f.title, f.module_id, f.module_name, f.page_id, f.page_name,
+        f.content, f.steps, f.expect_result, f.is_anonymous, f.status, f.submitter_id, f.submitter_name,
+        f.submit_time, f.reply_content, f.reply_by, f.reply_by_name, f.reply_time, f.del_flag,
+        f.create_time, f.update_time,
+        (select count(1) from oa_file x where x.biz_type = 'feedback' and x.biz_id = f.feedback_id) as attachment_count
+    </sql>
+
+    <!-- 列表只取展示列，避免把大字段 content/steps/expect_result 查出来 -->
+    <sql id="selectListColumns">
+        f.feedback_id, f.ticket_no, f.type, f.title, f.module_id, f.module_name, f.page_id, f.page_name,
+        f.is_anonymous, f.status, f.submitter_id, f.submitter_name,
+        f.submit_time, f.reply_content, f.reply_by_name, f.reply_time, f.del_flag,
+        f.create_time, f.update_time,
+        (select count(1) from oa_file x where x.biz_type = 'feedback' and x.biz_id = f.feedback_id) as attachment_count
+    </sql>
+
+    <select id="selectFeedbackList" parameterType="com.ruoyi.oa.feedback.dto.FeedbackQuery" resultMap="OaFeedbackResult">
+        select <include refid="selectListColumns"/>
+        from oa_feedback f
+        where f.del_flag = '0'
+        <if test="scope != null and scope == 'mine'">
+            and f.submitter_id = #{currentUserId}
+        </if>
+        <if test="type != null and type != ''">
+            and f.type = #{type}
+        </if>
+        <if test="status != null and status != ''">
+            and f.status = #{status}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (f.ticket_no like concat('%', #{keyword}, '%')
+                 or f.title like concat('%', #{keyword}, '%')
+                 or f.content like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and f.submit_time &gt;= concat(#{beginTime}, ' 00:00:00')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and f.submit_time &lt;= concat(#{endTime}, ' 23:59:59')
+        </if>
+        order by f.submit_time desc, f.feedback_id desc
+    </select>
+
+    <select id="selectManageList" parameterType="com.ruoyi.oa.feedback.dto.FeedbackQuery" resultMap="OaFeedbackResult">
+        select <include refid="selectListColumns"/>
+        from oa_feedback f
+        where f.del_flag = '0'
+        <if test="type != null and type != ''">
+            and f.type = #{type}
+        </if>
+        <if test="status != null and status != ''">
+            and f.status = #{status}
+        </if>
+        <if test="submitterId != null">
+            and f.submitter_id = #{submitterId}
+        </if>
+        <if test="isAnonymous != null and isAnonymous != ''">
+            and f.is_anonymous = #{isAnonymous}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (f.ticket_no like concat('%', #{keyword}, '%')
+                 or f.title like concat('%', #{keyword}, '%')
+                 or f.content like concat('%', #{keyword}, '%')
+                 or f.submitter_name like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="beginTime != null and beginTime != ''">
+            and f.submit_time &gt;= concat(#{beginTime}, ' 00:00:00')
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and f.submit_time &lt;= concat(#{endTime}, ' 23:59:59')
+        </if>
+        order by f.status asc, f.submit_time desc, f.feedback_id desc
+    </select>
+
+    <select id="selectFeedbackById" resultMap="OaFeedbackResult">
+        select <include refid="selectFeedbackColumns"/>
+        from oa_feedback f
+        where f.feedback_id = #{feedbackId}
+    </select>
+
+    <select id="selectFeedbackByIdForUpdate" resultMap="OaFeedbackResult">
+        select f.feedback_id, f.ticket_no, f.type, f.title, f.module_id, f.module_name, f.page_id, f.page_name,
+               f.content, f.steps, f.expect_result, f.is_anonymous, f.status, f.submitter_id, f.submitter_name,
+               f.submit_time, f.reply_content, f.reply_by, f.reply_by_name, f.reply_time, f.del_flag,
+               f.create_time, f.update_time
+        from oa_feedback f
+        where f.feedback_id = #{feedbackId} and f.del_flag = '0'
+        for update
+    </select>
+
+    <select id="selectFeedbackByIds" resultMap="OaFeedbackResult">
+        select f.feedback_id, f.ticket_no, f.type, f.title, f.module_id, f.module_name, f.page_id, f.page_name,
+               f.content, f.steps, f.expect_result, f.is_anonymous, f.status, f.submitter_id, f.submitter_name,
+               f.submit_time, f.reply_content, f.reply_by, f.reply_by_name, f.reply_time, f.del_flag,
+               f.create_time, f.update_time
+        from oa_feedback f
+        where f.del_flag = '0' and f.feedback_id in
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <insert id="insertFeedback" parameterType="com.ruoyi.oa.feedback.domain.OaFeedback" useGeneratedKeys="true" keyProperty="feedbackId">
+        insert into oa_feedback (
+            ticket_no, type, title, module_id, module_name, page_id, page_name,
+            content, steps, expect_result, is_anonymous, status,
+            submitter_id, submitter_name, submit_time, del_flag, create_time, update_time
+        ) values (
+            #{ticketNo}, #{type}, #{title}, #{moduleId}, #{moduleName}, #{pageId}, #{pageName},
+            #{content}, #{steps}, #{expectResult}, #{isAnonymous}, #{status},
+            #{submitterId}, #{submitterName}, #{submitTime}, '0', sysdate(), sysdate()
+        )
+    </insert>
+
+    <update id="withdrawFeedback">
+        update oa_feedback
+        set del_flag = '2', update_time = sysdate()
+        where feedback_id = #{feedbackId}
+          and submitter_id = #{submitterId}
+          and status = '0'
+          and del_flag = '0'
+    </update>
+
+    <update id="replyFeedback" parameterType="com.ruoyi.oa.feedback.domain.OaFeedback">
+        update oa_feedback
+        set status = '1',
+            reply_content = #{replyContent},
+            reply_by = #{replyBy},
+            reply_by_name = #{replyByName},
+            reply_time = sysdate(),
+            update_time = sysdate()
+        where feedback_id = #{feedbackId} and del_flag = '0'
+    </update>
+
+    <update id="reopenFeedback">
+        update oa_feedback
+        set status = '0',
+            reply_content = null,
+            reply_by = null,
+            reply_by_name = null,
+            reply_time = null,
+            update_time = sysdate()
+        where feedback_id = #{feedbackId} and del_flag = '0'
+    </update>
+
+    <update id="batchReply">
+        update oa_feedback
+        set status = '1',
+            reply_content = #{replyContent},
+            reply_by = #{replyBy},
+            reply_by_name = #{replyByName},
+            reply_time = sysdate(),
+            update_time = sysdate()
+        where del_flag = '0'
+          and status = '0'
+          and feedback_id in
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="deleteFeedbackByIds">
+        update oa_feedback
+        set del_flag = '1', update_time = sysdate()
+        where del_flag = '0' and feedback_id in
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectStats" resultType="com.ruoyi.oa.feedback.vo.FeedbackStatsVO">
+        select
+            count(case when status = '0' then 1 end) as pendingCount,
+            count(case when status = '1' then 1 end) as repliedCount,
+            count(case when submit_time &gt;= curdate() then 1 end) as todayCount,
+            count(case when submit_time &gt;= date_sub(curdate(), interval weekday(curdate()) day) then 1 end) as weekCount
+        from oa_feedback
+        where del_flag = '0'
+    </select>
+
+    <select id="selectMaxTicketNoSeq" resultType="Long">
+        select max(cast(substring(ticket_no, 11) as unsigned))
+        from oa_feedback
+        where ticket_no like concat('FB', #{datePart}, '%')
+    </select>
+
+    <select id="selectMenuOptions" resultType="com.ruoyi.oa.feedback.vo.FeedbackModuleVO">
+        select menu_id as id, menu_name as name, parent_id as parentId, menu_type as menuType
+        from sys_menu
+        where status = '0' and visible = '0' and menu_type in ('M', 'C')
+        order by menu_type desc, parent_id asc, order_num asc
+    </select>
+
+    <select id="selectMenuById" resultType="com.ruoyi.oa.feedback.vo.FeedbackModuleVO">
+        select menu_id as id, menu_name as name, parent_id as parentId, menu_type as menuType
+        from sys_menu
+        where menu_id = #{menuId}
+    </select>
+
+</mapper>
