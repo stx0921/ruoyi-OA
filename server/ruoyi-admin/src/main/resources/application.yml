@@ -195,4 +195,8 @@ oa:
     retire-cancel-batch: 100
     # 截止前 N 天提醒（基线=1）
     due-remind-days: 1
+  # 志愿活动
+  volunteer:
+    # H5 报名页地址（二维码内容 = 该地址 + /volunteer/apply?activityId=x）
+    h5-base-url: http://localhost:80
 

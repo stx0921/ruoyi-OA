@@ -44,6 +44,9 @@ const usePermissionStore = defineStore(
             const defaultRoutes = filterAsyncRouter(defaultData)
             const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
             asyncRoutes.forEach(route => { router.addRoute(route) })
+            // 兜底：不同目录下相同 path 会生成同名路由（如 /task/list 与 /feedback/list 都叫 List），
+            // vue-router 4 会移除先注册的那条导致页面 404；这里对重复名称加父级前缀
+            dedupeRouteNames(rewriteRoutes)
             this.setRoutes(rewriteRoutes)
             this.setSidebarRouters(constantRoutes.concat(sidebarRoutes))
             this.setDefaultRoutes(sidebarRoutes)
@@ -55,9 +58,46 @@ const usePermissionStore = defineStore(
     }
   })
 
+/**
+ * 路由名称去重兜底
+ *
+ * 后端 route_name 为空时会用 path 首字母大写当路由名，
+ * 不同目录下相同的 path（如 /task/list、/feedback/list 都叫 List）会生成同名路由，
+ * vue-router 4 遇到同名会移除先注册的记录 → 先注册的页面打开 404。
+ * 这里对重复名称加父级 path 前缀重命名（只影响路由匹配，不影响菜单/权限/标题）。
+ * 根治方式仍是：菜单管理里给这类菜单配置唯一的「路由名称」。
+ */
+function dedupeRouteNames(routes) {
+  const seen = new Set()
+  const capitalize = value => (value ? value.charAt(0).toUpperCase() + value.slice(1) : '')
+  const walk = (list, parentPath) => {
+    ;(list || []).forEach(route => {
+      if (route.name) {
+        if (seen.has(route.name)) {
+          const prefix = capitalize((parentPath || '').replace(/[^a-zA-Z0-9]/g, ''))
+          let newName = (prefix || 'Route') + route.name
+          let index = 2
+          while (seen.has(newName)) {
+            newName = (prefix || 'Route') + route.name + index++
+          }
+          if (import.meta.env.DEV) {
+            console.warn(`[路由] 路由名称 "${route.name}" 重复，已重命名为 "${newName}"；建议在菜单管理中配置唯一的「路由名称」`)
+          }
+          route.name = newName
+        }
+        seen.add(route.name)
+      }
+      if (route.children && route.children.length) {
+        walk(route.children, route.path || parentPath)
+      }
+    })
+  }
+  walk(routes, '')
+  return routes
+}
+
 // 遍历后台传来的路由字符串，转换为组件对象
-function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
-  return asyncRouterMap.filter(route => {
+function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {  return asyncRouterMap.filter(route => {
     if (type && route.children) {
       route.children = filterChildren(route.children)
     }

@@ -143,6 +143,20 @@ export const constantRoutes = [
         meta: { title: '站内信', activeMenu: '/task/my' }
       }
     ]
+  },
+  {
+    // 志愿活动 H5：免登录报名（二维码入口）
+    path: '/volunteer/apply',
+    component: () => import('@/views/volunteer/h5/apply.vue'),
+    hidden: true,
+    meta: { title: '志愿活动报名' }
+  },
+  {
+    // 志愿活动 H5：免登录报名结果查询
+    path: '/volunteer/query',
+    component: () => import('@/views/volunteer/h5/query.vue'),
+    hidden: true,
+    meta: { title: '报名结果查询' }
   }
 ]
 

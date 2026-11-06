@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.volunteer.mapper.VolunteerSignupMapper">
+
+    <resultMap type="com.ruoyi.oa.volunteer.domain.VolunteerSignup" id="VolunteerSignupResult">
+        <result property="signupId"       column="signup_id"/>
+        <result property="activityId"     column="activity_id"/>
+        <result property="name"           column="name"/>
+        <result property="studentNo"      column="student_no"/>
+        <result property="college"        column="college"/>
+        <result property="major"          column="major"/>
+        <result property="signupTime"     column="signup_time"/>
+        <result property="auditStatus"    column="audit_status"/>
+        <result property="auditRemark"    column="audit_remark"/>
+        <result property="auditorId"      column="auditor_id"/>
+        <result property="auditorName"    column="auditor_name"/>
+        <result property="auditTime"      column="audit_time"/>
+        <result property="activityName"   column="activity_name"/>
+        <result property="durationHours"  column="duration_hours"/>
+    </resultMap>
+
+    <select id="selectSignupList" parameterType="com.ruoyi.oa.volunteer.dto.SignupQuery" resultMap="VolunteerSignupResult">
+        select s.signup_id, s.activity_id, s.name, s.student_no, s.college, s.major,
+               s.signup_time, s.audit_status, s.audit_remark, s.auditor_id, s.auditor_name, s.audit_time,
+               a.name as activity_name, a.duration_hours
+        from oa_volunteer_signup s
+        join oa_volunteer_activity a on a.activity_id = s.activity_id and a.del_flag = '0'
+        where s.activity_id = #{activityId}
+        <if test="auditStatus != null and auditStatus != ''">
+            and s.audit_status = #{auditStatus}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (s.name like concat('%', #{keyword}, '%') or s.student_no like concat(#{keyword}, '%'))
+        </if>
+        order by s.signup_time desc, s.signup_id desc
+    </select>
+
+    <insert id="insertSignup" parameterType="com.ruoyi.oa.volunteer.domain.VolunteerSignup" useGeneratedKeys="true" keyProperty="signupId">
+        insert into oa_volunteer_signup (
+            activity_id, name, student_no, college, major, signup_time, audit_status
+        ) values (
+            #{activityId}, #{name}, #{studentNo}, #{college}, #{major}, sysdate(), '0'
+        )
+    </insert>
+
+    <update id="auditSignup">
+        update oa_volunteer_signup
+        set audit_status = #{auditStatus},
+            audit_remark = #{auditRemark},
+            auditor_id = #{auditorId},
+            auditor_name = #{auditorName},
+            audit_time = sysdate()
+        where signup_id in
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+          and exists (select 1 from oa_volunteer_activity a
+                      where a.activity_id = oa_volunteer_signup.activity_id and a.del_flag = '0')
+    </update>
+
+    <select id="selectSignupForResult" resultMap="VolunteerSignupResult">
+        select s.signup_id, s.activity_id, s.name, s.student_no, s.college, s.major,
+               s.signup_time, s.audit_status, s.audit_remark, s.auditor_id, s.auditor_name, s.audit_time,
+               a.name as activity_name, a.duration_hours
+        from oa_volunteer_signup s
+        join oa_volunteer_activity a on a.activity_id = s.activity_id and a.del_flag = '0'
+        where s.student_no = #{studentNo}
+          and s.name = #{name}
+        <if test="activityId != null">
+            and s.activity_id = #{activityId}
+        </if>
+        order by s.signup_time desc, s.signup_id desc
+        limit 1
+    </select>
+
+</mapper>

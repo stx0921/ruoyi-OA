@@ -12,7 +12,7 @@ import usePermissionStore from '@/store/modules/permission'
 
 NProgress.configure({ showSpinner: false })
 
-const whiteList = ['/login', '/register', '/h5/apply', '/h5/progress']
+const whiteList = ['/login', '/register', '/h5/apply', '/h5/progress', '/volunteer/apply', '/volunteer/query']
 
 const isWhiteList = (path) => {
   return whiteList.some(pattern => isPathMatch(pattern, path))

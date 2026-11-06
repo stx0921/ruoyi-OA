@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.volunteer.mapper.VolunteerActivityMapper">
+
+    <resultMap type="com.ruoyi.oa.volunteer.domain.VolunteerActivity" id="VolunteerActivityResult">
+        <result property="activityId"      column="activity_id"/>
+        <result property="activityNo"      column="activity_no"/>
+        <result property="name"            column="name"/>
+        <result property="location"        column="location"/>
+        <result property="capacity"        column="capacity"/>
+        <result property="durationHours"   column="duration_hours"/>
+        <result property="startTime"       column="start_time"/>
+        <result property="endTime"         column="end_time"/>
+        <result property="signupDeadline"  column="signup_deadline"/>
+        <result property="content"         column="content"/>
+        <result property="status"          column="status"/>
+        <result property="creatorId"       column="creator_id"/>
+        <result property="creatorName"     column="creator_name"/>
+        <result property="delFlag"         column="del_flag"/>
+        <result property="createTime"      column="create_time"/>
+        <result property="updateTime"      column="update_time"/>
+        <result property="signupCount"     column="signup_count"/>
+        <result property="passCount"       column="pass_count"/>
+        <result property="pendingCount"    column="pending_count"/>
+        <result property="rejectCount"     column="reject_count"/>
+    </resultMap>
+
+    <sql id="selectActivityVo">
+        select a.activity_id, a.activity_no, a.name, a.location, a.capacity, a.duration_hours,
+               a.start_time, a.end_time, a.signup_deadline, a.content, a.status,
+               a.creator_id, a.creator_name, a.del_flag, a.create_time, a.update_time,
+               (select count(1) from oa_volunteer_signup s where s.activity_id = a.activity_id) as signup_count,
+               (select count(1) from oa_volunteer_signup s where s.activity_id = a.activity_id and s.audit_status = '1') as pass_count,
+               (select count(1) from oa_volunteer_signup s where s.activity_id = a.activity_id and s.audit_status = '0') as pending_count,
+               (select count(1) from oa_volunteer_signup s where s.activity_id = a.activity_id and s.audit_status = '2') as reject_count
+        from oa_volunteer_activity a
+    </sql>
+
+    <select id="selectActivityList" parameterType="com.ruoyi.oa.volunteer.dto.ActivityQuery" resultMap="VolunteerActivityResult">
+        <include refid="selectActivityVo"/>
+        <where>
+            a.del_flag = '0'
+            <if test="keyword != null and keyword != ''">
+                and (a.name like concat('%', #{keyword}, '%') or a.location like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                and a.start_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and a.start_time &lt;= #{endTime}
+            </if>
+            <if test="showStatus != null">
+                <choose>
+                    <when test="showStatus == 0">
+                        and a.status = '0' and now() &lt; a.start_time and now() &lt;= a.signup_deadline
+                    </when>
+                    <when test="showStatus == 1">
+                        and a.status = '0' and a.start_time &lt;= now() and now() &lt;= a.end_time
+                    </when>
+                    <when test="showStatus == 2">
+                        and a.status = '0' and now() &gt; a.end_time
+                    </when>
+                    <when test="showStatus == 3">
+                        and a.status = '1'
+                    </when>
+                    <when test="showStatus == 4">
+                        and a.status = '0' and now() &lt; a.start_time and now() &gt; a.signup_deadline
+                    </when>
+                    <otherwise>
+                        and 1 = 0
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        order by a.start_time desc, a.activity_id desc
+    </select>
+
+    <select id="selectActivityById" resultMap="VolunteerActivityResult">
+        <include refid="selectActivityVo"/>
+        where a.activity_id = #{activityId}
+    </select>
+
+    <insert id="insertActivity" parameterType="com.ruoyi.oa.volunteer.domain.VolunteerActivity" useGeneratedKeys="true" keyProperty="activityId">
+        insert into oa_volunteer_activity (
+            activity_no, name, location, capacity, duration_hours,
+            start_time, end_time, signup_deadline, content, status,
+            creator_id, creator_name, del_flag, create_time, update_time
+        ) values (
+            #{activityNo}, #{name}, #{location}, #{capacity}, #{durationHours},
+            #{startTime}, #{endTime}, #{signupDeadline}, #{content}, #{status},
+            #{creatorId}, #{creatorName}, '0', sysdate(), sysdate()
+        )
+    </insert>
+
+    <update id="updateActivity" parameterType="com.ruoyi.oa.volunteer.domain.VolunteerActivity">
+        update oa_volunteer_activity
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="capacity != null">capacity = #{capacity},</if>
+            <if test="durationHours != null">duration_hours = #{durationHours},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="signupDeadline != null">signup_deadline = #{signupDeadline},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = sysdate()
+        </set>
+        where activity_id = #{activityId} and del_flag = '0'
+    </update>
+
+    <update id="deleteActivityByIds">
+        update oa_volunteer_activity
+        set del_flag = '1', update_time = sysdate()
+        where del_flag = '0' and activity_id in
+        <foreach item="item" collection="ids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <select id="selectMaxActivityNoSeq" resultType="Long">
+        select max(cast(substring(activity_no, 11) as unsigned))
+        from oa_volunteer_activity
+        where activity_no like concat('VA', #{datePart}, '%')
+    </select>
+
+    <select id="selectStatOverview" resultType="com.ruoyi.oa.volunteer.vo.StatOverviewVO">
+        select
+            ifnull(sum(a.duration_hours * ifnull(s.pass_cnt, 0)), 0) as totalHours,
+            ifnull(sum(ifnull(s.pass_cnt, 0)), 0) as participantCount,
+            count(case when a.start_time &lt;= now() then 1 end) as activityCount,
+            round(ifnull(sum(case when a.start_time &lt;= now() then a.duration_hours else 0 end)
+                / nullif(count(case when a.start_time &lt;= now() then 1 end), 0), 0), 1) as avgHours
+        from oa_volunteer_activity a
+        left join (
+            select activity_id, count(*) as pass_cnt
+            from oa_volunteer_signup
+            where audit_status = '1'
+            group by activity_id
+        ) s on s.activity_id = a.activity_id
+        where a.del_flag = '0' and a.status = '0'
+          and a.start_time &gt;= #{beginTime} and a.start_time &lt;= #{endTime}
+    </select>
+
+    <select id="selectStatMonthly" resultType="com.ruoyi.oa.volunteer.vo.StatMonthlyVO">
+        select
+            date_format(a.start_time, '%Y-%m') as month,
+            count(case when a.start_time &lt;= now() then 1 end) as activityCount,
+            ifnull(sum(ifnull(s.pass_cnt, 0)), 0) as passCount,
+            ifnull(sum(a.duration_hours * ifnull(s.pass_cnt, 0)), 0) as totalHours
+        from oa_volunteer_activity a
+        left join (
+            select activity_id, count(*) as pass_cnt
+            from oa_volunteer_signup
+            where audit_status = '1'
+            group by activity_id
+        ) s on s.activity_id = a.activity_id
+        where a.del_flag = '0' and a.status = '0'
+          and a.start_time &gt;= #{beginTime} and a.start_time &lt;= #{endTime}
+        group by date_format(a.start_time, '%Y-%m')
+        order by month asc
+    </select>
+
+</mapper>

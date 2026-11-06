@@ -52,6 +52,18 @@
             <artifactId>flowable-image-generator</artifactId>
         </dependency>
 
+        <!-- 二维码生成（离线仓库仅有 3.3.3；API 与 3.5.x 兼容） -->
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>core</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.zxing</groupId>
+            <artifactId>javase</artifactId>
+            <version>3.3.3</version>
+        </dependency>
+
         <!-- 单元测试（仅 test 作用域，不随包发布；版本取本地仓库已缓存版本，离线可构建） -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
