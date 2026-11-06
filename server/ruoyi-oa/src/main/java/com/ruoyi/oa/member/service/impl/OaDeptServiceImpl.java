@@ -214,7 +214,7 @@ public class OaDeptServiceImpl implements IOaDeptService
         }
         Long rootId = resolveOrgRootId();
         SysDept old = sysDeptService.selectDeptById(dto.getDeptId());
-        if (old == null || !"0".equals(old.getDelFlag()))
+        if (!isNotDeleted(old))
         {
             throw new ServiceException("部门不存在", 404);
         }
@@ -251,7 +251,7 @@ public class OaDeptServiceImpl implements IOaDeptService
             throw new ServiceException("组织架构根部门不允许删除", 400);
         }
         SysDept dept = sysDeptService.selectDeptById(deptId);
-        if (dept == null || !"0".equals(dept.getDelFlag()))
+        if (!isNotDeleted(dept))
         {
             throw new ServiceException("部门不存在", 404);
         }
@@ -363,8 +363,19 @@ public class OaDeptServiceImpl implements IOaDeptService
         {
             return false;
         }
-        SysDept dept = sysDeptService.selectDeptById(deptId);
-        return dept != null && "0".equals(dept.getDelFlag());
+        return isNotDeleted(sysDeptService.selectDeptById(deptId));
+    }
+
+    /**
+     * 部门是否未被删除。
+     *
+     * <p>注意：若依的 {@code selectDeptById} 历史上 SQL 里没有取 del_flag 列，
+     * 会导致 SysDept.delFlag 为 null；这里把 null 视为“未删除”，
+     * 否则所有部门都会被判定为不存在（手动加成员 / 部门编辑删除 全部失败）。</p>
+     */
+    private boolean isNotDeleted(SysDept dept)
+    {
+        return dept != null && (dept.getDelFlag() == null || "0".equals(dept.getDelFlag()));
     }
 
     private String safeConfig(String key)

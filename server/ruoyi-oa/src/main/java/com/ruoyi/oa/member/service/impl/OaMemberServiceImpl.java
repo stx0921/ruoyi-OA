@@ -696,7 +696,9 @@ public class OaMemberServiceImpl implements IOaMemberService
     private void assertDeptExists(Long deptId)
     {
         SysDept dept = deptService.selectDeptById(deptId);
-        if (dept == null || !"0".equals(dept.getStatus()) || !"0".equals(dept.getDelFlag()))
+        // 注意：若依的 selectDeptById 历史上不返回 del_flag，这里对 null 做兼容（null 视为未删除）
+        boolean deleted = dept != null && dept.getDelFlag() != null && !"0".equals(dept.getDelFlag());
+        if (dept == null || !"0".equals(dept.getStatus()) || deleted)
         {
             throw new ServiceException("部门不存在或已停用", 400);
         }

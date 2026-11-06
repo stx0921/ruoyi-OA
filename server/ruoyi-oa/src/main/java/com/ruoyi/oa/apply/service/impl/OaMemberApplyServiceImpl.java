@@ -531,7 +531,9 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
         for (Long deptId : deptIds)
         {
             SysDept dept = deptId == null ? null : deptService.selectDeptById(deptId);
-            if (dept == null || !"0".equals(dept.getStatus()))
+            // del_flag 为 null 时视为未删除（兼容若依 selectDeptById 历史上不返回该列）
+            boolean deleted = dept != null && dept.getDelFlag() != null && !"0".equals(dept.getDelFlag());
+            if (dept == null || !"0".equals(dept.getStatus()) || deleted)
             {
                 throw new ServiceException("意向部门不存在或已停用", 400);
             }
