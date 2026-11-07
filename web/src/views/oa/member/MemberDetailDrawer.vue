@@ -282,15 +282,15 @@
                 :disabled="!canEdit"
               >
                 <div class="member-att-thumb">
-                  <img v-if="cardPreview" :src="cardPreview" class="member-att-img" alt="学生证" />
+                  <img v-if="cardPreview" :src="cardPreview" class="member-att-img" alt="简历" />
                   <div v-else class="member-att-placeholder">
                     <el-icon :size="20"><Document /></el-icon>
-                    <span>{{ attachments.cardFileId ? '学生证' : '上传学生证' }}</span>
+                    <span>{{ attachments.cardFileId ? '简历' : '上传简历' }}</span>
                   </div>
                 </div>
               </el-upload>
               <div class="member-att-meta">
-                <span class="oa-strong">学生证</span>
+                <span class="oa-strong">简历</span>
                 <span class="oa-muted">jpg / png / pdf，≤5MB</span>
                 <el-button v-if="attachments.cardFileId" link type="primary" @click="downloadAttachment('card')">下载</el-button>
                 <span v-else class="oa-muted">未上传</span>
@@ -906,7 +906,7 @@ function beforeUpload(file, kind) {
     return true
   }
   if (!/\.(jpg|jpeg|png|pdf)$/i.test(file.name || '') || file.size > 5 * 1024 * 1024) {
-    proxy.$modal.msgError('学生证仅支持 jpg / png / pdf，且不超过 5MB')
+    proxy.$modal.msgError('简历仅支持 jpg / png / pdf，且不超过 5MB')
     return false
   }
   return true
@@ -966,7 +966,7 @@ function downloadAttachment(kind) {
         proxy.$modal.msgError('附件下载失败')
         return
       }
-      saveAs(new Blob([blob]), (kind === 'photo' ? '照片_' : '学生证_') + (member.value.studentNo || fileId) + '.jpg')
+      saveAs(new Blob([blob]), (kind === 'photo' ? '照片_' : '简历_') + (member.value.studentNo || fileId) + '.jpg')
     })
     .catch(() => proxy.$modal.msgError('附件下载失败'))
 }

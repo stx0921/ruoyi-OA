@@ -37,7 +37,7 @@ public class OaFileServiceImpl implements IOaFileService
     /** 业务类型：成员照片 */
     public static final String BIZ_MEMBER_PHOTO = "member_photo";
 
-    /** 业务类型：学生证 */
+    /** 业务类型：简历 */
     public static final String BIZ_MEMBER_CARD = "member_card";
 
     /** 业务类型：导入错误明细 */
@@ -55,7 +55,7 @@ public class OaFileServiceImpl implements IOaFileService
     /** 照片允许扩展名 */
     private static final String[] PHOTO_EXTENSION = { "jpg", "jpeg", "png" };
 
-    /** 学生证允许扩展名 */
+    /** 简历允许扩展名 */
     private static final String[] CARD_EXTENSION = { "jpg", "jpeg", "png", "pdf" };
 
     /** 任务附件允许扩展名 */
@@ -73,7 +73,7 @@ public class OaFileServiceImpl implements IOaFileService
     /** 照片最大 2MB */
     private static final long PHOTO_MAX_SIZE = 2 * 1024 * 1024L;
 
-    /** 学生证最大 5MB */
+    /** 简历最大 5MB */
     private static final long CARD_MAX_SIZE = 5 * 1024 * 1024L;
 
     /** 任务附件最大 10MB */
@@ -311,7 +311,7 @@ public class OaFileServiceImpl implements IOaFileService
     }
 
     /**
-     * 上传前校验：业务类型、扩展名、大小（照片 ≤2MB、学生证 ≤5MB）
+     * 上传前校验：业务类型、扩展名、大小（照片 ≤2MB、简历 ≤5MB）
      */
     private void assertUploadAllowed(MultipartFile file, String bizType)
     {
@@ -358,7 +358,7 @@ public class OaFileServiceImpl implements IOaFileService
             {
                 throw new ServiceException("照片仅支持 jpg / png，且不超过 2MB", 400);
             }
-            throw new ServiceException("学生证仅支持 jpg / png / pdf，且不超过 5MB", 400);
+            throw new ServiceException("简历仅支持 jpg / png / pdf，且不超过 5MB", 400);
         }
         long maxSize = photo ? PHOTO_MAX_SIZE : CARD_MAX_SIZE;
         if (file.getSize() > maxSize)
@@ -367,7 +367,7 @@ public class OaFileServiceImpl implements IOaFileService
             {
                 throw new ServiceException("照片仅支持 jpg / png，且不超过 2MB", 400);
             }
-            throw new ServiceException("学生证仅支持 jpg / png / pdf，且不超过 5MB", 400);
+            throw new ServiceException("简历仅支持 jpg / png / pdf，且不超过 5MB", 400);
         }
     }
 

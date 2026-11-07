@@ -1,7 +1,11 @@
 <template>
-  <div class="h5-page">
+  <div class="h5-page reg-page">
     <header class="h5-nav">
-      <button type="button" class="h5-nav__back" aria-label="返回" @click="handleBack">‹</button>
+      <button type="button" class="h5-nav__back" aria-label="返回" @click="handleBack">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M14.5 5.5L8 12l6.5 6.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </button>
       <span class="h5-nav__title">{{ pageTitle }}</span>
       <button v-if="!success" type="button" class="h5-nav__side" @click="noticeVisible = true">须知</button>
       <span v-else class="h5-nav__side h5-nav__side--muted"></span>
@@ -10,53 +14,80 @@
     <div ref="scrollRef" class="h5-scroll">
       <!-- ================= 提交成功 ================= -->
       <template v-if="success">
-        <div class="h5-success">
-          <div class="h5-success__ok">✓</div>
-          <h3>提交成功</h3>
-          <p class="h5-success__sub">{{ successDesc }}</p>
-          <div class="h5-success__no">
-            <span>申请编号</span>
-            <b v-for="no in result.applyNos" :key="no">{{ no }}</b>
-            <b v-if="!result.applyNos.length">AP••••••••</b>
+        <div class="reg-success">
+          <div class="reg-success__badge" aria-hidden="true">
+            <svg viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="2" opacity="0.22" />
+              <path d="M19 33.2l8.4 8.4L45 23" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </div>
-          <div class="h5-success__meta">
-            <div>意向部门：{{ selectedDeptNames || '—' }}</div>
-            <div>当前状态：待审批</div>
+          <h3 class="reg-success__title">注册成功</h3>
+          <p class="reg-success__sub">{{ successDesc }}</p>
+
+          <div class="reg-success__card">
+            <div class="reg-success__row">
+              <span>申请编号</span>
+              <b class="reg-success__no">{{ result.applyNos.length ? result.applyNos.join(' / ') : 'AP••••••••' }}</b>
+            </div>
+            <div class="reg-success__row"><span>意向部门</span><b>{{ selectedDeptNames || '—' }}</b></div>
+            <div class="reg-success__row"><span>当前状态</span><b class="is-pending">待审批</b></div>
           </div>
+
           <button type="button" class="h5-submit" @click="goProgress">查看报名进度</button>
-          <button type="button" class="h5-submit is-plain" @click="applyAnother">再投一个部门</button>
-          <p class="h5-tip-line">请截图保存申请编号，便于后续查询</p>
+          <button type="button" class="h5-submit is-plain" @click="applyAnother">继续注册其他部门</button>
+          <p class="reg-success__tip">建议截图保存申请编号，便于后续查询</p>
         </div>
       </template>
 
       <!-- ================= 报名表单 ================= -->
       <template v-else>
-        <div class="h5-hero">
-          <div class="h5-hero__org">
-            <div class="h5-hero__logo">青蟹堡</div>
-            <div class="h5-hero__meta">青蟹堡 · 入住服务<br />入住报名</div>
+        <section class="reg-hero" :class="{ 'is-compact': step > 1 }">
+          <div class="reg-hero__brand">
+            <span class="reg-hero__logo">青</span>
+            <span class="reg-hero__brand-meta">
+              <b>青蟹堡</b>
+              <i>新成员注册</i>
+            </span>
           </div>
-          <h2>{{ resubmitMode ? '修改报名申请' : '青蟹堡入住报名' }}</h2>
-          <p v-if="resubmitMode">
-            正在修改申请 <b>{{ resubmitApplyNo || '—' }}</b
-            ><span v-if="resubmitDeptName">（{{ resubmitDeptName }}）</span>，请核对并完善信息后重新提交
-          </p>
-          <p v-else>
-            填写入住信息并提交，管理员将在 1–3 个工作日内完成审核；<br />
-            审核结果可凭手机号 + 图形验证码在「报名进度」查询
-          </p>
-        </div>
 
-        <div class="h5-steps">
-          <div
-            v-for="(label, index) in steps"
-            :key="label"
-            class="h5-step"
-            :class="{ 'is-active': step === index + 1, 'is-done': step > index + 1 }"
-          >
-            <span class="h5-step__dot">{{ step > index + 1 ? '✓' : index + 1 }}</span>
-            <span class="h5-step__label">{{ label }}</span>
-            <i v-if="index < steps.length - 1" class="h5-step__line"></i>
+          <h1 class="reg-hero__title">{{ resubmitMode ? '修改注册信息' : '开启你的社团之旅' }}</h1>
+
+          <p v-if="resubmitMode" class="reg-hero__desc">
+            正在修改申请 <b class="reg-hero__no">{{ resubmitApplyNo || '—' }}</b>
+            <span v-if="resubmitDeptName">（{{ resubmitDeptName }}）</span>，核对信息后重新提交即可
+          </p>
+          <p v-else class="reg-hero__desc">
+            填写信息并提交，管理员会在 1–3 个工作日内完成审核，通过后自动开通账号
+          </p>
+
+          <ul class="reg-hero__meta">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 1.8" /></svg>
+              1–3 个工作日
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" /></svg>
+              结果可在线查询
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2.4" /><path d="M8.5 10V7.8a3.5 3.5 0 017 0V10" /></svg>
+              信息仅内部可见
+            </li>
+          </ul>
+        </section>
+
+        <div class="reg-steps">
+          <div class="reg-steps__bar"><i :style="{ width: stepProgress + '%' }"></i></div>
+          <div class="reg-steps__list">
+            <div
+              v-for="(label, index) in steps"
+              :key="label"
+              class="reg-step"
+              :class="{ 'is-active': step === index + 1, 'is-done': step > index + 1 }"
+            >
+              <span class="reg-step__idx">{{ step > index + 1 ? '✓' : index + 1 }}</span>
+              <span class="reg-step__label">{{ label }}</span>
+            </div>
           </div>
         </div>
 
@@ -329,18 +360,18 @@
                   <div class="h5-upload__bar-inner" :style="{ width: photo.progress + '%' }"></div>
                 </div>
               </div>
-              <!-- 学生证 -->
+              <!-- 简历 -->
               <div class="h5-upload" @click="pickCard">
                 <template v-if="card.fileName">
                   <span class="h5-upload__ico">📄</span>
                   <span class="h5-upload__file">{{ card.fileName }}</span>
                   <span v-if="card.original" class="h5-upload__note">沿用原附件 · 点击可重传</span>
-                  <button v-if="!card.original" type="button" class="h5-upload__del" aria-label="删除学生证" @click.stop="removeCard">×</button>
+                  <button v-if="!card.original" type="button" class="h5-upload__del" aria-label="删除简历" @click.stop="removeCard">×</button>
                 </template>
                 <template v-else>
                   <span class="h5-upload__ico">＋</span>
-                  <span>{{ card.uploading ? '上传中 ' + card.progress + '%' : '学生证扫描件' }}</span>
-                  <span class="h5-upload__note">jpg / png / pdf ≤ 5MB</span>
+                  <span>{{ card.uploading ? '上传中 ' + card.progress + '%' : '简历文件' }}</span>
+                  <span class="h5-upload__note">pdf / jpg / png ≤ 5MB</span>
                 </template>
                 <div v-if="card.uploading" class="h5-upload__bar">
                   <div class="h5-upload__bar-inner" :style="{ width: card.progress + '%' }"></div>
@@ -348,8 +379,8 @@
               </div>
             </div>
             <input ref="photoInput" class="h5-file-input" type="file" accept="image/jpeg,image/png" @change="onPhotoChange" />
-            <input ref="cardInput" class="h5-file-input" type="file" accept="image/jpeg,image/png,application/pdf" @change="onCardChange" />
-            <div class="h5-hint">照片用于入会建档；学生证用于核验在校身份，仅招新审核可见</div>
+            <input ref="cardInput" class="h5-file-input" type="file" accept="application/pdf,image/jpeg,image/png" @change="onCardChange" />
+            <div class="h5-hint">照片用于入会建档；简历用于了解你的经历与技能，仅招新审核可见</div>
             <div v-if="resubmitMode" class="h5-hint">已回填原附件；如需更换可重新上传，不重新上传将保留原附件</div>
           </div>
         </div>
@@ -372,7 +403,7 @@
               <div class="h5-summary__row"><span>特长</span><b>{{ form.skills || '未填写' }}</b><button type="button" @click="goStep(2)">修改</button></div>
               <div class="h5-summary__row"><span>自我介绍</span><b>{{ form.intro || '未填写' }}</b><button type="button" @click="goStep(2)">修改</button></div>
               <div class="h5-summary__row"><span>照片</span><b>{{ photo.fileId ? '已上传' : '未上传' }}</b><button type="button" @click="goStep(2)">修改</button></div>
-              <div class="h5-summary__row"><span>学生证</span><b>{{ card.fileId ? '已上传' : '未上传' }}</b><button type="button" @click="goStep(2)">修改</button></div>
+              <div class="h5-summary__row"><span>简历</span><b>{{ card.fileId ? '已上传' : '未上传' }}</b><button type="button" @click="goStep(2)">修改</button></div>
             </div>
           </div>
 
@@ -381,11 +412,11 @@
               <input v-model="agreed" type="checkbox" />
               <span>
                 我已阅读并同意
-                <button type="button" class="h5-agree__link" @click.prevent="noticeVisible = true">《入会须知》</button>
+                <button type="button" class="h5-agree__link" @click.prevent="noticeVisible = true">《注册须知》</button>
                 ，承诺填写信息真实有效，同意用于本次招新审核与入会建档
               </span>
             </label>
-            <div v-if="!agreed" class="h5-err">请先阅读并同意《入会须知》</div>
+            <div v-if="!agreed" class="h5-err">请先阅读并同意《注册须知》</div>
           </div>
 
           <p class="h5-tip-line">提交后可在「报名进度」用手机号 + 图形验证码查询结果</p>
@@ -409,13 +440,13 @@
       </button>
     </div>
 
-    <!-- 《入会须知》 -->
-    <el-dialog v-model="noticeVisible" title="入会须知" width="320px" append-to-body align-center class="h5-dialog">
+    <!-- 《注册须知》 -->
+    <el-dialog v-model="noticeVisible" title="注册须知" width="320px" append-to-body align-center class="h5-dialog">
       <div class="h5-notice">
-        <p>1. 报名信息须真实有效，用于本次招新审核与入会建档。</p>
+        <p>1. 注册信息须真实有效，用于本次招新审核与入会建档。</p>
         <p>2. 同一学号可同时向多个部门投递，每个部门同一时间只保留 1 条待审批申请。</p>
-        <p>3. 审核结果可在「报名进度」用报名手机号 + 图形验证码查询。</p>
-        <p>4. 审核通过后账号为学号，初始密码为报名手机号后 6 位，首次登录请修改密码。</p>
+        <p>3. 审核结果可在「报名进度」用注册手机号 + 图形验证码查询。</p>
+        <p>4. 审核通过后账号为学号，初始密码为注册手机号后 6 位，首次登录请修改密码。</p>
         <p>5. 个人信息仅用于招新与组织内部联络，不对外提供。</p>
       </div>
       <template #footer>
@@ -509,11 +540,12 @@ const resubmitQueryToken = ref('')
 const originalPhotoFileId = ref(null)
 const originalCardFileId = ref(null)
 
-const pageTitle = computed(() => (success.value ? '报名成功' : resubmitMode.value ? '修改重提' : '入住报名'))
+const pageTitle = computed(() => (success.value ? '注册成功' : resubmitMode.value ? '修改注册信息' : '注册'))
+const stepProgress = computed(() => ((step.value - 1) / (steps.length - 1)) * 100)
 const primaryText = computed(() => {
   if (submitting.value) return '提交中…'
   if (verifying.value) return '验证中…'
-  return step.value === 3 ? '提交报名' : '下一步'
+  return step.value === 3 ? '提交注册' : '下一步'
 })
 const captchaSrc = computed(() => (captcha.img ? 'data:image/jpeg;base64,' + captcha.img : ''))
 const genderLabel = computed(() => (GENDER_OPTIONS.find(item => item.value === form.gender) || {}).label || '—')
@@ -528,7 +560,7 @@ const selectedDeptNames = computed(() => {
 const successDesc = computed(
   () =>
     result.progressTip ||
-    '报名已提交，请保存申请编号。审核结果可在「报名进度」中查看，通过后账号为学号，初始密码为手机号后 6 位。'
+    '注册申请已提交，请保存申请编号。审核结果可在「报名进度」中查看，通过后账号为学号，初始密码为手机号后 6 位。'
 )
 
 // ---------- 初始化 ----------
@@ -575,7 +607,7 @@ function initResubmit() {
         originalCardFileId.value = handoff.cardFileId
         card.fileId = handoff.cardFileId
         card.original = true
-        card.fileName = '学生证（原附件）'
+        card.fileName = '简历（原附件）'
       }
     } catch (e) {
       resubmitQueryToken.value = ''
@@ -848,7 +880,7 @@ function scrollToTop() {
 // ---------- 提交 ----------
 async function doSubmit() {
   if (!agreed.value) {
-    ElMessage.warning('请先阅读并同意《入会须知》')
+    ElMessage.warning('请先阅读并同意《注册须知》')
     return
   }
   // 提交前复检第 1 步：已验证通过时同样跳过 captchaCode（验证成功后该输入已清空）
@@ -995,11 +1027,11 @@ function onCardChange(event) {
     /application\/pdf$/i.test(file.type) ||
     /\.(jpe?g|png|pdf)$/i.test(file.name)
   if (!allowed) {
-    ElMessage.error('学生证仅支持 jpg / png / pdf，且不超过 5MB')
+    ElMessage.error('简历仅支持 pdf / jpg / png，且不超过 5MB')
     return
   }
   if (file.size > CARD_MAX) {
-    ElMessage.error('学生证仅支持 jpg / png / pdf，且不超过 5MB')
+    ElMessage.error('简历仅支持 pdf / jpg / png，且不超过 5MB')
     return
   }
   if (!ensureCanUpload()) return
@@ -1058,7 +1090,7 @@ function removeCard() {
   if (resubmitMode.value && originalCardFileId.value) {
     card.fileId = originalCardFileId.value
     card.original = true
-    card.fileName = '学生证（原附件）'
+    card.fileName = '简历（原附件）'
   } else {
     card.fileId = null
     card.fileName = ''
@@ -1068,10 +1100,354 @@ function removeCard() {
 </script>
 
 <style lang="scss" scoped>
+/* ==========================================================================
+   注册页（/h5/apply）视觉改版
+   - 所有选择器都带 scoped 属性，只影响本页，不动 /h5/progress、/h5/portal
+   - 设计语言沿用珍珠玻璃：浅色场景面 + 近实色卡片 + 细边线 + 单一视觉主角
+   ========================================================================== */
+
+/* ---------- 顶部导航 ---------- */
+.reg-page {
+  .h5-nav {
+    padding: 0 14px;
+    background: var(--rail-bg);
+    backdrop-filter: blur(18px) saturate(1.1);
+    -webkit-backdrop-filter: blur(18px) saturate(1.1);
+  }
+
+  .h5-nav__back {
+    width: 32px;
+    color: var(--ink);
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .h5-nav__title {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+
+  .h5-nav__side {
+    flex: none;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--hover-bg);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+}
+
+/* ---------- 头图：浅色场景 + 品牌 + 三枚信息胶囊 ---------- */
+.reg-hero {
+  position: relative;
+  padding: 22px 18px 18px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+  background:
+    radial-gradient(110% 80% at 100% 0%, rgba(35, 109, 233, 0.1), transparent 62%),
+    radial-gradient(90% 70% at 0% 100%, rgba(130, 221, 45, 0.12), transparent 62%),
+    var(--canvas);
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  &__logo {
+    display: flex;
+    flex: 0 0 44px;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: linear-gradient(145deg, var(--blue), #3f7ff0);
+    box-shadow: 0 6px 16px rgba(35, 109, 233, 0.28), var(--edge);
+    color: #fff;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+  }
+
+  &__brand-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    b {
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    i {
+      color: var(--ink-soft);
+      font-size: 11.5px;
+      font-style: normal;
+    }
+  }
+
+  &__title {
+    margin: 0 0 8px;
+    color: var(--ink);
+    font-size: 25px;
+    font-weight: 760;
+    letter-spacing: -0.03em;
+    line-height: 1.26;
+  }
+
+  &__desc {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  &__no {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  &__meta {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-width: 0;
+      padding: 6px 8px;
+      border: 1px solid var(--glass-line);
+      border-radius: 12px;
+      background: var(--pill-bg);
+      box-shadow: var(--e1), var(--edge-strong);
+      color: var(--ink-muted);
+      font-size: 11px;
+      white-space: nowrap;
+
+      svg {
+        flex: none;
+        width: 12px;
+        height: 12px;
+        fill: none;
+        stroke: var(--blue);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+      }
+    }
+  }
+}
+
+/* 第 2/3 步收起头图，把屏幕让给表单 */
+.reg-hero.is-compact {
+  padding: 14px 18px 15px;
+
+  .reg-hero__brand {
+    margin-bottom: 10px;
+  }
+
+  .reg-hero__title {
+    margin: 0;
+    font-size: 19px;
+    letter-spacing: -0.02em;
+  }
+
+  .reg-hero__desc,
+  .reg-hero__meta {
+    display: none;
+  }
+}
+
+/* ---------- 步骤：细进度条 + 三段标签 ---------- */
+.reg-steps {
+  margin: 14px 16px 0;
+  padding: 14px 16px 13px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+
+  &__bar {
+    height: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--groove-bg);
+
+    i {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue), var(--lime));
+      transition: width 0.32s var(--ease-premium);
+    }
+  }
+
+  &__list {
+    display: flex;
+    gap: 4px;
+    margin-top: 11px;
+  }
+}
+
+.reg-step {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.3;
+
+  &__idx {
+    display: inline-flex;
+    flex: 0 0 20px;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--groove-bg);
+    color: var(--ink-soft);
+    font-size: 11px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &.is-active {
+    color: var(--ink);
+    font-weight: 650;
+
+    .reg-step__idx {
+      background: var(--blue);
+      box-shadow: 0 2px 8px rgba(35, 109, 233, 0.32);
+      color: #fff;
+    }
+  }
+
+  &.is-done {
+    color: var(--ink-muted);
+
+    .reg-step__idx {
+      background: var(--lime-soft);
+      color: var(--lime-text);
+    }
+  }
+}
+
+/* ---------- 卡片 / 表单 ---------- */
+.h5-card {
+  margin: 12px 16px 0;
+  padding: 18px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--edge), var(--e1);
+}
+
+.h5-sec-title {
+  gap: 9px;
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+
+  &::before {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: var(--lime);
+    box-shadow: 0 0 0 4px var(--lime-soft);
+  }
+}
+
+.h5-sec-title__tip {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.h5-field {
+  margin-bottom: 16px;
+}
+
+.h5-field__label {
+  gap: 3px;
+  margin-bottom: 7px;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.h5-req {
+  color: var(--red-text);
+}
+
+.h5-input,
+.h5-select {
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: var(--input-bg);
+  box-shadow: var(--edge);
+  line-height: 44px;
+  font-size: 16px;
+}
+
+.h5-textarea {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--input-bg);
+  box-shadow: var(--edge);
+  font-size: 16px;
+}
+
+.h5-input:focus,
+.h5-select:focus,
+.h5-textarea:focus {
+  box-shadow: 0 0 0 3px var(--blue-soft);
+}
+
+.h5-input.is-error,
+.h5-select.is-error,
+.h5-textarea.is-error {
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+.h5-err {
+  color: var(--red-text);
+}
+
 .h5-field__row .h5-input {
   flex: 1;
   width: auto;
   min-width: 0;
+}
+
+.h5-captcha {
+  height: 46px;
+  border-radius: 12px;
 }
 
 .h5-captcha--placeholder {
@@ -1079,88 +1455,187 @@ function removeCard() {
   font-family: inherit;
 }
 
-.h5-footer-gap {
-  height: 16px;
+.h5-radio-row {
+  gap: 8px;
+}
+
+.h5-radio {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+}
+
+.h5-dept {
+  min-height: 40px;
+  border-radius: 10px;
+}
+
+.h5-upload {
+  border-radius: 12px;
+}
+
+.h5-agree {
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
 }
 
 .h5-resubmit-dept {
-  padding: 10px 12px;
+  padding: 11px 13px;
   border: 1px solid var(--line-strong);
-  border-radius: 6px;
+  border-radius: 12px;
   background: var(--blue-soft);
   color: var(--blue);
   font-size: 14px;
   font-weight: 600;
 }
 
-/* 提交成功页 */
-.h5-success {
-  padding: 34px 22px 24px;
-  text-align: center;
+.h5-footer-gap {
+  height: 20px;
+}
 
-  &__ok {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 16px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #67c23a, #95d475);
-    box-shadow: 0 8px 20px rgba(103, 194, 58, 0.28);
-    color: #fff;
-    font-size: 30px;
+/* ---------- 底部操作条 ---------- */
+.h5-submit-bar {
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--rail-bg);
+  backdrop-filter: blur(18px) saturate(1.1);
+  -webkit-backdrop-filter: blur(18px) saturate(1.1);
+}
+
+.h5-submit {
+  height: 48px;
+  border-radius: 14px;
+  background: var(--blue);
+  box-shadow: 0 8px 20px rgba(35, 109, 233, 0.26);
+  font-size: 16px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+
+  &:active {
+    transform: translateY(1px);
+    box-shadow: none;
   }
 
-  h3 {
-    margin: 0 0 8px;
+  &.is-plain {
+    border: 1px solid var(--line-strong);
+    background: var(--input-bg);
+    box-shadow: var(--edge);
     color: var(--ink);
-    font-size: 19px;
   }
 
-  &__sub {
-    margin: 0 0 18px;
-    color: var(--ink-soft);
-    font-size: 13px;
-    line-height: 1.7;
-  }
-
-  &__no {
-    margin-bottom: 12px;
-    padding: 14px;
-    border-radius: 8px;
-    background: var(--blue-soft);
-    color: var(--blue);
-
-    span {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--ink-soft);
-      font-size: 12px;
-    }
-
-    b {
-      display: block;
-      color: var(--ink);
-      font-family: Consolas, Menlo, monospace;
-      font-size: 17px;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  &__meta {
-    margin-bottom: 22px;
-    color: var(--ink-soft);
-    font-size: 12px;
-    line-height: 1.9;
-  }
-
-  .h5-submit {
-    margin-bottom: 12px;
+  &.is-sm {
+    height: 38px;
+    border-radius: 12px;
+    font-size: 14px;
   }
 }
 
-/* 入会须知 */
+.h5-btn-text {
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--input-bg);
+  color: var(--ink-muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ---------- 注册成功 ---------- */
+.reg-success {
+  padding: 40px 20px 24px;
+  text-align: center;
+
+  &__badge {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 16px;
+    color: var(--lime-text);
+    filter: drop-shadow(0 8px 18px var(--lime-soft));
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__title {
+    margin: 0 0 8px;
+    color: var(--ink);
+    font-size: 21px;
+    font-weight: 740;
+    letter-spacing: -0.02em;
+  }
+
+  &__sub {
+    margin: 0 0 20px;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    line-height: 1.75;
+  }
+
+  &__card {
+    margin-bottom: 22px;
+    padding: 4px 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    box-shadow: var(--edge), var(--e1);
+    text-align: left;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    span {
+      flex: none;
+      color: var(--ink-soft);
+    }
+
+    b {
+      color: var(--ink);
+      font-weight: 650;
+      text-align: right;
+      word-break: break-all;
+    }
+
+    b.is-pending {
+      color: var(--warn-text);
+    }
+  }
+
+  &__no {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+
+  &__tip {
+    margin: 14px 0 0;
+    color: var(--ink-faint);
+    font-size: 11.5px;
+  }
+
+  .h5-submit {
+    margin-bottom: 10px;
+  }
+}
+
+/* ---------- 注册须知弹窗 ---------- */
 .h5-notice {
   color: var(--ink-muted);
   font-size: 13px;

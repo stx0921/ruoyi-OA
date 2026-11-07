@@ -523,7 +523,7 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
         }
         // 6) 附件存在性校验
         String photoUrl = resolveApplyFileUrl(dto.getPhotoFileId(), "照片");
-        String cardUrl = resolveApplyFileUrl(dto.getCardFileId(), "学生证");
+        String cardUrl = resolveApplyFileUrl(dto.getCardFileId(), "简历");
 
         Set<Long> deptIds = new LinkedHashSet<>(dto.getApplyDeptIds());
         List<Long> applyIds = new ArrayList<>(deptIds.size());
@@ -690,7 +690,7 @@ public class OaMemberApplyServiceImpl implements IOaMemberApplyService
             update.setPhotoUrl(dto.getPhotoFileId() == null ? apply.getPhotoUrl()
                     : resolveApplyFileUrl(dto.getPhotoFileId(), "照片"));
             update.setCardUrl(dto.getCardFileId() == null ? apply.getCardUrl()
-                    : resolveApplyFileUrl(dto.getCardFileId(), "学生证"));
+                    : resolveApplyFileUrl(dto.getCardFileId(), "简历"));
             int rows = applyMapper.resubmit(update);
             if (rows == 0)
             {

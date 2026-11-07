@@ -291,7 +291,7 @@ async function loadAttachments(data, seq) {
   clearAttachments()
   const candidates = [
     { key: 'photo', label: '一寸照', fileId: resolveFileId(data.photoFileId, data.photoUrl) },
-    { key: 'card', label: '学生证', fileId: resolveFileId(data.cardFileId, data.cardUrl) }
+    { key: 'card', label: '简历', fileId: resolveFileId(data.cardFileId, data.cardUrl) }
   ].filter(item => !!item.fileId)
 
   for (const item of candidates) {
