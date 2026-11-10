@@ -1,21 +1,22 @@
 package com.ruoyi.oa.apply.service.impl;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.ruoyi.common.constant.Constants;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.storage.FileStorageRouter;
+import com.ruoyi.common.storage.StorageException;
+import com.ruoyi.common.storage.StorageObject;
+import com.ruoyi.common.storage.StoredFile;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.file.FileUploadUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.oa.apply.domain.OaFile;
 import com.ruoyi.oa.apply.mapper.OaFileMapper;
@@ -25,7 +26,7 @@ import com.ruoyi.oa.apply.vo.FileUploadVO;
 import com.ruoyi.oa.support.OaFileUrlHelper;
 
 /**
- * 附件 Service 实现（本地磁盘存储，统一落 oa_file，下载走鉴权接口）
+ * 附件 Service 实现（统一存储抽象：本地磁盘 / 阿里云 OSS，统一落 oa_file，下载走鉴权接口）
  *
  * @author ruoyi-oa
  */
@@ -85,9 +86,6 @@ public class OaFileServiceImpl implements IOaFileService
     /** 工单 Word 最大 20MB */
     private static final long FEEDBACK_DOC_MAX_SIZE = 20 * 1024 * 1024L;
 
-    /** H5/PC 上传目录（相对 ruoyi.profile） */
-    private static final String OA_UPLOAD_DIR = "/oa/upload";
-
     /** 常见文件扩展名（用于解析存储名） */
     private static final Collection<String> ALLOWED_BIZ_TYPES = Arrays.asList(BIZ_MEMBER_PHOTO, BIZ_MEMBER_CARD,
             BIZ_TASK, BIZ_FEEDBACK_TEMP, BIZ_FEEDBACK);
@@ -98,18 +96,23 @@ public class OaFileServiceImpl implements IOaFileService
     @Autowired
     private OaCaptchaService captchaService;
 
+    @Autowired
+    private FileStorageRouter storageRouter;
+
     @Override
     public OaFile upload(MultipartFile file, String bizType, Long uploaderId)
     {
         assertUploadAllowed(file, bizType);
-        String baseDir = RuoYiConfig.getProfile() + OA_UPLOAD_DIR;
-        String[] allowed = BIZ_MEMBER_CARD.equals(bizType) ? CARD_EXTENSION
-                : (BIZ_TASK.equals(bizType) ? TASK_EXTENSION
-                        : (isFeedbackBiz(bizType) ? FEEDBACK_EXTENSION : PHOTO_EXTENSION));
-        String filePath;
+        StoredFile stored;
         try
         {
-            filePath = FileUploadUtils.upload(baseDir, file, allowed, true);
+            // 先存存储（本地/OSS），再落库；失败不留半成品记录
+            stored = storageRouter.store(file.getInputStream(), file.getSize(), file.getOriginalFilename(), "oa/upload");
+        }
+        catch (StorageException e)
+        {
+            log.error("附件上传失败 bizType={}", bizType, e);
+            throw new ServiceException("附件服务暂时不可用，请稍后再试", 503);
         }
         catch (Exception e)
         {
@@ -117,13 +120,30 @@ public class OaFileServiceImpl implements IOaFileService
             throw new ServiceException("附件上传失败，请稍后再试", 500);
         }
         OaFile oaFile = new OaFile();
-        oaFile.setFileName(FileUtils.getName(filePath));
+        oaFile.setFileName(FileUtils.getName(stored.getKey()));
         oaFile.setOriginalName(file.getOriginalFilename());
-        oaFile.setFilePath(filePath);
+        // 本地模式：/profile/oa/upload/...；OSS 模式：裸 key oa/upload/...
+        oaFile.setFilePath(storageRouter.storeRef(stored.getKey()));
         oaFile.setBizType(bizType);
         oaFile.setFileSize(file.getSize());
         oaFile.setUploaderId(uploaderId);
-        fileMapper.insertFile(oaFile);
+        try
+        {
+            fileMapper.insertFile(oaFile);
+        }
+        catch (RuntimeException e)
+        {
+            // 落库失败：尽力清理已写入的存储对象，避免产生孤儿文件
+            try
+            {
+                storageRouter.deleteByPath(oaFile.getFilePath());
+            }
+            catch (Exception ignored)
+            {
+                // 清理失败不影响原始异常
+            }
+            throw e;
+        }
         log.info("附件上传成功 fileId={} bizType={} size={}", oaFile.getFileId(), bizType, file.getSize());
         return oaFile;
     }
@@ -240,13 +260,23 @@ public class OaFileServiceImpl implements IOaFileService
         {
             throw new ServiceException("附件不存在", 404);
         }
-        String absPath = toAbsolutePath(file.getFilePath());
-        if (StringUtils.isEmpty(absPath) || !new File(absPath).isFile())
+        StorageObject storageObject;
+        try
+        {
+            // 统一路径路由：/profile/ 读本地、/common/attach/ 读 OSS、裸 key 读 OSS、http 读外链
+            storageObject = storageRouter.openByPath(file.getFilePath());
+        }
+        catch (StorageException e)
+        {
+            log.error("附件读取失败 fileId={} path={}", fileId, file.getFilePath(), e);
+            throw new ServiceException("附件服务暂时不可用，请稍后再试", 503);
+        }
+        if (storageObject == null)
         {
             log.warn("附件物理文件不存在 fileId={} path={}", fileId, file.getFilePath());
             throw new ServiceException("附件文件已丢失，请联系管理员", 404);
         }
-        try
+        try (StorageObject stream = storageObject)
         {
             String downloadName = StringUtils.isNotEmpty(file.getOriginalName()) ? file.getOriginalName()
                     : file.getFileName();
@@ -259,7 +289,12 @@ public class OaFileServiceImpl implements IOaFileService
                 response.setContentType(contentType(downloadName));
                 response.setHeader("Content-Disposition", "inline");
             }
-            FileUtils.writeBytes(absPath, response.getOutputStream());
+            if (stream.getSize() > 0)
+            {
+                response.setContentLengthLong(stream.getSize());
+            }
+            IOUtils.copyLarge(stream.getInputStream(), response.getOutputStream());
+            response.flushBuffer();
         }
         catch (Exception e)
         {
@@ -292,22 +327,6 @@ public class OaFileServiceImpl implements IOaFileService
             default:
                 return "application/octet-stream";
         }
-    }
-
-    /**
-     * 逻辑路径（/profile/...）转物理绝对路径
-     */
-    private String toAbsolutePath(String filePath)
-    {
-        if (StringUtils.isEmpty(filePath))
-        {
-            return null;
-        }
-        if (filePath.startsWith(Constants.RESOURCE_PREFIX))
-        {
-            return RuoYiConfig.getProfile() + filePath.substring(Constants.RESOURCE_PREFIX.length());
-        }
-        return filePath;
     }
 
     /**

@@ -126,6 +126,9 @@
 
     <footer class="el-login-footer">
       <span>{{ footerContent }}</span>
+      <span v-if="icpNumber" class="icp-link">
+        <a :href="icpLink" target="_blank" rel="noopener noreferrer">{{ icpNumber }}</a>
+      </span>
     </footer>
   </div>
 </template>
@@ -142,6 +145,8 @@ import loginBg from '@/assets/images/login-bg.jpg'
 
 const title = import.meta.env.VITE_APP_TITLE
 const footerContent = defaultSettings.footerContent
+const icpNumber = defaultSettings.icpNumber
+const icpLink = defaultSettings.icpLink
 const userStore = useUserStore()
 const route = useRoute()
 const router = useRouter()
@@ -767,6 +772,10 @@ onBeforeUnmount(() => {
   position: absolute;
   bottom: 20px;
   left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   width: 100%;
   text-align: center;
   color: rgba(255, 255, 255, 0.78);
@@ -774,6 +783,16 @@ onBeforeUnmount(() => {
   letter-spacing: 1px;
   text-shadow: 0 1px 8px rgba(4, 14, 30, 0.4);
   z-index: 2;
+}
+
+.el-login-footer .icp-link a {
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+}
+
+.el-login-footer .icp-link a:hover {
+  color: #fff;
+  text-decoration: underline;
 }
 
 /* 登录失败抖动 */

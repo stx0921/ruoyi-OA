@@ -59,11 +59,21 @@ export default {
   /**
    * 是否显示底部版权
    */
-  footerVisible: false,
+  footerVisible: true,
 
   /**
    * 底部版权文本内容
    */
-  footerContent: '© 2026 轻量 OA · 企业协同办公平台'
+  footerContent: '© 2026 轻量 OA · 企业协同办公平台',
+
+  /**
+   * ICP 备案号：在 web/.env.production 的 VITE_APP_ICP 中配置，留空则底部不显示
+   */
+  icpNumber: import.meta.env.VITE_APP_ICP || '',
+
+  /**
+   * 备案号点击跳转地址（工信部备案查询）
+   */
+  icpLink: 'https://beian.miit.gov.cn/'
 }
 

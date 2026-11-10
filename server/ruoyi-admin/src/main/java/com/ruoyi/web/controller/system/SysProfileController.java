@@ -11,18 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
-import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.storage.FileStorageRouter;
+import com.ruoyi.common.storage.StoredFile;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUploadUtils;
-import com.ruoyi.common.utils.file.FileUtils;
-import com.ruoyi.common.utils.file.MimeTypeUtils;
 import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.service.ISysUserService;
 
@@ -40,6 +39,9 @@ public class SysProfileController extends BaseController
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private FileStorageRouter storageRouter;
 
     /**
      * 个人信息
@@ -119,31 +121,52 @@ public class SysProfileController extends BaseController
     }
 
     /**
+     * 头像允许扩展名：与匿名代理白名单（/common/attach/**）保持一致，避免 OSS 模式下 .bmp 头像无法显示
+     */
+    private static final String[] AVATAR_EXTENSION = { "jpg", "jpeg", "png", "gif", "webp" };
+
+    /**
      * 头像上传
+     *
+     * <p>本地模式写 /profile/avatar/...；OSS 模式写裸 key 并返回 /common/attach/avatar/...
+     * （前端 store 对非 http 值统一拼接 VITE_APP_BASE_API，无需改动）。</p>
      */
     @Log(title = "用户头像", businessType = BusinessType.UPDATE)
     @PostMapping("/avatar")
     public AjaxResult avatar(@RequestParam("avatarfile") MultipartFile file) throws Exception
     {
-        if (!file.isEmpty())
+        if (file == null || file.isEmpty())
         {
-            LoginUser loginUser = getLoginUser();
-            String avatar = FileUploadUtils.upload(RuoYiConfig.getAvatarPath(), file, MimeTypeUtils.IMAGE_EXTENSION, true);
-            if (userService.updateUserAvatar(loginUser.getUserId(), avatar))
-            {
-                String oldAvatar = loginUser.getUser().getAvatar();
-                if (StringUtils.isNotEmpty(oldAvatar))
-                {
-                    FileUtils.deleteFile(RuoYiConfig.getProfile() + FileUtils.stripPrefix(oldAvatar));
-                }
-                AjaxResult ajax = AjaxResult.success();
-                ajax.put("imgUrl", avatar);
-                // 更新缓存用户头像
-                loginUser.getUser().setAvatar(avatar);
-                tokenService.setLoginUser(loginUser);
-                return ajax;
-            }
+            return error("上传图片异常，请联系管理员");
         }
+        if (StringUtils.isEmpty(file.getOriginalFilename()))
+        {
+            return error("文件名不能为空");
+        }
+        // 沿用原有图片扩展名/大小校验（最外层防线，不信任前端 Content-Type）
+        FileUploadUtils.assertFileNameLength(file);
+        FileUploadUtils.assertAllowed(file, AVATAR_EXTENSION);
+        LoginUser loginUser = getLoginUser();
+        StoredFile stored = storageRouter.store(file.getInputStream(), file.getSize(), file.getOriginalFilename(),
+                "avatar");
+        String avatar = storageRouter.publicRef(stored.getKey());
+        if (userService.updateUserAvatar(loginUser.getUserId(), avatar))
+        {
+            String oldAvatar = loginUser.getUser().getAvatar();
+            if (StringUtils.isNotEmpty(oldAvatar))
+            {
+                // 旧头像删除失败不影响主流程
+                storageRouter.deleteByPath(oldAvatar);
+            }
+            AjaxResult ajax = AjaxResult.success();
+            ajax.put("imgUrl", avatar);
+            // 更新缓存用户头像
+            loginUser.getUser().setAvatar(avatar);
+            tokenService.setLoginUser(loginUser);
+            return ajax;
+        }
+        // 落库失败：清理刚写入的头像对象，避免孤儿文件
+        storageRouter.deleteByPath(avatar);
         return error("上传图片异常，请联系管理员");
     }
 }

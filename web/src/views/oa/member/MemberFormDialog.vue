@@ -910,5 +910,5 @@ defineExpose({ open })
 </script>
 
 <style scoped lang="scss">
-@import './member-drawer.scss';
+@use './member-drawer.scss';
 </style>

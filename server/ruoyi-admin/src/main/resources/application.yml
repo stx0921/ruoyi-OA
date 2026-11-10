@@ -12,6 +12,36 @@ ruoyi:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
+  # 文件存储抽象：local 本地磁盘（默认，兼容历史文件）/ oss 阿里云私有桶
+  # 说明：本地开发用 local 无需任何 OSS 凭据；生产切 oss 时凭据只从环境变量注入，
+  #      AK/SK 严禁写入本文件、Dockerfile、启动脚本或提交到 git。
+  storage:
+    # 写模式：local | oss
+    type: local
+    # 读取兜底：OSS 读不到时尝试本地（迁移期/回滚期建议 true）
+    read-fallback: true
+    oss:
+      # 地域节点（环境变量 OSS_ENDPOINT）
+      endpoint: ${OSS_ENDPOINT:https://oss-cn-hangzhou.aliyuncs.com}
+      # 私有 Bucket（环境变量 OSS_BUCKET）；type=oss 时缺失则启动失败
+      bucket: ${OSS_BUCKET:}
+      # 凭据只允许来自环境变量；此处仅占位，缺省为空 → type=oss 时启动期强校验失败
+      access-key-id: ${OSS_ACCESS_KEY_ID:}
+      access-key-secret: ${OSS_ACCESS_KEY_SECRET:}
+      # ECS 实例 RAM 角色（无静态 AK/SK）：置 true 时上面两项可留空
+      use-instance-role: ${OSS_USE_INSTANCE_ROLE:false}
+      # RAM 角色名（可留空，自动从 ECS 元数据发现）
+      ram-role-name: ${OSS_RAM_ROLE_NAME:}
+      # 私有桶：不使用公网直链；图片走 /common/attach 代理，文档走 /oa/file/{id}
+      private: true
+      # 可选：CDN/自定义域名（public 模式才用；私有模式留空）
+      public-domain: ""
+      # 签名 URL 有效期（备用能力，不存库、不下发业务附件）
+      sign-expire-seconds: 7200
+      # key 前缀（多环境共用桶时隔离，如 dev/、prod/）
+      key-prefix: ${OSS_KEY_PREFIX:}
+      connect-timeout: 10000
+      socket-timeout: 60000
 
 # 开发环境配置
 server:
@@ -36,6 +66,8 @@ logging:
   level:
     com.ruoyi: debug
     org.springframework: warn
+    # OSS SDK 压到 warn，避免 debug 日志打印签名请求头/凭据
+    com.aliyun.oss: warn
 
 # 用户配置
 user:

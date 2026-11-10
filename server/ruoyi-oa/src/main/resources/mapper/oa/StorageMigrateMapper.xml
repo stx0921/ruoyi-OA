@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.oa.storage.mapper.StorageMigrateMapper">
+
+    <resultMap type="com.ruoyi.oa.storage.domain.StorageRef" id="StorageRefResult">
+        <result property="id"   column="id"/>
+        <result property="path" column="path"/>
+    </resultMap>
+
+    <!-- 待迁移 OA 附件：历史本地路径，跳过导入错误明细（本地临时文件，不迁移） -->
+    <select id="selectLegacyOaFilesAfter" resultMap="StorageRefResult">
+        select file_id as id, file_path as path
+        from oa_file
+        where file_id &gt; #{afterId}
+          and file_path like '/profile/%'
+          and (biz_type is null or biz_type &lt;&gt; 'import_error')
+        order by file_id asc
+        limit #{limit}
+    </select>
+
+    <!-- 待迁移头像：历史本地路径 -->
+    <select id="selectLegacyAvatarsAfter" resultMap="StorageRefResult">
+        select user_id as id, avatar as path
+        from sys_user
+        where user_id &gt; #{afterId}
+          and avatar like '/profile/%'
+        order by user_id asc
+        limit #{limit}
+    </select>
+
+    <!-- 已迁移 OA 附件（裸 key，回滚用；排除外链/空值/导入错误明细） -->
+    <select id="selectOssOaFilesAfter" resultMap="StorageRefResult">
+        select file_id as id, file_path as path
+        from oa_file
+        where file_id &gt; #{afterId}
+          and file_path is not null
+          and file_path &lt;&gt; ''
+          and file_path not like '/profile/%'
+          and file_path not like 'http%'
+          and (biz_type is null or biz_type &lt;&gt; 'import_error')
+        order by file_id asc
+        limit #{limit}
+    </select>
+
+    <!-- 已迁移头像（/common/attach/%，回滚用） -->
+    <select id="selectOssAvatarsAfter" resultMap="StorageRefResult">
+        select user_id as id, avatar as path
+        from sys_user
+        where user_id &gt; #{afterId}
+          and avatar like '/common/attach/%'
+        order by user_id asc
+        limit #{limit}
+    </select>
+
+    <update id="updateOaFilePath">
+        update oa_file
+        set file_path = #{newPath}
+        where file_id = #{id}
+          and file_path = #{oldPath}
+    </update>
+
+    <update id="updateAvatarPath">
+        update sys_user
+        set avatar = #{newPath}
+        where user_id = #{id}
+          and avatar = #{oldPath}
+    </update>
+
+    <select id="countLegacyOaFiles" resultType="long">
+        select count(1) from oa_file
+        where file_path like '/profile/%'
+          and (biz_type is null or biz_type &lt;&gt; 'import_error')
+    </select>
+
+    <select id="countLegacyAvatars" resultType="long">
+        select count(1) from sys_user where avatar like '/profile/%'
+    </select>
+
+    <select id="countOssOaFiles" resultType="long">
+        select count(1) from oa_file
+        where file_path is not null
+          and file_path &lt;&gt; ''
+          and file_path not like '/profile/%'
+          and file_path not like 'http%'
+          and (biz_type is null or biz_type &lt;&gt; 'import_error')
+    </select>
+
+    <select id="countOssAvatars" resultType="long">
+        select count(1) from sys_user where avatar like '/common/attach/%'
+    </select>
+
+</mapper>

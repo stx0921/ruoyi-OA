@@ -71,6 +71,9 @@
     <!--  底部  -->
     <div class="el-register-footer">
       <span>{{ footerContent }}</span>
+      <span v-if="icpNumber" class="icp-link">
+        <a :href="icpLink" target="_blank" rel="noopener noreferrer">{{ icpNumber }}</a>
+      </span>
     </div>
   </div>
 </template>
@@ -83,6 +86,8 @@ import { usePasswordRule } from "@/utils/passwordRule"
 
 const title = import.meta.env.VITE_APP_TITLE
 const footerContent = defaultSettings.footerContent
+const icpNumber = defaultSettings.icpNumber
+const icpLink = defaultSettings.icpLink
 const router = useRouter()
 const { proxy } = getCurrentInstance()
 const { registerPwdValidator } = usePasswordRule()
@@ -206,11 +211,22 @@ getCode()
   position: fixed;
   bottom: 0;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-align: center;
   color: #fff;
   font-family: Arial;
   font-size: 12px;
   letter-spacing: 1px;
+}
+.el-register-footer .icp-link a {
+  color: #fff;
+  text-decoration: none;
+}
+.el-register-footer .icp-link a:hover {
+  text-decoration: underline;
 }
 .register-code-img {
   height: 40px;

@@ -176,6 +176,31 @@ public class FileUploadUtils
     }
 
     /**
+     * 校验原始文件名长度（与 upload(baseDir, file, allowedExtension, useCustomNaming) 行为一致），
+     * 供走存储抽象（不再写本地临时文件）的调用方复用。
+     *
+     * @param file 上传的文件
+     * @throws FileNameLengthLimitExceededException 文件名太长
+     */
+    public static final void assertFileNameLength(MultipartFile file) throws FileNameLengthLimitExceededException
+    {
+        if (file == null)
+        {
+            return;
+        }
+        String originalFilename = file.getOriginalFilename();
+        // 文件名缺失时交给扩展名/大小校验兜底，不抛 NPE
+        if (StringUtils.isEmpty(originalFilename))
+        {
+            return;
+        }
+        if (originalFilename.length() > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH)
+        {
+            throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
+        }
+    }
+
+    /**
      * 文件大小校验
      *
      * @param file 上传的文件
